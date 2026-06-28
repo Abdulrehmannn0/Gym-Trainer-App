@@ -4,14 +4,19 @@ import { Exercise } from '../types';
 import { 
   Search, 
   Dumbbell, 
-  HelpCircle,
   SlidersHorizontal,
   ChevronRight,
   Heart,
-  Plus,
-  Play
+  Play,
+  Clock,
+  Flame,
+  Layers,
+  Sparkles,
+  BookmarkCheck,
+  Star,
+  Compass
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../contexts/AuthContext';
 import { updateUserProfile } from '../services/userService';
 
@@ -23,9 +28,13 @@ export const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({ onNavigate }) 
   const { profile, refreshProfile } = useAuth();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Advanced Search & Filter States
   const [search, setSearch] = useState('');
   const [selectedGroup, setSelectedGroup] = useState('All');
   const [selectedDifficulty, setSelectedDifficulty] = useState('All');
+  const [selectedEquipment, setSelectedEquipment] = useState('All');
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 
   useEffect(() => {
     const loadExercises = async () => {
@@ -43,17 +52,25 @@ export const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({ onNavigate }) 
 
   const groups = ['All', 'Chest', 'Back', 'Shoulders', 'Arms', 'Legs', 'Core', 'Cardio'];
   const difficulties = ['All', 'Beginner', 'Intermediate', 'Advanced'];
+  
+  // Extract unique equipments for the advanced filter dropdown
+  const equipmentsList = ['All', ...Array.from(new Set(exercises.map(ex => ex.equipment).filter(Boolean)))];
 
-  // Advanced Filtering
+  // Advanced Filtering Logic
   const filtered = exercises.filter(ex => {
     const matchesSearch = ex.name.toLowerCase().includes(search.toLowerCase()) || 
       ex.description.toLowerCase().includes(search.toLowerCase()) ||
+      ex.muscleGroup.toLowerCase().includes(search.toLowerCase()) ||
       ex.equipment.toLowerCase().includes(search.toLowerCase());
     
-    const matchesGroup = selectedGroup === 'All' || ex.muscleGroup === selectedGroup;
-    const matchesDifficulty = selectedDifficulty === 'All' || ex.difficulty === selectedDifficulty;
+    const matchesGroup = selectedGroup === 'All' || ex.muscleGroup.toLowerCase() === selectedGroup.toLowerCase();
+    const matchesDifficulty = selectedDifficulty === 'All' || ex.difficulty.toLowerCase() === selectedDifficulty.toLowerCase();
+    const matchesEquipment = selectedEquipment === 'All' || ex.equipment.toLowerCase() === selectedEquipment.toLowerCase();
+    
+    const isFav = (profile?.favorites || []).includes(ex.id);
+    const matchesFavorites = !showOnlyFavorites || isFav;
 
-    return matchesSearch && matchesGroup && matchesDifficulty;
+    return matchesSearch && matchesGroup && matchesDifficulty && matchesEquipment && matchesFavorites;
   });
 
   const handleToggleFavorite = async (exerciseId: string) => {
@@ -87,38 +104,71 @@ export const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({ onNavigate }) 
 
   const recentExercises = exercises.filter(ex => (profile?.recentlyViewed || []).includes(ex.id));
 
+  // Dynamic Image Generation/Lookup matching the muscle group style
+  const getIllustrationUrl = (muscleGroup: string) => {
+    const normalized = muscleGroup.toLowerCase();
+    if (normalized.includes('chest')) return 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=400&auto=format&fit=crop';
+    if (normalized.includes('back')) return 'https://images.unsplash.com/photo-1603287637292-ca1e9a8e5759?q=80&w=400&auto=format&fit=crop';
+    if (normalized.includes('shoulder')) return 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=400&auto=format&fit=crop';
+    if (normalized.includes('arm')) return 'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=400&auto=format&fit=crop';
+    if (normalized.includes('leg')) return 'https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=400&auto=format&fit=crop';
+    if (normalized.includes('cardio')) return 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=400&auto=format&fit=crop';
+    return 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=400&auto=format&fit=crop'; // fallback
+  };
+
   return (
-    <div className="space-y-8">
-      {/* Title Header */}
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white flex items-center gap-3">
-          <Dumbbell className="w-8 h-8 text-indigo-500" />
-          <span>Exercise & Movement Library</span>
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-          Explore complete physical blueprints with detailed form, sets, reps, and biomechanical targets.
-        </p>
+    <div className="space-y-8 pb-12">
+      
+      {/* 1. HEADER SECTION */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-3">
+            <Dumbbell className="w-8 h-8 text-[#7C3AED]" />
+            <span>Exercise & Routine Index</span>
+          </h1>
+          <p className="text-sm text-[#A1A1AA] mt-1">
+            Explore complete physical blueprints with detailed form, estimated energy cost, and kinetic targets.
+          </p>
+        </div>
+
+        {/* Favorites only filter switch */}
+        <button
+          onClick={() => setShowOnlyFavorites(prev => !prev)}
+          className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold border transition-all cursor-pointer ${
+            showOnlyFavorites 
+              ? 'bg-[#7C3AED]/15 border-[#7C3AED] text-white shadow-md shadow-[#7C3AED]/10' 
+              : 'bg-[#111827] border-white/[0.08] text-[#A1A1AA] hover:text-white'
+          }`}
+        >
+          <Star className={`w-4 h-4 ${showOnlyFavorites ? 'fill-[#7C3AED] text-[#7C3AED]' : ''}`} />
+          <span>{showOnlyFavorites ? 'Showing Favorites Only' : 'Show Favorites Only'}</span>
+        </button>
       </div>
 
-      {/* Recently Viewed Horizontal Tray */}
+      {/* 2. RECENTLY VIEWED ATHLETE TRAYS */}
       {recentExercises.length > 0 && (
-        <div className="space-y-3">
-          <span className="text-[10px] font-black text-indigo-500 dark:text-indigo-400 uppercase tracking-widest block">RECENTLY VIEWED BLUEPRINTS</span>
-          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
+        <div className="space-y-4">
+          <span className="text-[10px] font-black text-[#7C3AED] bg-[#7C3AED]/10 px-3 py-1.5 rounded-full uppercase tracking-widest block w-fit">
+            RECENTLY ACCESSED BLUEPRINTS
+          </span>
+          <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-none">
             {recentExercises.map(ex => (
               <div 
                 key={`recent-${ex.id}`}
                 onClick={() => handleViewBlueprint(ex.id)}
-                className="bg-white dark:bg-zinc-900/30 border border-zinc-200/50 dark:border-zinc-850 p-4 rounded-xl min-w-[200px] max-w-[240px] hover:scale-[1.02] cursor-pointer transition-all space-y-2 shrink-0 flex flex-col justify-between"
+                className="group bg-[#111827] border border-white/[0.08] hover:border-[#7C3AED]/40 p-4 rounded-2xl min-w-[220px] max-w-[260px] hover:scale-[1.02] cursor-pointer transition-all space-y-3 shrink-0 flex flex-col justify-between"
               >
                 <div>
-                  <span className="text-[9px] font-bold text-zinc-400 uppercase">{ex.muscleGroup}</span>
-                  <h4 className="text-xs font-black text-zinc-900 dark:text-white uppercase truncate">{ex.name}</h4>
-                  <p className="text-[10px] text-zinc-400">{ex.difficulty}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-black text-[#7C3AED] uppercase">{ex.muscleGroup}</span>
+                    <span className="text-[8px] font-bold text-white bg-white/[0.04] px-2 py-0.5 rounded uppercase">{ex.difficulty}</span>
+                  </div>
+                  <h4 className="text-sm font-black text-white uppercase truncate mt-2 group-hover:text-[#7C3AED] transition-colors">{ex.name}</h4>
+                  <p className="text-[10px] text-[#A1A1AA] truncate">{ex.equipment}</p>
                 </div>
-                <div className="text-[9px] text-indigo-500 font-bold uppercase flex items-center gap-1 mt-2">
-                  <span>View Details</span>
-                  <ChevronRight className="w-3 h-3" />
+                <div className="text-[10px] text-[#7C3AED] font-bold uppercase flex items-center gap-1 pt-2 border-t border-white/[0.04]">
+                  <span>Launch Blueprint</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </div>
               </div>
             ))}
@@ -126,141 +176,222 @@ export const ExerciseLibrary: React.FC<ExerciseLibraryProps> = ({ onNavigate }) 
         </div>
       )}
 
-      {/* Advanced Filters Block */}
-      <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm space-y-4">
-        <div className="flex items-center gap-2 text-zinc-900 dark:text-white font-bold text-xs uppercase tracking-wider">
-          <SlidersHorizontal className="w-4 h-4 text-indigo-500" />
-          <span>Advanced Filter Deck</span>
+      {/* 3. ADVANCED SEARCH & FILTER DECKS */}
+      <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl space-y-5">
+        <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
+          <div className="flex items-center gap-2.5 text-white font-black text-sm uppercase tracking-wider">
+            <SlidersHorizontal className="w-4 h-4 text-[#7C3AED]" />
+            <span>Interactive Filtering Engine</span>
+          </div>
+          <button
+            onClick={() => {
+              setSearch('');
+              setSelectedGroup('All');
+              setSelectedDifficulty('All');
+              setSelectedEquipment('All');
+              setShowOnlyFavorites(false);
+            }}
+            className="text-xs text-[#A1A1AA] hover:text-white transition-all font-bold uppercase"
+          >
+            Reset Filters
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search bar */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          {/* Keyword Search Autocomplete Input */}
           <div className="relative">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-zinc-400">
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#A1A1AA]">
               <Search className="w-4.5 h-4.5" />
             </span>
             <input
               type="text"
-              placeholder="Search by keyword..."
+              placeholder="Search index..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 pl-10 pr-4 text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full bg-[#09090B] border border-white/[0.08] text-white rounded-2xl py-3 pl-10 pr-4 text-xs font-semibold outline-none focus:ring-2 focus:ring-[#7C3AED] transition-all"
             />
           </div>
 
-          {/* Muscle selection */}
-          <div className="flex items-center gap-2.5">
-            <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">MUSCLE:</span>
+          {/* Muscle Target Chips Selection */}
+          <div className="flex items-center gap-2 bg-[#09090B] border border-white/[0.08] px-3 py-1 rounded-2xl">
+            <span className="text-[9px] font-black text-[#A1A1AA] uppercase tracking-wider">MUSCLE:</span>
             <select
               value={selectedGroup}
               onChange={(e) => setSelectedGroup(e.target.value)}
-              className="flex-1 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 px-3 text-xs font-semibold text-zinc-700 dark:text-zinc-300 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              className="flex-1 bg-transparent border-none text-white text-xs font-bold outline-none cursor-pointer"
             >
               {groups.map(g => (
-                <option key={g} value={g}>{g.toUpperCase()}</option>
+                <option key={g} value={g} className="bg-[#111827] text-white">{g.toUpperCase()}</option>
               ))}
             </select>
           </div>
 
-          {/* Difficulty Selection */}
-          <div className="flex items-center gap-2.5">
-            <span className="text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">LEVEL:</span>
+          {/* Difficulty Level Dropdown */}
+          <div className="flex items-center gap-2 bg-[#09090B] border border-white/[0.08] px-3 py-1 rounded-2xl">
+            <span className="text-[9px] font-black text-[#A1A1AA] uppercase tracking-wider">LEVEL:</span>
             <select
               value={selectedDifficulty}
               onChange={(e) => setSelectedDifficulty(e.target.value)}
-              className="flex-1 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 px-3 text-xs font-semibold text-zinc-700 dark:text-zinc-300 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              className="flex-1 bg-transparent border-none text-white text-xs font-bold outline-none cursor-pointer"
             >
               {difficulties.map(d => (
-                <option key={d} value={d}>{d.toUpperCase()}</option>
+                <option key={d} value={d} className="bg-[#111827] text-white">{d.toUpperCase()}</option>
               ))}
             </select>
           </div>
+
+          {/* Equipment Dropdown */}
+          <div className="flex items-center gap-2 bg-[#09090B] border border-white/[0.08] px-3 py-1 rounded-2xl">
+            <span className="text-[9px] font-black text-[#A1A1AA] uppercase tracking-wider">EQUIP:</span>
+            <select
+              value={selectedEquipment}
+              onChange={(e) => setSelectedEquipment(e.target.value)}
+              className="flex-1 bg-transparent border-none text-white text-xs font-bold outline-none cursor-pointer"
+            >
+              {equipmentsList.map(eq => (
+                <option key={eq} value={eq} className="bg-[#111827] text-white">{eq.toUpperCase()}</option>
+              ))}
+            </select>
+          </div>
+
+        </div>
+
+        {/* Visual category tags chips bar */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none pt-2">
+          {groups.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedGroup(category)}
+              className={`
+                px-4 py-2 text-[10px] font-black rounded-xl transition-all uppercase tracking-wider cursor-pointer
+                ${selectedGroup === category
+                  ? 'bg-[#7C3AED] text-white shadow-md shadow-[#7C3AED]/20'
+                  : 'bg-white/[0.03] border border-white/[0.06] text-[#A1A1AA] hover:bg-white/[0.06] hover:text-white'
+                }
+              `}
+            >
+              {category}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Grid of cards */}
+      {/* 4. PREMIUM CARD GRID LIST */}
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {Array.from({ length: 4 }).map((_, idx) => (
-            <div key={idx} className="bg-white dark:bg-zinc-900/20 border border-zinc-100 dark:border-zinc-900 rounded-2xl p-6 h-56 animate-pulse flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded-md w-1/3" />
-                <div className="h-6 bg-zinc-200 dark:bg-zinc-800 rounded-md w-2/3" />
-                <div className="h-10 bg-zinc-200 dark:bg-zinc-800 rounded-md w-full" />
-              </div>
-              <div className="h-8 bg-zinc-200 dark:bg-zinc-800 rounded-md w-1/4" />
-            </div>
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <div key={idx} className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 h-64 animate-pulse" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 bg-white dark:bg-zinc-900/40 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-8 shadow-sm">
-          <p className="text-zinc-500 dark:text-zinc-400 text-sm font-semibold">No movements matched your filters.</p>
+        <div className="text-center py-20 bg-[#111827] border border-white/[0.08] rounded-3xl p-8">
+          <Compass className="w-12 h-12 text-[#A1A1AA] mx-auto mb-4 animate-bounce" />
+          <p className="text-[#A1A1AA] font-bold uppercase tracking-wider text-sm">No exercises matched the query constraints.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filtered.map((ex) => {
             const isFav = (profile?.favorites || []).includes(ex.id);
+            
+            // Derive static aesthetic values safely
+            const isAdvanced = ex.difficulty.toLowerCase() === 'advanced';
+            const isIntermediate = ex.difficulty.toLowerCase() === 'intermediate';
+            
+            const estTime = isAdvanced ? '25 mins' : isIntermediate ? '20 mins' : '15 mins';
+            const estCalories = isAdvanced ? '240 kcal' : isIntermediate ? '180 kcal' : '120 kcal';
+
             return (
-              <div 
+              <motion.div 
                 key={ex.id}
-                className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 p-6 rounded-2xl flex flex-col sm:flex-row gap-5 shadow-sm hover:shadow-lg transition-all duration-200"
+                whileHover={{ y: -4 }}
+                className="bg-[#111827] border border-white/[0.08] p-6 rounded-3xl flex flex-col sm:flex-row gap-6 hover:border-[#7C3AED]/40 transition-all duration-300 relative overflow-hidden group"
               >
-                {/* Muscle Group Graphic Pill */}
-                <div className="sm:w-32 flex flex-col justify-center items-center bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-100 dark:border-zinc-800/50 p-4 rounded-xl text-center space-y-2 shrink-0">
-                  <div className="p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-lg text-indigo-500">
-                    <Dumbbell className="w-5 h-5" />
+                {/* Visual Thumbnail Frame with Dark Gradients */}
+                <div className="w-full sm:w-44 h-40 sm:h-full bg-[#09090B] rounded-2xl overflow-hidden relative border border-white/[0.06] shrink-0">
+                  <img 
+                    src={getIllustrationUrl(ex.muscleGroup)} 
+                    alt={ex.name}
+                    className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500 filter brightness-90 contrast-110"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#09090B] via-transparent to-transparent pointer-events-none" />
+                  
+                  {/* Muscle Group floating pill */}
+                  <div className="absolute top-2.5 left-2.5">
+                    <span className="text-[9px] font-black text-white bg-[#7C3AED]/80 backdrop-blur-md px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                      {ex.muscleGroup}
+                    </span>
                   </div>
-                  <span className="text-[10px] font-bold text-zinc-900 dark:text-white uppercase tracking-wider truncate max-w-full">
-                    {ex.muscleGroup}
-                  </span>
-                  <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-widest">MUSCLE UNIT</span>
                 </div>
 
-                {/* Main Text Block */}
-                <div className="flex-1 flex flex-col justify-between space-y-3">
+                {/* Main Content Details Block */}
+                <div className="flex-1 flex flex-col justify-between space-y-4">
                   <div>
-                    <div className="flex items-center justify-between gap-2 mb-1.5">
-                      <h3 className="text-lg font-bold tracking-tight text-zinc-900 dark:text-white uppercase">{ex.name}</h3>
-                      <div className="flex items-center gap-1.5">
-                        <span className={`
-                          text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider
-                          ${ex.difficulty === 'Beginner' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' : ''}
-                          ${ex.difficulty === 'Intermediate' ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' : ''}
-                          ${ex.difficulty === 'Advanced' ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400' : ''}
-                        `}>
-                          {ex.difficulty}
-                        </span>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="text-xl font-black text-white tracking-tight group-hover:text-[#7C3AED] transition-colors leading-tight uppercase">
+                          {ex.name}
+                        </h3>
+                        <p className="text-[10px] text-[#A1A1AA] font-bold uppercase mt-1 tracking-widest">
+                          EQUIPMENT: {ex.equipment}
+                        </p>
+                      </div>
 
-                        <button
-                          onClick={() => handleToggleFavorite(ex.id)}
-                          className={`p-1 rounded-full transition-colors cursor-pointer ${
-                            isFav ? 'text-rose-500' : 'text-zinc-300 dark:text-zinc-600 hover:text-rose-500'
-                          }`}
-                        >
-                          <Heart className={`w-4 h-4 ${isFav ? 'fill-rose-500' : ''}`} />
-                        </button>
+                      {/* Favorite icon trigger */}
+                      <button
+                        onClick={() => handleToggleFavorite(ex.id)}
+                        className={`p-2 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-[#EF4444]/15 hover:border-[#EF4444]/20 transition-all cursor-pointer ${
+                          isFav ? 'text-[#EF4444] bg-[#EF4444]/10' : 'text-[#A1A1AA] hover:text-white'
+                        }`}
+                      >
+                        <Heart className={`w-4 h-4 ${isFav ? 'fill-[#EF4444] text-[#EF4444]' : ''}`} />
+                      </button>
+                    </div>
+
+                    <p className="text-[#A1A1AA] text-xs leading-relaxed mt-3 line-clamp-2">
+                      {ex.description}
+                    </p>
+
+                    {/* Meta statistics values inside the card */}
+                    <div className="flex items-center gap-4 text-[10px] font-mono text-[#A1A1AA] pt-3 flex-wrap">
+                      <div className="flex items-center gap-1.5 bg-white/[0.02] border border-white/[0.06] px-2.5 py-1.5 rounded-xl">
+                        <Clock className="w-3.5 h-3.5 text-[#7C3AED]" />
+                        <span>EST: {estTime}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 bg-white/[0.02] border border-white/[0.06] px-2.5 py-1.5 rounded-xl">
+                        <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500" />
+                        <span>BURN: {estCalories}</span>
                       </div>
                     </div>
-                    <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider">EQUIPMENT: {ex.equipment}</p>
-                    <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed mt-3.5 font-medium line-clamp-2">{ex.description}</p>
                   </div>
 
-                  <div className="flex items-center justify-between pt-3.5 border-t border-zinc-100 dark:border-zinc-800/50 mt-auto">
-                    <span className="text-xs text-zinc-400 font-semibold">{ex.recommendedSets} TARGET</span>
+                  {/* Sets indicator, Difficulty Badge, and Details view CTA */}
+                  <div className="flex items-center justify-between pt-4 border-t border-white/[0.06] mt-auto">
+                    <span className={`
+                      text-[9px] font-black uppercase px-2.5 py-1 rounded-lg border
+                      ${ex.difficulty === 'Beginner' ? 'bg-[#22C55E]/10 text-[#22C55E] border-[#22C55E]/20' : ''}
+                      ${ex.difficulty === 'Intermediate' ? 'bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/20' : ''}
+                      ${ex.difficulty === 'Advanced' ? 'bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/20' : ''}
+                    `}>
+                      {ex.difficulty}
+                    </span>
+
                     <button
                       onClick={() => handleViewBlueprint(ex.id)}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-zinc-900 dark:text-white hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors cursor-pointer"
+                      className="bg-white/[0.03] border border-white/[0.08] hover:bg-[#7C3AED] hover:border-[#7C3AED] hover:text-white text-white font-bold text-[10px] uppercase tracking-widest px-4.5 py-3 rounded-2xl transition-all flex items-center gap-1 cursor-pointer"
                     >
-                      <span>VIEW BLUEPRINT</span>
-                      <ChevronRight className="w-4 h-4" />
+                      <span>BluePrint details</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
       )}
+
     </div>
   );
 };

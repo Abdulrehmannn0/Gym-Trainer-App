@@ -17,9 +17,13 @@ import {
   Upload,
   Ruler,
   Weight as WeightIcon,
-  Smile
+  Smile,
+  Shield,
+  Star,
+  Cpu,
+  Bookmark
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
 const AVATAR_SEEDS = [
   'John', 'Garfield', 'Kitten', 'Bear', 'Daisy', 
@@ -163,36 +167,42 @@ export const Profile: React.FC = () => {
     : 'N/A';
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto pb-12">
-      {/* Title block */}
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white flex items-center gap-3">
-          <Settings className="w-8 h-8 text-indigo-500" />
-          <span>My Athlete Profile</span>
-        </h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-          Define physical statistics, active fitness goals, experience level metrics, and custom vectors.
-        </p>
+    <div className="space-y-8 max-w-6xl mx-auto pb-12">
+      
+      {/* HEADER SECTION */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-3">
+            <Settings className="w-8 h-8 text-[#7C3AED] animate-spin-slow" />
+            <span>My Athlete Profile</span>
+          </h1>
+          <p className="text-sm text-[#A1A1AA] mt-1">
+            Define physical statistics, active fitness goals, experience levels, and customization settings.
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Left Column: Account Metadata & Profile Picture Upload */}
+        {/* LEFT PANEL - ACCOUNT BRIEF & PICTURE */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
-            
-            {/* Profile Picture */}
-            <div className="relative group mb-4">
+          <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 flex flex-col items-center text-center relative overflow-hidden shadow-xl">
+            {/* Soft decorative background glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-40 bg-[#7C3AED] opacity-10 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Profile image with camera upload button */}
+            <div className="relative group mb-4 z-10">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#7C3AED] to-[#4F46E5] opacity-20 blur group-hover:opacity-40 transition-opacity" />
               <img
                 src={customPhotoURL || `https://api.dicebear.com/7.x/adventurer/svg?seed=${profile?.uid}`}
                 alt={profile?.name}
-                className="w-28 h-28 md:w-32 md:h-32 rounded-full object-cover border-2 border-indigo-500/20 bg-zinc-50 dark:bg-zinc-950 shadow-md"
+                className="w-32 h-32 rounded-full object-cover border border-white/10 bg-[#09090B] relative z-10"
                 referrerPolicy="no-referrer"
               />
               <button
                 type="button"
                 onClick={triggerFileUpload}
-                className="absolute bottom-0 right-0 bg-indigo-600 hover:bg-indigo-500 text-white p-2.5 rounded-full shadow-lg transition-all cursor-pointer border border-white dark:border-zinc-900"
+                className="absolute bottom-1 right-1 bg-[#7C3AED] hover:bg-violet-600 text-white p-2.5 rounded-full shadow-lg transition-all cursor-pointer border border-[#111827] z-20"
                 title="Upload Photo"
               >
                 <Camera className="w-4 h-4" />
@@ -207,35 +217,37 @@ export const Profile: React.FC = () => {
               onChange={handleImageUpload}
             />
 
-            <h3 className="text-lg font-bold text-zinc-900 dark:text-white mt-2">
+            <h3 className="text-lg font-black text-white mt-2 z-10">
               {profile?.name || 'GYM ATHLETE'}
             </h3>
 
-            <span className="text-[10px] font-black uppercase bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-500/15 text-indigo-600 dark:text-indigo-400 px-3 py-1.5 mt-2.5 rounded-full tracking-widest inline-block">
-              LEVEL 14 ATHLETE
-            </span>
+            <div className="flex items-center gap-1.5 mt-2.5 z-10">
+              <span className="text-[9px] font-black uppercase bg-[#7C3AED]/15 text-[#7C3AED] px-3.5 py-1.5 rounded-full tracking-widest border border-[#7C3AED]/20">
+                PRO ATHLETE
+              </span>
+            </div>
 
-            {/* Account Details */}
-            <div className="w-full border-t border-zinc-100 dark:border-zinc-800/50 mt-6 pt-5 space-y-3.5 text-left">
+            {/* Account Info Details */}
+            <div className="w-full border-t border-white/[0.06] mt-6 pt-5 space-y-4 text-left z-10">
               <div>
-                <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">
+                <span className="text-[9px] font-bold text-[#A1A1AA] uppercase tracking-wider block">
                   EMAIL ADDRESS
                 </span>
-                <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center mt-1 truncate">
-                  <Mail className="w-4 h-4 mr-2 text-indigo-500 shrink-0" />
+                <span className="text-xs font-semibold text-white flex items-center mt-1.5 truncate">
+                  <Mail className="w-4 h-4 mr-2 text-[#7C3AED] shrink-0" />
                   <span className="truncate">{profile?.email || 'N/A'}</span>
                 </span>
                 
-                {/* Email Verification Action & Status */}
+                {/* Verification block */}
                 {user && (
-                  <div className="mt-2.5 flex items-center gap-2">
+                  <div className="mt-2 flex items-center gap-2">
                     {user.emailVerified ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md">
-                        <Check className="w-3 h-3" /> VERIFIED ATHLETE
+                      <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-md">
+                        <Check className="w-3 h-3 stroke-[3]" /> VERIFIED PROFILE
                       </span>
                     ) : (
                       <div className="flex flex-col gap-1.5 w-full">
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase bg-amber-500/10 text-amber-500 dark:text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md self-start">
+                        <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md self-start">
                           UNVERIFIED EMAIL
                         </span>
                         <button
@@ -256,7 +268,7 @@ export const Profile: React.FC = () => {
                             }
                           }}
                           id="send-verification-btn"
-                          className="text-[10px] font-extrabold uppercase text-indigo-500 dark:text-indigo-400 hover:underline cursor-pointer self-start"
+                          className="text-[10px] font-extrabold uppercase text-[#7C3AED] hover:underline cursor-pointer self-start"
                         >
                           RESEND VERIFICATION LINK
                         </button>
@@ -267,22 +279,22 @@ export const Profile: React.FC = () => {
               </div>
 
               <div>
-                <span className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">
-                  REGISTRATION DATE
+                <span className="text-[9px] font-bold text-[#A1A1AA] uppercase tracking-wider block">
+                  MEMBER SINCE
                 </span>
-                <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center mt-1">
-                  <Calendar className="w-4 h-4 mr-2 text-indigo-500 shrink-0" />
+                <span className="text-xs font-semibold text-white flex items-center mt-1.5">
+                  <Calendar className="w-4 h-4 mr-2 text-[#4F46E5] shrink-0" />
                   <span>{formattedCreationDate}</span>
                 </span>
               </div>
             </div>
 
             {/* Logout block */}
-            <div className="w-full pt-5 mt-4 border-t border-zinc-100 dark:border-zinc-800/50">
+            <div className="w-full pt-5 mt-4 border-t border-white/[0.06] z-10">
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full bg-zinc-50 dark:bg-zinc-950 hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-600 dark:text-zinc-400 text-xs font-bold tracking-widest uppercase py-3 px-4 rounded-xl border border-zinc-100 dark:border-zinc-800/50 transition-all flex items-center justify-center space-x-2 cursor-pointer"
+                className="w-full bg-[#09090B] hover:bg-white/[0.02] text-[#A1A1AA] hover:text-white text-xs font-bold tracking-widest uppercase py-3.5 px-4 rounded-xl border border-white/[0.06] transition-all flex items-center justify-center space-x-2 cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
                 <span>SIGN OUT SYSTEM</span>
@@ -292,12 +304,12 @@ export const Profile: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column: Update Biometrics & Level Details Form */}
+        {/* RIGHT PANEL - FORM FIELDS */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 sm:p-8 shadow-sm">
-            <h2 className="text-lg font-bold text-zinc-900 dark:text-white pb-4 border-b border-zinc-100 dark:border-zinc-800/50 mb-6 flex items-center space-x-2">
-              <Activity className="w-5 h-5 text-indigo-500" />
-              <span>Biometrics & Workout Configuration</span>
+          <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            <h2 className="text-lg font-bold text-white pb-4 border-b border-white/[0.06] mb-6 flex items-center gap-2">
+              <Activity className="w-5 h-5 text-[#7C3AED]" />
+              <span>Biometrics & Fitness Setup</span>
             </h2>
 
             <form onSubmit={handleSave} className="space-y-6">
@@ -307,7 +319,7 @@ export const Profile: React.FC = () => {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="p-4 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold rounded-xl flex items-center space-x-2"
+                  className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold rounded-xl flex items-center space-x-2"
                 >
                   <Check className="w-5 h-5" />
                   <span>ATHLETE BLUEPRINT UPDATED SUCCESSFULLY!</span>
@@ -318,31 +330,31 @@ export const Profile: React.FC = () => {
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-semibold rounded-xl"
+                  className="p-4 bg-[#EF4444]/15 border border-[#EF4444]/20 text-[#EF4444] text-xs font-semibold rounded-xl"
                 >
                   {error}
                 </motion.div>
               )}
 
-              {/* Basic Details Section */}
+              {/* Primary Identity */}
               <div className="space-y-4">
-                <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest block">
+                <span className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest block">
                   [STEP 1] PRIMARY IDENTITY
                 </span>
                 
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                  <label className="block text-[10px] font-bold uppercase tracking-widest text-[#A1A1AA]">
                     DISPLAY NAME / FULL NAME
                   </label>
                   <div className="relative">
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-zinc-400">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#A1A1AA]">
                       <User className="w-4.5 h-4.5" />
                     </span>
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full bg-zinc-50 dark:bg-zinc-950/30 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500 text-zinc-900 dark:text-white"
+                      className="w-full bg-[#09090B] border border-white/[0.08] rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:ring-1 focus:ring-[#7C3AED] text-white"
                       placeholder="ENTER NAME"
                       required
                     />
@@ -350,20 +362,20 @@ export const Profile: React.FC = () => {
                 </div>
               </div>
 
-              {/* Biometrics Section */}
-              <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
-                <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest block">
+              {/* Biometrics Data */}
+              <div className="space-y-4 pt-4 border-t border-white/[0.06]">
+                <span className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest block">
                   [STEP 2] BIOMETRICS DATA DECK
                 </span>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Age Input */}
+                  {/* Age */}
                   <div className="space-y-1.5">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#A1A1AA]">
                       AGE (YEARS)
                     </label>
                     <div className="relative">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-zinc-400">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#A1A1AA]">
                         <Smile className="w-4.5 h-4.5" />
                       </span>
                       <input
@@ -372,38 +384,38 @@ export const Profile: React.FC = () => {
                         max="120"
                         value={age}
                         onChange={(e) => setAge(e.target.value)}
-                        className="w-full bg-zinc-50 dark:bg-zinc-950/30 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500 text-zinc-900 dark:text-white"
+                        className="w-full bg-[#09090B] border border-white/[0.08] rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:ring-1 focus:ring-[#7C3AED] text-white"
                         placeholder="E.G. 28"
                       />
                     </div>
                   </div>
 
-                  {/* Gender Select */}
+                  {/* Gender */}
                   <div className="space-y-1.5">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#A1A1AA]">
                       GENDER
                     </label>
                     <select
                       value={gender}
                       onChange={(e) => setGender(e.target.value)}
-                      className="w-full bg-zinc-50 dark:bg-zinc-950/30 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 px-4 text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500 text-zinc-700 dark:text-zinc-300 cursor-pointer"
+                      className="w-full bg-[#09090B] border border-white/[0.08] rounded-xl py-3 px-4 text-xs font-semibold outline-none focus:ring-1 focus:ring-[#7C3AED] text-zinc-300 cursor-pointer"
                     >
-                      <option value="">SELECT GENDER</option>
-                      <option value="Male">MALE</option>
-                      <option value="Female">FEMALE</option>
-                      <option value="Non-binary">NON-BINARY</option>
-                      <option value="Other">OTHER</option>
-                      <option value="Prefer not to say">PREFER NOT TO SAY</option>
+                      <option value="" className="bg-[#111827]">SELECT GENDER</option>
+                      <option value="Male" className="bg-[#111827]">MALE</option>
+                      <option value="Female" className="bg-[#111827]">FEMALE</option>
+                      <option value="Non-binary" className="bg-[#111827]">NON-BINARY</option>
+                      <option value="Other" className="bg-[#111827]">OTHER</option>
+                      <option value="Prefer not to say" className="bg-[#111827]">PREFER NOT TO SAY</option>
                     </select>
                   </div>
 
-                  {/* Height Input */}
+                  {/* Height */}
                   <div className="space-y-1.5">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#A1A1AA]">
                       HEIGHT (CM)
                     </label>
                     <div className="relative">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-zinc-400">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#A1A1AA]">
                         <Ruler className="w-4.5 h-4.5" />
                       </span>
                       <input
@@ -413,19 +425,19 @@ export const Profile: React.FC = () => {
                         max="250"
                         value={height}
                         onChange={(e) => setHeight(e.target.value)}
-                        className="w-full bg-zinc-50 dark:bg-zinc-950/30 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500 text-zinc-900 dark:text-white"
+                        className="w-full bg-[#09090B] border border-white/[0.08] rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:ring-1 focus:ring-[#7C3AED] text-white"
                         placeholder="E.G. 175"
                       />
                     </div>
                   </div>
 
-                  {/* Weight Input */}
+                  {/* Weight */}
                   <div className="space-y-1.5">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#A1A1AA]">
                       WEIGHT (KG)
                     </label>
                     <div className="relative">
-                      <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-zinc-400">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#A1A1AA]">
                         <WeightIcon className="w-4.5 h-4.5" />
                       </span>
                       <input
@@ -435,7 +447,7 @@ export const Profile: React.FC = () => {
                         max="400"
                         value={weight}
                         onChange={(e) => setWeight(e.target.value)}
-                        className="w-full bg-zinc-50 dark:bg-zinc-950/30 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500 text-zinc-900 dark:text-white"
+                        className="w-full bg-[#09090B] border border-white/[0.08] rounded-xl py-3 pl-11 pr-4 text-xs font-semibold outline-none focus:ring-1 focus:ring-[#7C3AED] text-white"
                         placeholder="E.G. 78.5"
                       />
                     </div>
@@ -443,58 +455,58 @@ export const Profile: React.FC = () => {
                 </div>
               </div>
 
-              {/* Fitness Setup Section */}
-              <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
-                <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest block">
-                  [STEP 3] TARGETS & INTENSITY BLUEPRINTS
+              {/* Fitness Setup */}
+              <div className="space-y-4 pt-4 border-t border-white/[0.06]">
+                <span className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest block">
+                  [STEP 3] TARGETS & EXPERIENCE BLUEPRINTS
                 </span>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Fitness Goal Select */}
+                  {/* Fitness Goal */}
                   <div className="space-y-1.5">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#A1A1AA]">
                       FITNESS GOAL
                     </label>
                     <select
                       value={fitnessGoal}
                       onChange={(e) => setFitnessGoal(e.target.value)}
-                      className="w-full bg-zinc-50 dark:bg-zinc-950/30 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 px-4 text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500 text-zinc-700 dark:text-zinc-300 cursor-pointer"
+                      className="w-full bg-[#09090B] border border-white/[0.08] rounded-xl py-3 px-4 text-xs font-semibold outline-none focus:ring-1 focus:ring-[#7C3AED] text-zinc-300 cursor-pointer"
                     >
-                      <option value="">SELECT FIT TARGET</option>
-                      <option value="Build Muscle">BUILD MUSCLE</option>
-                      <option value="Lose Fat">LOSE BODY FAT</option>
-                      <option value="Increase Strength">INCREASE STRENGTH (1RM)</option>
-                      <option value="Improve Endurance">IMPROVE ENDURANCE</option>
-                      <option value="General Health">GENERAL HEALTH & FITNESS</option>
+                      <option value="" className="bg-[#111827]">SELECT FIT TARGET</option>
+                      <option value="Build Muscle" className="bg-[#111827]">BUILD MUSCLE</option>
+                      <option value="Lose Fat" className="bg-[#111827]">LOSE BODY FAT</option>
+                      <option value="Increase Strength" className="bg-[#111827]">INCREASE STRENGTH (1RM)</option>
+                      <option value="Improve Endurance" className="bg-[#111827]">IMPROVE ENDURANCE</option>
+                      <option value="General Health" className="bg-[#111827]">GENERAL HEALTH & FITNESS</option>
                     </select>
                   </div>
 
-                  {/* Experience Level Select */}
+                  {/* Experience Level */}
                   <div className="space-y-1.5">
-                    <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500">
+                    <label className="block text-[10px] font-bold uppercase tracking-widest text-[#A1A1AA]">
                       EXPERIENCE LEVEL
                     </label>
                     <select
                       value={experienceLevel}
                       onChange={(e) => setExperienceLevel(e.target.value)}
-                      className="w-full bg-zinc-50 dark:bg-zinc-950/30 border border-zinc-200 dark:border-zinc-800 rounded-xl py-3 px-4 text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500 text-zinc-700 dark:text-zinc-300 cursor-pointer"
+                      className="w-full bg-[#09090B] border border-white/[0.08] rounded-xl py-3 px-4 text-xs font-semibold outline-none focus:ring-1 focus:ring-[#7C3AED] text-zinc-300 cursor-pointer"
                     >
-                      <option value="">SELECT WORKOUT LEVEL</option>
-                      <option value="Beginner">BEGINNER (0-1 YEARS)</option>
-                      <option value="Intermediate">INTERMEDIATE (1-3 YEARS)</option>
-                      <option value="Advanced">ADVANCED (3-5 YEARS)</option>
-                      <option value="Elite">ELITE (5+ YEARS)</option>
+                      <option value="" className="bg-[#111827]">SELECT WORKOUT LEVEL</option>
+                      <option value="Beginner" className="bg-[#111827]">BEGINNER (0-1 YEARS)</option>
+                      <option value="Intermediate" className="bg-[#111827]">INTERMEDIATE (1-3 YEARS)</option>
+                      <option value="Advanced" className="bg-[#111827]">ADVANCED (3-5 YEARS)</option>
+                      <option value="Elite" className="bg-[#111827]">ELITE (5+ YEARS)</option>
                     </select>
                   </div>
                 </div>
               </div>
 
-              {/* Avatar Preset Presets Block */}
-              <div className="space-y-3 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
-                <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 flex items-center justify-between">
+              {/* Avatar presets */}
+              <div className="space-y-3 pt-4 border-t border-white/[0.06]">
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-[#A1A1AA] flex items-center justify-between">
                   <span>OR SWAP WITH AN AVATAR PRESET</span>
-                  <span className="text-[10px] text-indigo-500 font-bold flex items-center tracking-widest">
-                    <Sparkles className="w-3.5 h-3.5 mr-1" /> VECTOR RIGS
+                  <span className="text-[10px] text-[#7C3AED] font-bold flex items-center tracking-widest">
+                    <Sparkles className="w-3.5 h-3.5 mr-1" /> VECTOR REGS
                   </span>
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -508,8 +520,8 @@ export const Profile: React.FC = () => {
                         className={`
                           px-3 py-1.5 border text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer rounded-lg
                           ${isSelected 
-                            ? 'bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-600/15' 
-                            : 'bg-zinc-50 dark:bg-zinc-950/20 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900'
+                            ? 'bg-[#7C3AED] border-[#7C3AED] text-white shadow-md' 
+                            : 'bg-[#09090B] border-white/[0.08] text-[#A1A1AA] hover:bg-white/[0.02]'
                           }
                         `}
                       >
@@ -521,11 +533,11 @@ export const Profile: React.FC = () => {
               </div>
 
               {/* Save Button */}
-              <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800/50">
+              <div className="pt-6 border-t border-white/[0.06]">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold tracking-widest uppercase py-4 px-6 rounded-xl shadow-lg shadow-indigo-600/15 transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+                  className="w-full bg-[#7C3AED] hover:bg-violet-600 text-white text-xs font-bold tracking-widest uppercase py-4 px-6 rounded-xl transition-all flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
                 >
                   {submitting ? (
                     <>

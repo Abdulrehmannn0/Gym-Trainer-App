@@ -22,6 +22,7 @@ export interface UserProfile {
   weightHistory?: MetricLog[];
   caloriesHistory?: MetricLog[];
   waterHistory?: MetricLog[];
+  progressPhotos?: { id: string; date: string; url: string; caption?: string }[];
   streak?: number;
   completedWorkoutsCount?: number;
   achievements?: string[];

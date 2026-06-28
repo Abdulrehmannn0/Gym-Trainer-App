@@ -21,7 +21,13 @@ import {
   Trash2,
   Sparkles,
   Layers,
-  Sparkle
+  Sparkle,
+  Zap,
+  Star,
+  Info,
+  Camera,
+  Printer,
+  Target
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { updateUserProfile } from '../services/userService';
@@ -71,12 +77,39 @@ const DEFAULT_WATER = [
   { date: 'Jun 28', value: 2400 }
 ];
 
+const DEFAULT_PHOTOS = [
+  {
+    id: 'seed-1',
+    date: '2026-04-28',
+    url: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=800&auto=format&fit=crop',
+    caption: 'Day 1 of clean split - Focus on building baseline endurance and overhead press forms.'
+  },
+  {
+    id: 'seed-2',
+    date: '2026-05-28',
+    url: 'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=800&auto=format&fit=crop',
+    caption: 'Month 1 Check-In - Solid hypertrophy gains across lats and biceps. Increased squat depth.'
+  },
+  {
+    id: 'seed-3',
+    date: '2026-06-28',
+    url: 'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=800&auto=format&fit=crop',
+    caption: 'Current Physique - Fat percentage is down 3.5% with significant abdominal conditioning.'
+  }
+];
+
 export const Progress: React.FC = () => {
   const { profile, refreshProfile } = useAuth();
   
-  // Tabs: 'analytics' | 'measurements' | 'habits' | 'sleep' | 'calculators' | 'records'
-  const [activeTab, setActiveTab] = useState<'analytics' | 'measurements' | 'habits' | 'sleep' | 'calculators' | 'records'>('analytics');
+  // Tabs: 'analytics' | 'measurements' | 'habits' | 'sleep' | 'calculators' | 'records' | 'photos' | 'goals'
+  const [activeTab, setActiveTab] = useState<'analytics' | 'measurements' | 'habits' | 'sleep' | 'calculators' | 'records' | 'photos' | 'goals'>('analytics');
   
+  // Progress Photos States
+  const [photoUrl, setPhotoUrl] = useState('');
+  const [photoCaption, setPhotoCaption] = useState('');
+  const [photoDate, setPhotoDate] = useState(new Date().toISOString().split('T')[0]);
+  const [photoSyncing, setPhotoSyncing] = useState(false);
+
   // Custom Log States
   const [logType, setLogType] = useState<'weight' | 'calories' | 'water'>('weight');
   const [logValue, setLogValue] = useState('');
@@ -166,6 +199,8 @@ export const Progress: React.FC = () => {
 
   // Latest stats
   const latestWeight = weightData[weightData.length - 1]?.value || 78;
+  const latestWater = waterData[waterData.length - 1]?.value || 0;
+  const latestCalories = caloriesData[caloriesData.length - 1]?.value || 0;
   const currentHeightMeters = (profile?.height || 178) / 100;
   const currentBMI = latestWeight / (currentHeightMeters * currentHeightMeters);
   
@@ -173,9 +208,9 @@ export const Progress: React.FC = () => {
                     currentBMI < 25 ? 'Healthy Weight' :
                     currentBMI < 30 ? 'Overweight' : 'Obese';
 
-  const bmiColor = currentBMI < 18.5 ? 'text-blue-500' :
-                   currentBMI < 25 ? 'text-emerald-500' :
-                   currentBMI < 30 ? 'text-amber-500' : 'text-rose-500';
+  const bmiColor = currentBMI < 18.5 ? 'text-blue-400' :
+                   currentBMI < 25 ? 'text-emerald-400' :
+                   currentBMI < 30 ? 'text-amber-400' : 'text-[#EF4444]';
 
   // Log Simple Biometrics
   const handleLogSubmit = async (e: React.FormEvent) => {
@@ -363,6 +398,47 @@ export const Progress: React.FC = () => {
     }
   };
 
+  // Progress photo submission handler
+  const handlePhotoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile || !photoUrl.trim()) return;
+    setPhotoSyncing(true);
+
+    try {
+      const newPhoto = {
+        id: 'photo-' + Date.now(),
+        date: photoDate,
+        url: photoUrl.trim(),
+        caption: photoCaption.trim() || undefined
+      };
+
+      const currentPhotos = profile.progressPhotos || [];
+      const updatedPhotos = [newPhoto, ...currentPhotos];
+
+      await updateUserProfile(profile.uid, { progressPhotos: updatedPhotos });
+      await refreshProfile();
+      setPhotoUrl('');
+      setPhotoCaption('');
+    } catch (err) {
+      console.error('Error saving progress photo:', err);
+    } finally {
+      setPhotoSyncing(false);
+    }
+  };
+
+  const handleDeletePhoto = async (photoId: string) => {
+    if (!profile) return;
+    try {
+      const currentPhotos = profile.progressPhotos || [];
+      const updatedPhotos = currentPhotos.filter(p => p.id !== photoId);
+
+      await updateUserProfile(profile.uid, { progressPhotos: updatedPhotos });
+      await refreshProfile();
+    } catch (err) {
+      console.error('Error deleting progress photo:', err);
+    }
+  };
+
   // Safe Math for SVG drawing
   const getMinMax = (arr: { value: number }[]) => {
     if (arr.length === 0) return { min: 0, max: 100 };
@@ -424,47 +500,93 @@ export const Progress: React.FC = () => {
   const cTargetGram = Math.round((targetCalories * 0.45) / 4);
 
   return (
-    <div className="space-y-8">
-      {/* Page Title */}
+    <div className="space-y-8 pb-12">
+      {/* 0. PRINT STYLE DYNAMIC OVERRIDE */}
+      <style>{`
+        @media print {
+          #app-sidebar, .no-print, nav, header, button, .tab-selector-container {
+            display: none !important;
+          }
+          main {
+            padding: 0 !important;
+            margin: 0 !important;
+            background: white !important;
+            color: black !important;
+            width: 100% !important;
+          }
+          .print-full-width {
+            width: 100% !important;
+            display: block !important;
+          }
+          .text-white {
+            color: black !important;
+          }
+          .text-\[\#A1A1AA\] {
+            color: #4b5563 !important;
+          }
+          .bg-\[\#111827\] {
+            background-color: #f3f4f6 !important;
+            border-color: #d1d5db !important;
+          }
+          .border-white\/\[0\.08\] {
+            border-color: #e5e7eb !important;
+          }
+        }
+      `}</style>
+      
+      {/* 1. PAGE HEADER */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white flex items-center gap-3">
-            <TrendingUp className="w-8 h-8 text-violet-500 animate-pulse" />
-            <span>Biometric Analytics & Progress</span>
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-            Check body dimension logs, monitor sleep patterns, toggle habit streaks, and access metabolic calculators.
-          </p>
-        </div>
-
-        {/* Tab Selection Switch */}
-        <div className="flex p-1 bg-zinc-200/60 dark:bg-zinc-900/60 border border-zinc-300/20 rounded-2xl gap-1 self-start md:self-auto shrink-0 overflow-x-auto max-w-full">
-          {[
-            { id: 'analytics', label: 'Analytics' },
-            { id: 'measurements', label: 'Body Stats' },
-            { id: 'habits', label: 'Daily Habits' },
-            { id: 'sleep', label: 'Sleep Tracker' },
-            { id: 'calculators', label: 'Calculators' },
-            { id: 'records', label: 'PR Hall' }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all shrink-0 cursor-pointer ${
-                activeTab === tab.id 
-                  ? 'bg-indigo-600 text-white shadow-md' 
-                  : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-4">
+          <div>
+            <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-3">
+              <TrendingUp className="w-8 h-8 text-[#7C3AED] animate-pulse" />
+              <span>Biometric Analytics & Progress</span>
+            </h1>
+            <p className="text-sm text-[#A1A1AA] mt-1">
+              Check body dimension logs, monitor sleep patterns, toggle habit streaks, and access metabolic calculators.
+            </p>
+          </div>
+          
+          <button
+            onClick={() => window.print()}
+            className="px-4 py-2.5 bg-[#111827] border border-white/[0.08] hover:border-[#7C3AED]/30 text-white rounded-xl hover:bg-zinc-900 transition-all flex items-center gap-2 cursor-pointer text-xs font-bold no-print self-start sm:self-auto shrink-0"
+          >
+            <Printer className="w-4 h-4 text-[#7C3AED]" />
+            <span>Print Report (PDF)</span>
+          </button>
         </div>
       </div>
 
+      {/* Tab Selector Buttons Container */}
+      <div className="tab-selector-container flex p-1 bg-[#111827] border border-white/[0.08] rounded-2xl gap-1 self-start shrink-0 overflow-x-auto max-w-full">
+        {[
+          { id: 'analytics', label: 'Analytics' },
+          { id: 'measurements', label: 'Body Stats' },
+          { id: 'habits', label: 'Daily Habits' },
+          { id: 'sleep', label: 'Sleep Tracker' },
+          { id: 'photos', label: 'Progress Photos' },
+          { id: 'goals', label: 'Goals Tracker' },
+          { id: 'calculators', label: 'Calculators' },
+          { id: 'records', label: 'PR Hall' }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all shrink-0 cursor-pointer ${
+              activeTab === tab.id 
+                ? 'bg-[#7C3AED] text-white shadow-md' 
+                : 'text-[#A1A1AA] hover:text-white hover:bg-white/[0.02]'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* 2. TABBED CONTENT BOX PANELS WITH GLASSMORPHIC EFFECT */}
       <AnimatePresence mode="wait">
 
-        {/* TAB 1: Analytics & Charts */}
+        {/* TAB 1: Analytics & Interactive Charts */}
         {activeTab === 'analytics' && (
           <motion.div
             key="analytics"
@@ -473,20 +595,20 @@ export const Progress: React.FC = () => {
             exit={{ opacity: 0, y: -5 }}
             className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           >
-            {/* Charts Panel */}
+            {/* Charts Panels Grid */}
             <div className="lg:col-span-2 space-y-6">
               
-              {/* Weight chart */}
-              <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm">
+              {/* Weight Progression custom line chart */}
+              <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl">
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 block uppercase tracking-wider">ATHLETE WEIGHT GRAPH</span>
-                    <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
-                      <Scale className="w-4 h-4 text-emerald-500" />
+                    <span className="text-[10px] font-bold text-[#A1A1AA] block uppercase tracking-wider">ATHLETE WEIGHT GRAPH</span>
+                    <h3 className="text-base font-black text-white flex items-center gap-1.5 mt-1">
+                      <Scale className="w-4 h-4 text-emerald-400" />
                       <span>Weight Progression (kg)</span>
                     </h3>
                   </div>
-                  <span className="text-xl font-black text-emerald-500 tracking-tight">{latestWeight.toFixed(1)} <span className="text-xs font-normal">kg</span></span>
+                  <span className="text-2xl font-black text-emerald-400 tracking-tight">{latestWeight.toFixed(1)} <span className="text-xs font-normal text-[#A1A1AA]">kg</span></span>
                 </div>
 
                 <div className="h-40 w-full relative">
@@ -508,7 +630,7 @@ export const Progress: React.FC = () => {
                       points={generateLinePoints(weightData, 500, 140, getMinMax(weightData).min, getMinMax(weightData).max)}
                     />
                   </svg>
-                  <div className="flex justify-between text-[10px] text-zinc-400 font-bold tracking-widest uppercase mt-3">
+                  <div className="flex justify-between text-[10px] text-[#A1A1AA] font-bold tracking-widest uppercase mt-3 font-mono">
                     {weightData.map((w, idx) => (
                       <span key={idx}>{w.date}</span>
                     ))}
@@ -516,18 +638,18 @@ export const Progress: React.FC = () => {
                 </div>
               </div>
 
-              {/* Calories Chart */}
-              <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm">
+              {/* Calories Burned Line Area chart */}
+              <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl">
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 block uppercase tracking-wider">CALORIE INCINERATOR INDEX</span>
-                    <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
-                      <Flame className="w-4 h-4 text-orange-500" />
+                    <span className="text-[10px] font-bold text-[#A1A1AA] block uppercase tracking-wider">CALORIE INCINERATOR INDEX</span>
+                    <h3 className="text-base font-black text-white flex items-center gap-1.5 mt-1">
+                      <Flame className="w-4 h-4 text-orange-400" />
                       <span>Calories Burned History (kcal)</span>
                     </h3>
                   </div>
-                  <span className="text-xl font-black text-orange-500 tracking-tight">
-                    {caloriesData[caloriesData.length - 1]?.value || 0} <span className="text-xs font-normal">kcal</span>
+                  <span className="text-2xl font-black text-orange-400 tracking-tight">
+                    {caloriesData[caloriesData.length - 1]?.value || 0} <span className="text-xs font-normal text-[#A1A1AA]">kcal</span>
                   </span>
                 </div>
 
@@ -550,7 +672,7 @@ export const Progress: React.FC = () => {
                       points={generateLinePoints(caloriesData, 500, 140, getMinMax(caloriesData).min, getMinMax(caloriesData).max)}
                     />
                   </svg>
-                  <div className="flex justify-between text-[10px] text-zinc-400 font-bold tracking-widest uppercase mt-3">
+                  <div className="flex justify-between text-[10px] text-[#A1A1AA] font-bold tracking-widest uppercase mt-3 font-mono">
                     {caloriesData.map((c, idx) => (
                       <span key={idx}>{c.date}</span>
                     ))}
@@ -558,14 +680,14 @@ export const Progress: React.FC = () => {
                 </div>
               </div>
 
-              {/* Workout frequency and BMI Gauge row */}
+              {/* Workout frequency and BMI classifying cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
-                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm">
+                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl">
                   <div className="mb-4">
-                    <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 block uppercase tracking-wider">WEEKLY SPLIT FREQUENCY</span>
-                    <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
-                      <Dumbbell className="w-4 h-4 text-indigo-500" />
+                    <span className="text-[10px] font-bold text-[#A1A1AA] block uppercase tracking-wider">WEEKLY SPLIT FREQUENCY</span>
+                    <h3 className="text-sm font-black text-white flex items-center gap-1.5 mt-1">
+                      <Dumbbell className="w-4 h-4 text-[#7C3AED]" />
                       <span>Workout Frequency</span>
                     </h3>
                   </div>
@@ -576,38 +698,38 @@ export const Progress: React.FC = () => {
                       const pct = Math.min((val / 8) * 100, 100);
                       return (
                         <div key={idx} className="flex flex-col items-center gap-2 flex-1">
-                          <div className="w-5 bg-zinc-100 dark:bg-zinc-850 rounded-full h-20 flex items-end overflow-hidden">
-                            <div className="w-full bg-indigo-500 rounded-full" style={{ height: `${pct}%` }} />
+                          <div className="w-5 bg-[#09090B] border border-white/[0.04] rounded-full h-20 flex items-end overflow-hidden">
+                            <div className="w-full bg-[#7C3AED] rounded-full" style={{ height: `${pct}%` }} />
                           </div>
-                          <span className="text-[10px] font-bold text-zinc-400">{day}</span>
+                          <span className="text-[10px] font-black text-[#A1A1AA]">{day}</span>
                         </div>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* BMI Index Status card */}
-                <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+                {/* BMI Index status classifications */}
+                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl flex flex-col justify-between">
                   <div>
-                    <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 block uppercase tracking-wider">ATHLETIC BODY INDEX</span>
-                    <h3 className="text-sm font-bold text-zinc-900 dark:text-white flex items-center gap-1.5 mb-4">
-                      <User className="w-4 h-4 text-violet-500" />
+                    <span className="text-[10px] font-bold text-[#A1A1AA] block uppercase tracking-wider">ATHLETIC BODY INDEX</span>
+                    <h3 className="text-sm font-black text-white flex items-center gap-1.5 mb-4 mt-1">
+                      <User className="w-4 h-4 text-[#7C3AED]" />
                       <span>BMI Classification Index</span>
                     </h3>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{currentBMI.toFixed(1)}</span>
+                      <span className="text-3xl font-black text-white tracking-tight">{currentBMI.toFixed(1)}</span>
                       <span className={`text-[10px] font-bold uppercase tracking-wider ${bmiColor}`}>{bmiStatus}</span>
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
-                    <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden flex">
+                  <div className="mt-4 pt-4 border-t border-white/[0.06]">
+                    <div className="w-full bg-[#09090B] h-2 rounded-full overflow-hidden flex">
                       <div className="bg-blue-400 h-full" style={{ width: '18.5%' }} />
                       <div className="bg-emerald-400 h-full" style={{ width: '25%' }} />
                       <div className="bg-amber-400 h-full" style={{ width: '30%' }} />
                       <div className="bg-rose-400 h-full" style={{ width: '26.5%' }} />
                     </div>
-                    <div className="flex justify-between text-[8px] text-zinc-400 font-bold uppercase tracking-widest mt-1">
+                    <div className="flex justify-between text-[8px] text-[#A1A1AA] font-bold uppercase tracking-widest mt-1.5">
                       <span>UNDER</span><span>HEALTHY</span><span>OVER</span><span>OBESE</span>
                     </div>
                   </div>
@@ -617,35 +739,35 @@ export const Progress: React.FC = () => {
 
             </div>
 
-            {/* Quick Log simple biometrics form */}
+            {/* Metric logger form */}
             <div className="lg:col-span-1">
-              <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm space-y-5">
+              <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl space-y-5">
                 <div>
-                  <h3 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-violet-500" />
+                  <h3 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-[#7C3AED]" />
                     <span>Instant Metrics Syncer</span>
                   </h3>
-                  <p className="text-xs text-zinc-400 mt-1">Directly log base biometrics to keep your records synchronized.</p>
+                  <p className="text-xs text-[#A1A1AA] mt-1">Directly log base biometrics to keep your records synchronized.</p>
                 </div>
 
                 <form onSubmit={handleLogSubmit} className="space-y-4">
                   {success && (
-                    <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2">
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold px-4 py-2.5 rounded-xl flex items-center gap-2">
                       <Check className="w-4 h-4" />
                       <span>Metric synchronized!</span>
                     </div>
                   )}
 
-                  <div className="grid grid-cols-3 gap-1">
+                  <div className="grid grid-cols-3 gap-1 bg-[#09090B] border border-white/[0.08] p-1 rounded-2xl">
                     {['weight', 'calories', 'water'].map((btn) => (
                       <button
                         key={btn}
                         type="button"
                         onClick={() => setLogType(btn as any)}
-                        className={`py-2 text-[10px] font-black uppercase rounded-xl border transition-all cursor-pointer ${
+                        className={`py-2 text-[10px] font-black uppercase rounded-xl transition-all cursor-pointer ${
                           logType === btn 
-                            ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' 
-                            : 'bg-zinc-50 dark:bg-zinc-950/20 border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:bg-zinc-100'
+                            ? 'bg-[#7C3AED] text-white shadow-md' 
+                            : 'text-[#A1A1AA] hover:text-white'
                         }`}
                       >
                         {btn}
@@ -653,8 +775,8 @@ export const Progress: React.FC = () => {
                     ))}
                   </div>
 
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-wider block">
                       Value ({logType === 'weight' ? 'kg' : logType === 'calories' ? 'kcal' : 'ml'})
                     </label>
                     <input
@@ -663,14 +785,14 @@ export const Progress: React.FC = () => {
                       value={logValue}
                       onChange={(e) => setLogValue(e.target.value)}
                       placeholder={logType === 'weight' ? 'e.g. 78.5' : logType === 'calories' ? 'e.g. 500' : 'e.g. 2500'}
-                      className="w-full bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-xs font-bold text-zinc-900 dark:text-white outline-none"
+                      className="w-full bg-[#09090B] border border-white/[0.08] rounded-xl px-4 py-3 text-xs font-bold text-white outline-none focus:ring-1 focus:ring-[#7C3AED]"
                       required
                     />
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl text-[10px] uppercase tracking-widest cursor-pointer shadow-lg shadow-indigo-600/10"
+                    className="w-full bg-[#7C3AED] hover:bg-violet-600 text-white font-bold py-3.5 rounded-xl text-[10px] uppercase tracking-widest cursor-pointer shadow-lg"
                   >
                     SYNC BIOMETRICS
                   </button>
@@ -681,7 +803,7 @@ export const Progress: React.FC = () => {
           </motion.div>
         )}
 
-        {/* TAB 2: Body Stats Measurements */}
+        {/* TAB 2: Body Dimension Measurements */}
         {activeTab === 'measurements' && (
           <motion.div
             key="measurements"
@@ -690,51 +812,51 @@ export const Progress: React.FC = () => {
             exit={{ opacity: 0, y: -5 }}
             className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           >
-            {/* Form logger */}
-            <div className="lg:col-span-1 bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm h-fit">
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-tight flex items-center gap-1.5 mb-2">
-                <Layers className="w-5 h-5 text-indigo-500" />
+            {/* Dimensions form logger */}
+            <div className="lg:col-span-1 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl h-fit">
+              <h3 className="text-base font-bold text-white uppercase tracking-tight flex items-center gap-1.5 mb-2">
+                <Layers className="w-5 h-5 text-[#7C3AED]" />
                 <span>Dimensions Logger</span>
               </h3>
-              <p className="text-xs text-zinc-400 mb-6">Log body circumference measurements (cm) to track hypertrophy.</p>
+              <p className="text-xs text-[#A1A1AA] mb-6">Log body circumference measurements (cm) to track hypertrophy splits.</p>
 
               <form onSubmit={handleMeasurementSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-zinc-400 block uppercase">Chest</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mChest} onChange={(e) => setMChest(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950/45 border border-zinc-200 dark:border-zinc-850 px-3 py-2 text-xs font-mono font-bold text-zinc-900 dark:text-white rounded-lg outline-none" />
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Chest</label>
+                    <input type="number" step="0.1" placeholder="cm" value={mChest} onChange={(e) => setMChest(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-zinc-400 block uppercase">Waist</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mWaist} onChange={(e) => setMWaist(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950/45 border border-zinc-200 dark:border-zinc-850 px-3 py-2 text-xs font-mono font-bold text-zinc-900 dark:text-white rounded-lg outline-none" />
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Waist</label>
+                    <input type="number" step="0.1" placeholder="cm" value={mWaist} onChange={(e) => setMWaist(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-zinc-400 block uppercase">Arm Right</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mArmsRight} onChange={(e) => setMArmsRight(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950/45 border border-zinc-200 dark:border-zinc-850 px-3 py-2 text-xs font-mono font-bold text-zinc-900 dark:text-white rounded-lg outline-none" />
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Arm Right</label>
+                    <input type="number" step="0.1" placeholder="cm" value={mArmsRight} onChange={(e) => setMArmsRight(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-zinc-400 block uppercase">Arm Left</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mArmsLeft} onChange={(e) => setMArmsLeft(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950/45 border border-zinc-200 dark:border-zinc-850 px-3 py-2 text-xs font-mono font-bold text-zinc-900 dark:text-white rounded-lg outline-none" />
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Arm Left</label>
+                    <input type="number" step="0.1" placeholder="cm" value={mArmsLeft} onChange={(e) => setMArmsLeft(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-zinc-400 block uppercase">Hips</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mHips} onChange={(e) => setMHips(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950/45 border border-zinc-200 dark:border-zinc-850 px-3 py-2 text-xs font-mono font-bold text-zinc-900 dark:text-white rounded-lg outline-none" />
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Hips</label>
+                    <input type="number" step="0.1" placeholder="cm" value={mHips} onChange={(e) => setMHips(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-zinc-400 block uppercase">Thigh Right</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mThighsRight} onChange={(e) => setMThighsRight(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950/45 border border-zinc-200 dark:border-zinc-850 px-3 py-2 text-xs font-mono font-bold text-zinc-900 dark:text-white rounded-lg outline-none" />
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Thigh Right</label>
+                    <input type="number" step="0.1" placeholder="cm" value={mThighsRight} onChange={(e) => setMThighsRight(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-zinc-400 block uppercase">Thigh Left</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mThighsLeft} onChange={(e) => setMThighsLeft(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950/45 border border-zinc-200 dark:border-zinc-850 px-3 py-2 text-xs font-mono font-bold text-zinc-900 dark:text-white rounded-lg outline-none" />
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Thigh Left</label>
+                    <input type="number" step="0.1" placeholder="cm" value={mThighsLeft} onChange={(e) => setMThighsLeft(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] font-bold text-zinc-400 block uppercase">Calves</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mCalves} onChange={(e) => setMCalves(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950/45 border border-zinc-200 dark:border-zinc-850 px-3 py-2 text-xs font-mono font-bold text-zinc-900 dark:text-white rounded-lg outline-none" />
+                  <div className="space-y-1.5">
+                    <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Calves</label>
+                    <input type="number" step="0.1" placeholder="cm" value={mCalves} onChange={(e) => setMCalves(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
                 </div>
 
-                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl text-[10px] uppercase tracking-widest cursor-pointer shadow-md">
+                <button type="submit" className="w-full bg-[#7C3AED] hover:bg-violet-600 text-white font-bold py-3.5 rounded-xl text-[10px] uppercase tracking-widest cursor-pointer shadow-md mt-4">
                   Commit Measurements
                 </button>
               </form>
@@ -742,33 +864,33 @@ export const Progress: React.FC = () => {
 
             {/* List history */}
             <div className="lg:col-span-2 space-y-4">
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
-                <Activity className="w-5 h-5 text-indigo-500" />
+              <h3 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                <Activity className="w-5 h-5 text-[#7C3AED]" />
                 <span>Measurements Ledger</span>
               </h3>
 
               {measurementLogs.length === 0 ? (
-                <div className="bg-white dark:bg-zinc-900/30 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-10 text-center">
-                  <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">No dimension entries committed yet.</p>
+                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-12 text-center">
+                  <p className="text-xs font-bold text-[#A1A1AA] uppercase tracking-widest">No dimension entries committed yet.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {measurementLogs.map((log) => (
-                    <div key={log.id} className="bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <div key={log.id} className="bg-[#111827] border border-white/[0.08] rounded-2xl p-4.5 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                       <div>
-                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">Entry Date</span>
-                        <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200">{new Date(log.date).toLocaleDateString(undefined, { dateStyle: 'long' })}</span>
+                        <span className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest block">Entry Date</span>
+                        <span className="text-xs font-bold text-white">{new Date(log.date).toLocaleDateString(undefined, { dateStyle: 'long' })}</span>
                       </div>
 
-                      <div className="grid grid-cols-4 sm:grid-cols-8 gap-2.5 text-center font-mono text-[10px]">
-                        {log.chest && <div className="bg-zinc-50 dark:bg-zinc-950 p-1.5 rounded-lg border border-zinc-200/40 dark:border-zinc-850"><span className="text-zinc-400 block">CHST</span><span className="font-bold text-zinc-900 dark:text-white">{log.chest}cm</span></div>}
-                        {log.waist && <div className="bg-zinc-50 dark:bg-zinc-950 p-1.5 rounded-lg border border-zinc-200/40 dark:border-zinc-850"><span className="text-zinc-400 block">WST</span><span className="font-bold text-zinc-900 dark:text-white">{log.waist}cm</span></div>}
-                        {log.armsRight && <div className="bg-zinc-50 dark:bg-zinc-950 p-1.5 rounded-lg border border-zinc-200/40 dark:border-zinc-850"><span className="text-zinc-400 block">AR-R</span><span className="font-bold text-zinc-900 dark:text-white">{log.armsRight}cm</span></div>}
-                        {log.armsLeft && <div className="bg-zinc-50 dark:bg-zinc-950 p-1.5 rounded-lg border border-zinc-200/40 dark:border-zinc-850"><span className="text-zinc-400 block">AR-L</span><span className="font-bold text-zinc-900 dark:text-white">{log.armsLeft}cm</span></div>}
-                        {log.hips && <div className="bg-zinc-50 dark:bg-zinc-950 p-1.5 rounded-lg border border-zinc-200/40 dark:border-zinc-850"><span className="text-zinc-400 block">HIPS</span><span className="font-bold text-zinc-900 dark:text-white">{log.hips}cm</span></div>}
-                        {log.thighsRight && <div className="bg-zinc-50 dark:bg-zinc-950 p-1.5 rounded-lg border border-zinc-200/40 dark:border-zinc-850"><span className="text-zinc-400 block">TH-R</span><span className="font-bold text-zinc-900 dark:text-white">{log.thighsRight}cm</span></div>}
-                        {log.thighsLeft && <div className="bg-zinc-50 dark:bg-zinc-950 p-1.5 rounded-lg border border-zinc-200/40 dark:border-zinc-850"><span className="text-zinc-400 block">TH-L</span><span className="font-bold text-zinc-900 dark:text-white">{log.thighsLeft}cm</span></div>}
-                        {log.calves && <div className="bg-zinc-50 dark:bg-zinc-950 p-1.5 rounded-lg border border-zinc-200/40 dark:border-zinc-850"><span className="text-zinc-400 block">CLFS</span><span className="font-bold text-zinc-900 dark:text-white">{log.calves}cm</span></div>}
+                      <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 text-center font-mono text-[10px]">
+                        {log.chest && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">CHST</span><span className="font-bold text-white">{log.chest}cm</span></div>}
+                        {log.waist && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">WST</span><span className="font-bold text-white">{log.waist}cm</span></div>}
+                        {log.armsRight && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">AR-R</span><span className="font-bold text-white">{log.armsRight}cm</span></div>}
+                        {log.armsLeft && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">AR-L</span><span className="font-bold text-white">{log.armsLeft}cm</span></div>}
+                        {log.hips && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">HIPS</span><span className="font-bold text-white">{log.hips}cm</span></div>}
+                        {log.thighsRight && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">TH-R</span><span className="font-bold text-white">{log.thighsRight}cm</span></div>}
+                        {log.thighsLeft && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">TH-L</span><span className="font-bold text-white">{log.thighsLeft}cm</span></div>}
+                        {log.calves && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">CLFS</span><span className="font-bold text-white">{log.calves}cm</span></div>}
                       </div>
                     </div>
                   ))}
@@ -787,17 +909,17 @@ export const Progress: React.FC = () => {
             exit={{ opacity: 0, y: -5 }}
             className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           >
-            {/* Habit Checklist interactive */}
-            <div className="lg:col-span-2 bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm space-y-4">
+            {/* Habit checklist list */}
+            <div className="lg:col-span-2 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl space-y-4">
               <div>
-                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block">DAILY RECURRENCE METRIC</span>
-                <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
-                  <Heart className="w-5 h-5 text-indigo-500" />
+                <span className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest block">DAILY RECURRENCE METRIC</span>
+                <h3 className="text-base font-bold text-white flex items-center gap-1.5 mt-1">
+                  <Heart className="w-5 h-5 text-indigo-400" />
                   <span>Today's Habit Checklist</span>
                 </h3>
               </div>
 
-              <div className="space-y-2.5">
+              <div className="space-y-3">
                 {habits.map((h) => {
                   const done = todayStatus.completedHabitIds.includes(h.id);
                   return (
@@ -805,23 +927,23 @@ export const Progress: React.FC = () => {
                       key={h.id}
                       onClick={() => handleToggleHabit(h.id)}
                       className={`
-                        p-4 rounded-xl border flex items-center justify-between transition-all cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-850/50
+                        p-4.5 rounded-2xl border flex items-center justify-between transition-all cursor-pointer hover:bg-white/[0.02]
                         ${done 
-                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' 
-                          : 'bg-zinc-50 dark:bg-zinc-950/20 border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200'
+                          ? 'bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]' 
+                          : 'bg-[#09090B] border-white/[0.08] text-[#A1A1AA]'
                         }
                       `}
                     >
                       <span className="text-xs font-bold flex items-center gap-3">
-                        <span className={`w-5 h-5 rounded-md border flex items-center justify-center ${done ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-zinc-300 dark:border-zinc-700'}`}>
-                          {done && <Check className="w-3.5 h-3.5" />}
+                        <span className={`w-5 h-5 rounded-md border flex items-center justify-center ${done ? 'bg-[#22C55E] border-[#22C55E] text-white' : 'border-white/[0.12]'}`}>
+                          {done && <Check className="w-3.5 h-3.5 text-black stroke-[3.5]" />}
                         </span>
-                        <span>{h.name}</span>
+                        <span className={done ? 'line-through text-[#A1A1AA]' : 'text-white'}>{h.name}</span>
                       </span>
 
                       <button
                         onClick={(e) => { e.stopPropagation(); handleDeleteHabitItem(h.id); }}
-                        className="text-zinc-400 hover:text-rose-500 p-1.5 rounded hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
+                        className="text-[#A1A1AA] hover:text-[#EF4444] p-1.5 rounded hover:bg-[#EF4444]/15 transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -831,28 +953,28 @@ export const Progress: React.FC = () => {
               </div>
             </div>
 
-            {/* Add new custom habits form */}
-            <div className="lg:col-span-1 bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm h-fit">
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-tight mb-2 flex items-center gap-1.5">
-                <Sparkle className="w-4 h-4 text-indigo-500" />
+            {/* Add custom habits builder form */}
+            <div className="lg:col-span-1 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl h-fit">
+              <h3 className="text-base font-bold text-white uppercase tracking-tight mb-2 flex items-center gap-1.5">
+                <Sparkle className="w-4 h-4 text-[#7C3AED]" />
                 <span>Habit Studio Builder</span>
               </h3>
-              <p className="text-xs text-zinc-400 mb-6">Create a daily routine target to build consistent fitness habits.</p>
+              <p className="text-xs text-[#A1A1AA] mb-6">Create a daily routine target to build consistent fitness habits.</p>
 
               <form onSubmit={handleAddHabit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-zinc-400 block uppercase">Habit Title</label>
+                  <label className="text-[10px] font-bold text-[#A1A1AA] block uppercase">Habit Title</label>
                   <input
                     type="text"
                     value={newHabitName}
                     onChange={(e) => setNewHabitName(e.target.value)}
                     placeholder="E.g. Take 10,000 steps"
-                    className="w-full bg-zinc-50 dark:bg-zinc-950/45 border border-zinc-200 dark:border-zinc-850 px-3.5 py-3 text-xs font-bold text-zinc-900 dark:text-white rounded-xl outline-none"
+                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-bold text-white rounded-xl outline-none"
                     required
                   />
                 </div>
 
-                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl text-[10px] uppercase tracking-widest shadow-md">
+                <button type="submit" className="w-full bg-[#7C3AED] hover:bg-violet-600 text-white font-bold py-3.5 rounded-xl text-[10px] uppercase tracking-widest">
                   Append Habit
                 </button>
               </form>
@@ -860,7 +982,7 @@ export const Progress: React.FC = () => {
           </motion.div>
         )}
 
-        {/* TAB 4: Sleep Tracker */}
+        {/* TAB 4: Sleep Rec recovery index */}
         {activeTab === 'sleep' && (
           <motion.div
             key="sleep"
@@ -869,87 +991,87 @@ export const Progress: React.FC = () => {
             exit={{ opacity: 0, y: -5 }}
             className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           >
-            {/* Sleep logger form */}
-            <div className="lg:col-span-1 bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm h-fit">
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-tight flex items-center gap-1.5 mb-2">
-                <Moon className="w-5 h-5 text-indigo-400" />
+            {/* Sleep log builder */}
+            <div className="lg:col-span-1 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl h-fit">
+              <h3 className="text-base font-bold text-white uppercase tracking-tight flex items-center gap-1.5 mb-2">
+                <Moon className="w-5 h-5 text-indigo-400 animate-bounce" />
                 <span>Sleep Logger</span>
               </h3>
-              <p className="text-xs text-zinc-400 mb-6">Record your nightly sleep metrics to optimize muscular recovery.</p>
+              <p className="text-xs text-[#A1A1AA] mb-6">Record your nightly sleep metrics to optimize muscular recovery.</p>
 
               <form onSubmit={handleSleepSubmit} className="space-y-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-400 block uppercase">Duration (Hours)</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-[#A1A1AA] block uppercase">Duration (Hours)</label>
                   <input 
                     type="number" 
                     step="0.5" 
                     value={sleepHours} 
                     onChange={(e) => setSleepHours(e.target.value)} 
-                    className="w-full bg-zinc-50 dark:bg-zinc-950/45 border border-zinc-200 dark:border-zinc-850 px-3 py-2.5 text-xs font-mono font-bold text-zinc-900 dark:text-white rounded-xl outline-none" 
+                    className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" 
                     required 
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-400 block uppercase">Quality Rating</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-[#A1A1AA] block uppercase">Quality Rating</label>
                   <select 
                     value={sleepQuality} 
                     onChange={(e) => setSleepQuality(e.target.value)} 
-                    className="w-full bg-zinc-50 dark:bg-zinc-950/45 border border-zinc-200 dark:border-zinc-850 px-3 py-2.5 text-xs font-bold text-zinc-900 dark:text-white rounded-xl outline-none cursor-pointer"
+                    className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none cursor-pointer"
                   >
-                    <option value="Poor">Poor (Restless / Interrupted)</option>
-                    <option value="Fair">Fair (Suboptimal depth)</option>
-                    <option value="Good">Good (Refreshed / Calm)</option>
-                    <option value="Excellent">Excellent (Deep REM / High HRV)</option>
+                    <option value="Poor" className="bg-[#111827]">Poor (Restless / Interrupted)</option>
+                    <option value="Fair" className="bg-[#111827]">Fair (Suboptimal depth)</option>
+                    <option value="Good" className="bg-[#111827]">Good (Refreshed / Calm)</option>
+                    <option value="Excellent" className="bg-[#111827]">Excellent (Deep REM / High HRV)</option>
                   </select>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-zinc-400 block uppercase">Notes / Dreams</label>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-[#A1A1AA] block uppercase">Notes</label>
                   <input 
                     type="text" 
-                    placeholder="Had some vivid dreams, woke up flat." 
+                    placeholder="Woke up refreshed." 
                     value={sleepNotes} 
                     onChange={(e) => setSleepNotes(e.target.value)} 
-                    className="w-full bg-zinc-50 dark:bg-zinc-950/45 border border-zinc-200 dark:border-zinc-850 px-3 py-2.5 text-xs font-bold text-zinc-900 dark:text-white rounded-xl outline-none" 
+                    className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none" 
                   />
                 </div>
 
-                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl text-[10px] uppercase tracking-widest shadow-md">
+                <button type="submit" className="w-full bg-[#7C3AED] hover:bg-violet-600 text-white font-bold py-3.5 rounded-xl text-[10px] uppercase tracking-widest">
                   Commit Sleep Log
                 </button>
               </form>
             </div>
 
-            {/* Sleep Ledger */}
+            {/* Sleep Ledger list */}
             <div className="lg:col-span-2 space-y-4">
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+              <h3 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
                 <Moon className="w-5 h-5 text-indigo-400" />
                 <span>Sleep History Logs</span>
               </h3>
 
               {sleepLogs.length === 0 ? (
-                <div className="bg-white dark:bg-zinc-900/30 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-10 text-center">
-                  <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">No sleep logs recorded yet.</p>
+                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-12 text-center">
+                  <p className="text-xs font-bold text-[#A1A1AA] uppercase tracking-widest">No sleep logs recorded yet.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {sleepLogs.map((log) => (
-                    <div key={log.id} className="bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 flex justify-between items-center gap-4">
+                    <div key={log.id} className="bg-[#111827] border border-white/[0.08] rounded-2xl p-4.5 flex justify-between items-center gap-4">
                       <div className="space-y-1">
-                        <span className="text-[10px] font-bold text-zinc-400 block">{new Date(log.date).toLocaleDateString(undefined, { dateStyle: 'long' })}</span>
-                        {log.notes && <p className="text-xs italic text-zinc-500">"{log.notes}"</p>}
+                        <span className="text-[10px] font-bold text-[#A1A1AA] block">{new Date(log.date).toLocaleDateString(undefined, { dateStyle: 'long' })}</span>
+                        {log.notes && <p className="text-xs italic text-[#A1A1AA]">"{log.notes}"</p>}
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <span className="bg-zinc-50 dark:bg-zinc-950 px-3 py-1.5 border border-zinc-200/30 dark:border-zinc-850 text-xs font-bold text-zinc-800 dark:text-zinc-200 rounded-lg">
+                        <span className="bg-[#09090B] border border-white/[0.04] px-3.5 py-1.5 text-xs font-bold text-white rounded-lg">
                           {log.hours} Hours
                         </span>
                         <span className={`px-2.5 py-1 text-[10px] font-bold rounded-md uppercase tracking-wide ${
-                          log.quality === 'Excellent' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' :
-                          log.quality === 'Good' ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400' :
-                          log.quality === 'Fair' ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' :
-                          'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'
+                          log.quality === 'Excellent' ? 'bg-emerald-500/15 text-emerald-400' :
+                          log.quality === 'Good' ? 'bg-[#7C3AED]/15 text-[#7C3AED]' :
+                          log.quality === 'Fair' ? 'bg-amber-500/15 text-amber-400' :
+                          'bg-[#EF4444]/15 text-[#EF4444]'
                         }`}>
                           {log.quality}
                         </span>
@@ -962,7 +1084,7 @@ export const Progress: React.FC = () => {
           </motion.div>
         )}
 
-        {/* TAB 5: Interactive Calculators */}
+        {/* TAB 5: Interactive Metabolic Calculators */}
         {activeTab === 'calculators' && (
           <motion.div
             key="calculators"
@@ -971,134 +1093,133 @@ export const Progress: React.FC = () => {
             exit={{ opacity: 0, y: -5 }}
             className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           >
-            {/* Input Form Panel */}
-            <div className="lg:col-span-1 bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm space-y-5 h-fit">
+            {/* Form settings */}
+            <div className="lg:col-span-1 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl space-y-5 h-fit">
               <div>
-                <h3 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-tight flex items-center gap-1.5">
-                  <Calculator className="w-5 h-5 text-indigo-500" />
+                <h3 className="text-base font-bold text-white uppercase tracking-tight flex items-center gap-1.5">
+                  <Calculator className="w-5 h-5 text-[#7C3AED]" />
                   <span>Calculators Input</span>
                 </h3>
-                <p className="text-xs text-zinc-400 mt-1">Configure your metrics to instantly solve metabolic coefficients.</p>
+                <p className="text-xs text-[#A1A1AA] mt-1">Configure your metrics to instantly solve metabolic coefficients.</p>
               </div>
 
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 bg-[#09090B] p-1 border border-white/[0.08] rounded-2xl">
                   <button 
                     onClick={() => setCalcGender('male')}
-                    className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${calcGender === 'male' ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-500'}`}
+                    className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${calcGender === 'male' ? 'bg-[#7C3AED] text-white' : 'text-[#A1A1AA] hover:text-white'}`}
                   >
                     MALE
                   </button>
                   <button 
                     onClick={() => setCalcGender('female')}
-                    className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${calcGender === 'female' ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-500'}`}
+                    className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${calcGender === 'female' ? 'bg-[#7C3AED] text-white' : 'text-[#A1A1AA] hover:text-white'}`}
                   >
                     FEMALE
                   </button>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-bold text-zinc-400 block uppercase">Age (Years)</label>
-                  <input type="number" value={calcAge} onChange={(e) => setCalcAge(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 px-3 py-2.5 text-xs font-bold text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-850 rounded-xl outline-none" />
+                  <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Age (Years)</label>
+                  <input type="number" value={calcAge} onChange={(e) => setCalcAge(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold text-zinc-400 block uppercase">Weight (kg)</label>
-                    <input type="number" value={calcWeight} onChange={(e) => setCalcWeight(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 px-3 py-2.5 text-xs font-bold text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-850 rounded-xl outline-none" />
+                    <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Weight (kg)</label>
+                    <input type="number" value={calcWeight} onChange={(e) => setCalcWeight(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none" />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[9px] font-bold text-zinc-400 block uppercase">Height (cm)</label>
-                    <input type="number" value={calcHeight} onChange={(e) => setCalcHeight(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 px-3 py-2.5 text-xs font-bold text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-850 rounded-xl outline-none" />
+                    <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Height (cm)</label>
+                    <input type="number" value={calcHeight} onChange={(e) => setCalcHeight(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none" />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-bold text-zinc-400 block uppercase">Fitness Goal Target</label>
-                  <select value={calcGoal} onChange={(e: any) => setCalcGoal(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 px-3 py-2.5 text-xs font-bold text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-850 rounded-xl outline-none cursor-pointer">
-                    <option value="lose">Fat Loss Deficit (-500 kcal)</option>
-                    <option value="maintain">Maintenance Equilibrium</option>
-                    <option value="gain">Hypertrophic Surplus (+350 kcal)</option>
+                  <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Fitness Goal Target</label>
+                  <select value={calcGoal} onChange={(e: any) => setCalcGoal(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none cursor-pointer">
+                    <option value="lose" className="bg-[#111827]">Fat Loss Deficit (-500 kcal)</option>
+                    <option value="maintain" className="bg-[#111827]">Maintenance Equilibrium</option>
+                    <option value="gain" className="bg-[#111827]">Hypertrophic Surplus (+350 kcal)</option>
                   </select>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-bold text-zinc-400 block uppercase">Activity Factor</label>
-                  <select value={calcActivity} onChange={(e) => setCalcActivity(e.target.value)} className="w-full bg-zinc-50 dark:bg-zinc-950 px-3 py-2.5 text-xs font-bold text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-850 rounded-xl outline-none cursor-pointer">
-                    <option value="1.2">Sedentary (Office job, 0 training)</option>
-                    <option value="1.375">Light Training (1-3 days/week)</option>
-                    <option value="1.55">Moderate Training (3-5 days/week)</option>
-                    <option value="1.725">Heavy Athlete (6-7 days intense splits)</option>
+                  <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Activity Factor</label>
+                  <select value={calcActivity} onChange={(e) => setCalcActivity(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none cursor-pointer">
+                    <option value="1.2" className="bg-[#111827]">Sedentary (Office job, 0 training)</option>
+                    <option value="1.375" className="bg-[#111827]">Light Training (1-3 days/week)</option>
+                    <option value="1.55" className="bg-[#111827]">Moderate Training (3-5 days/week)</option>
+                    <option value="1.725" className="bg-[#111827]">Heavy Athlete (6-7 days intense splits)</option>
                   </select>
                 </div>
               </div>
             </div>
 
-            {/* Calculations Result output panels */}
+            {/* Calculations results */}
             <div className="lg:col-span-2 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
                 {/* BMR card */}
-                <div className="bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 shadow-sm space-y-2">
-                  <span className="text-[10px] font-bold text-zinc-400 block uppercase tracking-wider">BASAL METABOLIC RATE (BMR)</span>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-3xl font-black text-indigo-500 tracking-tight">{Math.round(calculatedBMR)}</span>
-                    <span className="text-xs text-zinc-400">kcal/day</span>
+                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-5 shadow-sm space-y-2">
+                  <span className="text-[10px] font-bold text-[#A1A1AA] block uppercase tracking-wider">BASAL METABOLIC RATE (BMR)</span>
+                  <div className="flex items-baseline gap-1.5 mt-2">
+                    <span className="text-3xl font-black text-[#7C3AED] tracking-tight">{Math.round(calculatedBMR)}</span>
+                    <span className="text-xs text-[#A1A1AA]">kcal/day</span>
                   </div>
-                  <p className="text-xs text-zinc-500 leading-relaxed">
+                  <p className="text-xs text-[#A1A1AA] leading-relaxed mt-2 font-medium">
                     This represents your resting caloric energy burn in a complete fast.
                   </p>
                 </div>
 
                 {/* BMI card */}
-                <div className="bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 shadow-sm space-y-2">
-                  <span className="text-[10px] font-bold text-zinc-400 block uppercase tracking-wider">BODY MASS INDEX (BMI)</span>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-3xl font-black text-violet-500 tracking-tight">{calculatedBMI.toFixed(1)}</span>
-                    <span className="text-xs text-zinc-400">index</span>
+                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-5 shadow-sm space-y-2">
+                  <span className="text-[10px] font-bold text-[#A1A1AA] block uppercase tracking-wider">BODY MASS INDEX (BMI)</span>
+                  <div className="flex items-baseline gap-1.5 mt-2">
+                    <span className="text-3xl font-black text-violet-400 tracking-tight">{calculatedBMI.toFixed(1)}</span>
+                    <span className="text-xs text-[#A1A1AA]">index</span>
                   </div>
-                  <p className="text-xs text-zinc-500 leading-relaxed">
+                  <p className="text-xs text-[#A1A1AA] leading-relaxed mt-2 font-medium">
                     Standard biometric classification ratio of body density.
                   </p>
                 </div>
 
               </div>
 
-              {/* Maintenance & macro target cards combined */}
-              <div className="bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-6 shadow-sm space-y-6">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-center pb-4 border-b border-zinc-100 dark:border-zinc-850 gap-2">
+              {/* Macro breakdown percentage bars */}
+              <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center pb-4 border-b border-white/[0.06] gap-2">
                   <div>
-                    <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest block">TARGET TDEE OUTLET</span>
-                    <h3 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-tight">Daily Caloric Target</h3>
+                    <span className="text-[10px] font-black text-orange-400 uppercase tracking-widest block">TARGET TDEE OUTLET</span>
+                    <h3 className="text-base font-black text-white uppercase tracking-tight mt-1">Daily Caloric Target</h3>
                   </div>
 
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-black text-orange-500 tracking-tight">{Math.round(targetCalories)}</span>
-                    <span className="text-xs text-zinc-400">kcal/day</span>
+                    <span className="text-3xl font-black text-orange-400 tracking-tight">{Math.round(targetCalories)}</span>
+                    <span className="text-xs text-[#A1A1AA]">kcal/day</span>
                   </div>
                 </div>
 
-                {/* Macromolecules breakdown percentage grids */}
                 <div className="space-y-4">
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">Macromolecules Target splits</span>
+                  <span className="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-widest block">Macromolecules Target splits</span>
                   
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-zinc-50 dark:bg-zinc-950 p-4 rounded-xl text-center space-y-1 border border-zinc-200/40 dark:border-zinc-850">
-                      <span className="text-xs text-zinc-400 block">PROTEIN (30%)</span>
-                      <span className="text-2xl font-black text-rose-500 block">{pTargetGram}g</span>
-                      <span className="text-[10px] text-zinc-400 font-bold block">{pTargetGram * 4} kcal</span>
+                    <div className="bg-[#09090B] p-4 rounded-2xl text-center space-y-1 border border-white/[0.04]">
+                      <span className="text-[10px] text-[#A1A1AA] font-bold block">PROTEIN (30%)</span>
+                      <span className="text-2xl font-black text-rose-500 block mt-1">{pTargetGram}g</span>
+                      <span className="text-[9px] text-[#A1A1AA] font-mono block">{pTargetGram * 4} kcal</span>
                     </div>
 
-                    <div className="bg-zinc-50 dark:bg-zinc-950 p-4 rounded-xl text-center space-y-1 border border-zinc-200/40 dark:border-zinc-850">
-                      <span className="text-xs text-zinc-400 block">CARBS (45%)</span>
-                      <span className="text-2xl font-black text-emerald-500 block">{cTargetGram}g</span>
-                      <span className="text-[10px] text-zinc-400 font-bold block">{cTargetGram * 4} kcal</span>
+                    <div className="bg-[#09090B] p-4 rounded-2xl text-center space-y-1 border border-white/[0.04]">
+                      <span className="text-[10px] text-[#A1A1AA] font-bold block">CARBS (45%)</span>
+                      <span className="text-2xl font-black text-emerald-500 block mt-1">{cTargetGram}g</span>
+                      <span className="text-[9px] text-[#A1A1AA] font-mono block">{cTargetGram * 4} kcal</span>
                     </div>
 
-                    <div className="bg-zinc-50 dark:bg-zinc-950 p-4 rounded-xl text-center space-y-1 border border-zinc-200/40 dark:border-zinc-850">
-                      <span className="text-xs text-zinc-400 block">FATS (25%)</span>
-                      <span className="text-2xl font-black text-amber-500 block">{fTargetGram}g</span>
-                      <span className="text-[10px] text-zinc-400 font-bold block">{fTargetGram * 9} kcal</span>
+                    <div className="bg-[#09090B] p-4 rounded-2xl text-center space-y-1 border border-white/[0.04]">
+                      <span className="text-[10px] text-[#A1A1AA] font-bold block">FATS (25%)</span>
+                      <span className="text-2xl font-black text-amber-500 block mt-1">{fTargetGram}g</span>
+                      <span className="text-[9px] text-[#A1A1AA] font-mono block">{fTargetGram * 9} kcal</span>
                     </div>
                   </div>
                 </div>
@@ -1108,7 +1229,7 @@ export const Progress: React.FC = () => {
           </motion.div>
         )}
 
-        {/* TAB 6: Personal Records Hall */}
+        {/* TAB 6: Personal Records Trophies Hall */}
         {activeTab === 'records' && (
           <motion.div
             key="records"
@@ -1117,90 +1238,463 @@ export const Progress: React.FC = () => {
             exit={{ opacity: 0, y: -5 }}
             className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           >
-            {/* PR Logger Form */}
-            <div className="lg:col-span-1 bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm h-fit">
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-tight flex items-center gap-1.5 mb-2">
-                <Award className="w-5 h-5 text-indigo-500" />
+            {/* Form logger */}
+            <div className="lg:col-span-1 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl h-fit">
+              <h3 className="text-base font-bold text-white uppercase tracking-tight flex items-center gap-1.5 mb-2">
+                <Award className="w-5 h-5 text-[#7C3AED]" />
                 <span>Log Personal Best</span>
               </h3>
-              <p className="text-xs text-zinc-400 mb-6">Enter your ultimate compound rep counts to compute your Epley 1RM.</p>
+              <p className="text-xs text-[#A1A1AA] mb-6">Enter your ultimate compound rep counts to compute your Epley 1RM.</p>
 
               <form onSubmit={handlePRSubmit} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-zinc-400 block uppercase">Exercise Name</label>
+                  <label className="text-[10px] font-bold text-[#A1A1AA] block uppercase">Exercise Name</label>
                   <input 
                     type="text" 
                     placeholder="E.g. Deadlift" 
                     value={prExercise} 
                     onChange={(e) => setPrExercise(e.target.value)} 
-                    className="w-full bg-zinc-50 dark:bg-zinc-950/45 border border-zinc-200 dark:border-zinc-850 px-3.5 py-3 text-xs font-bold text-zinc-900 dark:text-white rounded-xl outline-none" 
+                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-bold text-white rounded-xl outline-none" 
                     required 
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3.5">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-400 block uppercase">Weight (kg)</label>
+                    <label className="text-[10px] font-bold text-[#A1A1AA] block uppercase">Weight (kg)</label>
                     <input 
                       type="number" 
                       placeholder="kg" 
                       value={prWeight} 
                       onChange={(e) => setPrWeight(e.target.value)} 
-                      className="w-full bg-zinc-50 dark:bg-zinc-950/45 border border-zinc-200 dark:border-zinc-850 px-3.5 py-3 text-xs font-mono font-bold text-zinc-900 dark:text-white rounded-xl outline-none" 
+                      className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-mono font-bold text-white rounded-xl outline-none" 
                       required 
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-zinc-400 block uppercase">Reps Count</label>
+                    <label className="text-[10px] font-bold text-[#A1A1AA] block uppercase">Reps Count</label>
                     <input 
                       type="number" 
                       value={prReps} 
                       onChange={(e) => setPrReps(e.target.value)} 
-                      className="w-full bg-zinc-50 dark:bg-zinc-950/45 border border-zinc-200 dark:border-zinc-850 px-3.5 py-3 text-xs font-mono font-bold text-zinc-900 dark:text-white rounded-xl outline-none" 
+                      className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-mono font-bold text-white rounded-xl outline-none" 
                       required 
                     />
                   </div>
                 </div>
 
-                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl text-[10px] uppercase tracking-widest shadow-md">
+                <button type="submit" className="w-full bg-[#7C3AED] hover:bg-violet-600 text-white font-bold py-3.5 rounded-xl text-[10px] uppercase tracking-widest">
                   Commit Personal Record
                 </button>
               </form>
             </div>
 
-            {/* List personal records trophies */}
+            {/* List trophies */}
             <div className="lg:col-span-2 space-y-4">
-              <h3 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
-                <Award className="w-5 h-5 text-indigo-500 animate-bounce" />
+              <h3 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                <Award className="w-5 h-5 text-[#7C3AED] animate-bounce" />
                 <span>Personal Best Records Ledger</span>
               </h3>
 
               {personalRecords.length === 0 ? (
-                <div className="bg-white dark:bg-zinc-900/30 border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-10 text-center">
-                  <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">No Personal Records entered yet.</p>
+                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-12 text-center">
+                  <p className="text-xs font-bold text-[#A1A1AA] uppercase tracking-widest">No Personal Records entered yet.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {personalRecords.map((rec) => (
-                    <div key={rec.id} className="bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 flex flex-col justify-between relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-3 text-indigo-500 opacity-20 group-hover:opacity-40 transition-opacity">
+                    <div key={rec.id} className="bg-[#111827] border border-white/[0.08] rounded-3xl p-5 flex flex-col justify-between relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-3 text-[#7C3AED] opacity-10 group-hover:opacity-25 transition-opacity pointer-events-none">
                         <Award className="w-16 h-16" />
                       </div>
 
                       <div className="space-y-1">
-                        <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest block">{rec.date}</span>
-                        <h4 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-tight truncate max-w-[200px]">{rec.exerciseName}</h4>
-                        <p className="text-xs text-zinc-400 font-semibold">Rep Best: {rec.weight} kg x {rec.reps} reps</p>
+                        <span className="text-[9px] font-black text-[#7C3AED] uppercase tracking-widest block">{rec.date}</span>
+                        <h4 className="text-base font-black text-white uppercase tracking-tight truncate max-w-[200px] mt-1">{rec.exerciseName}</h4>
+                        <p className="text-xs text-[#A1A1AA] font-semibold mt-1">Rep Best: {rec.weight} kg x {rec.reps} reps</p>
                       </div>
 
-                      <div className="mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-850 flex justify-between items-center">
-                        <span className="text-[10px] font-bold text-zinc-400 uppercase">Calculated 1RM</span>
-                        <span className="text-lg font-black text-indigo-500">{rec.calculated1RM} kg</span>
+                      <div className="mt-4 pt-3 border-t border-white/[0.06] flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-[#A1A1AA] uppercase">Calculated 1RM</span>
+                        <span className="text-lg font-black text-[#7C3AED]">{rec.calculated1RM} kg</span>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* TAB 7: Progress Photos (Aesthetic Athlete Gallery) */}
+        {activeTab === 'photos' && (
+          <motion.div
+            key="photos"
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          >
+            {/* Left Column: Form Uploader */}
+            <div className="lg:col-span-1 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl h-fit">
+              <h3 className="text-base font-bold text-white uppercase tracking-tight flex items-center gap-1.5 mb-2">
+                <Camera className="w-5 h-5 text-[#7C3AED]" />
+                <span>Add Progress Photo</span>
+              </h3>
+              <p className="text-xs text-[#A1A1AA] mb-6">Log physical conditioning milestones to visually compare hypertrophic adaptations.</p>
+
+              <form onSubmit={handlePhotoSubmit} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-[#A1A1AA] block uppercase">Image URL</label>
+                  <input 
+                    type="url" 
+                    placeholder="Enter image web URL" 
+                    value={photoUrl} 
+                    onChange={(e) => setPhotoUrl(e.target.value)} 
+                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-bold text-white rounded-xl outline-none" 
+                    required 
+                  />
+                </div>
+
+                {/* Preset helpers */}
+                <div className="space-y-1.5">
+                  <span className="text-[9px] font-bold text-[#A1A1AA] uppercase">Or Use Model Seed Presets:</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setPhotoUrl('https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=800&auto=format&fit=crop')}
+                      className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-[9px] font-bold text-white rounded-lg border border-white/[0.04] cursor-pointer"
+                    >
+                      Gym Split
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPhotoUrl('https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=800&auto=format&fit=crop')}
+                      className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-[9px] font-bold text-white rounded-lg border border-white/[0.04] cursor-pointer"
+                    >
+                      Athletic Run
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPhotoUrl('https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=800&auto=format&fit=crop')}
+                      className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-[9px] font-bold text-white rounded-lg border border-white/[0.04] cursor-pointer"
+                    >
+                      Weight Lift
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-[#A1A1AA] block uppercase">Date Taken</label>
+                  <input 
+                    type="date" 
+                    value={photoDate} 
+                    onChange={(e) => setPhotoDate(e.target.value)} 
+                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-bold text-white rounded-xl outline-none" 
+                    required 
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-[#A1A1AA] block uppercase">Caption / Muscle focus</label>
+                  <textarea 
+                    placeholder="Focus: chest fibers split, quad separation, lower back strength." 
+                    value={photoCaption} 
+                    onChange={(e) => setPhotoCaption(e.target.value)} 
+                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-bold text-white rounded-xl outline-none h-20 resize-none" 
+                  />
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={photoSyncing}
+                  className="w-full bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold py-3.5 rounded-xl text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {photoSyncing ? 'Syncing Photo...' : 'Save Gallery Image'}
+                </button>
+              </form>
+            </div>
+
+            {/* Right Column: Gallery list */}
+            <div className="lg:col-span-2 space-y-4">
+              <h3 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                <Camera className="w-5 h-5 text-[#7C3AED]" />
+                <span>Athlete Conditioning Dossier</span>
+              </h3>
+
+              {(() => {
+                const photosToRender = profile?.progressPhotos && profile.progressPhotos.length > 0 
+                  ? profile.progressPhotos 
+                  : DEFAULT_PHOTOS;
+
+                return (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {photosToRender.map((pic) => (
+                      <div key={pic.id} className="bg-[#111827] border border-white/[0.08] rounded-3xl overflow-hidden shadow-2xl flex flex-col group relative">
+                        <div className="h-48 w-full overflow-hidden bg-black relative">
+                          <img 
+                            src={pic.url} 
+                            alt={pic.caption || "Progress shot"} 
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-transparent to-black/35 flex flex-col justify-between p-4">
+                            <span className="bg-black/45 backdrop-blur-md px-2.5 py-1 text-[9px] font-black text-[#7C3AED] rounded-md tracking-wider uppercase self-start border border-white/[0.04]">
+                              {pic.date}
+                            </span>
+                            
+                            <button
+                              onClick={() => handleDeletePhoto(pic.id)}
+                              className="self-end p-2 bg-red-600/80 hover:bg-red-600 text-white rounded-lg transition-colors cursor-pointer"
+                              title="Delete photo reference"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                        {pic.caption && (
+                          <div className="p-4 flex-1 flex flex-col justify-between">
+                            <p className="text-xs text-[#A1A1AA] leading-relaxed italic">"{pic.caption}"</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+          </motion.div>
+        )}
+
+        {/* TAB 8: Interactive Goal Tracker (Unified Biometrics Dashboard) */}
+        {activeTab === 'goals' && (
+          <motion.div
+            key="goals"
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+          >
+            {/* Quick Goals Log Card */}
+            <div className="lg:col-span-1 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl h-fit">
+              <h3 className="text-base font-bold text-white uppercase tracking-tight flex items-center gap-1.5 mb-2">
+                <Target className="w-5 h-5 text-[#7C3AED]" />
+                <span>Adjust Target Goals</span>
+              </h3>
+              <p className="text-xs text-[#A1A1AA] mb-6">Instantly adjust your athletic profiles for real-time validation inside progress meters.</p>
+
+              {/* Adjust targets form */}
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-[#A1A1AA] block uppercase">Daily Hydration Goal (ml)</label>
+                  <input 
+                    type="number" 
+                    value={profile?.waterIntakeGoal || 2500} 
+                    onChange={async (e) => {
+                      if (!profile) return;
+                      await updateUserProfile(profile.uid, { waterIntakeGoal: parseInt(e.target.value, 10) || 2500 });
+                      await refreshProfile();
+                    }}
+                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-mono font-bold text-white rounded-xl outline-none" 
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-[#A1A1AA] block uppercase">Calories Burned Goal (kcal)</label>
+                  <input 
+                    type="number" 
+                    value={profile?.caloriesBurnedGoal || 600} 
+                    onChange={async (e) => {
+                      if (!profile) return;
+                      await updateUserProfile(profile.uid, { caloriesBurnedGoal: parseInt(e.target.value, 10) || 600 });
+                      await refreshProfile();
+                    }}
+                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-mono font-bold text-white rounded-xl outline-none" 
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-[#A1A1AA] block uppercase">Daily Workout Goal (Mins)</label>
+                  <input 
+                    type="number" 
+                    value={profile?.workoutDurationGoal || 45} 
+                    onChange={async (e) => {
+                      if (!profile) return;
+                      await updateUserProfile(profile.uid, { workoutDurationGoal: parseInt(e.target.value, 10) || 45 });
+                      await refreshProfile();
+                    }}
+                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-mono font-bold text-white rounded-xl outline-none" 
+                  />
+                </div>
+
+                <div className="p-4 bg-zinc-900/50 rounded-2xl border border-white/[0.04] text-[10px] font-semibold text-[#A1A1AA] uppercase leading-relaxed">
+                  💡 Updates made here automatically sync to your global Athlete profile settings.
+                </div>
+              </div>
+            </div>
+
+            {/* Goals metrics panel */}
+            <div className="lg:col-span-2 space-y-6">
+              <h3 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                <Target className="w-5 h-5 text-[#7C3AED]" />
+                <span>Validation Ring Meters</span>
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 1. Hydration Target */}
+                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <span className="text-[9px] font-bold text-sky-400 uppercase tracking-widest block">HYDRATION TRACKER</span>
+                      <h4 className="text-sm font-black text-white uppercase tracking-tight mt-1">Water Hydration Intake</h4>
+                    </div>
+                    <Droplet className="w-5 h-5 text-sky-400" />
+                  </div>
+
+                  <div className="space-y-2 mt-4">
+                    <div className="flex justify-between text-xs font-mono font-bold">
+                      <span className="text-[#A1A1AA]">Current: {latestWater} ml</span>
+                      <span className="text-sky-400">Target: {profile?.waterIntakeGoal || 2500} ml</span>
+                    </div>
+                    <div className="h-2 w-full bg-[#09090B] rounded-full overflow-hidden border border-white/[0.02]">
+                      <div 
+                        className="h-full bg-sky-400 rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(100, (latestWater / (profile?.waterIntakeGoal || 2500)) * 100)}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between items-center text-[10px] text-[#A1A1AA] mt-1 font-bold">
+                      <span>{Math.round((latestWater / (profile?.waterIntakeGoal || 2500)) * 100)}% COMPLETED</span>
+                      
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!profile) return;
+                            const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                            const currentHist = profile.waterHistory || [];
+                            const updatedHist = [...currentHist, { date: today, value: latestWater + 250 }];
+                            await updateUserProfile(profile.uid, { waterHistory: updatedHist });
+                            await refreshProfile();
+                          }}
+                          className="px-2 py-1 bg-sky-950 hover:bg-sky-900 border border-sky-500/20 text-[9px] font-bold text-sky-400 rounded-lg cursor-pointer transition-all"
+                        >
+                          +250ml
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!profile) return;
+                            const today = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                            const currentHist = profile.waterHistory || [];
+                            const updatedHist = [...currentHist, { date: today, value: latestWater + 500 }];
+                            await updateUserProfile(profile.uid, { waterHistory: updatedHist });
+                            await refreshProfile();
+                          }}
+                          className="px-2 py-1 bg-sky-950 hover:bg-sky-900 border border-sky-500/20 text-[9px] font-bold text-sky-400 rounded-lg cursor-pointer transition-all"
+                        >
+                          +500ml
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Calories burned Tracker */}
+                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest block">ENERGY EXPENDITURE</span>
+                      <h4 className="text-sm font-black text-white uppercase tracking-tight mt-1">Active Calories Burned</h4>
+                    </div>
+                    <Flame className="w-5 h-5 text-emerald-400" />
+                  </div>
+
+                  <div className="space-y-2 mt-4">
+                    <div className="flex justify-between text-xs font-mono font-bold">
+                      <span className="text-[#A1A1AA]">Current: {latestCalories} kcal</span>
+                      <span className="text-emerald-400">Target: {profile?.caloriesBurnedGoal || 600} kcal</span>
+                    </div>
+                    <div className="h-2 w-full bg-[#09090B] rounded-full overflow-hidden border border-white/[0.02]">
+                      <div 
+                        className="h-full bg-emerald-400 rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(100, (latestCalories / (profile?.caloriesBurnedGoal || 600)) * 100)}%` }}
+                      />
+                    </div>
+                    <p className="text-[10px] text-[#A1A1AA] mt-1 font-bold">
+                      {Math.round((latestCalories / (profile?.caloriesBurnedGoal || 600)) * 100)}% OF DAILY TARGET EXPENDITURE
+                    </p>
+                  </div>
+                </div>
+
+                {/* 3. Sleep Tracker Hours */}
+                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest block">RECOVERY HYPNOS</span>
+                      <h4 className="text-sm font-black text-white uppercase tracking-tight mt-1">Nightly Sleep Target</h4>
+                    </div>
+                    <Moon className="w-5 h-5 text-indigo-400" />
+                  </div>
+
+                  {(() => {
+                    const latestSleep = sleepLogs.length > 0 ? sleepLogs[0].hours : 7.5;
+                    const sleepPercentage = Math.round((latestSleep / 8) * 100);
+                    return (
+                      <div className="space-y-2 mt-4">
+                        <div className="flex justify-between text-xs font-mono font-bold">
+                          <span className="text-[#A1A1AA]">Last Sleep: {latestSleep} hrs</span>
+                          <span className="text-indigo-400">Standard: 8 hrs</span>
+                        </div>
+                        <div className="h-2 w-full bg-[#09090B] rounded-full overflow-hidden border border-white/[0.02]">
+                          <div 
+                            className="h-full bg-indigo-400 rounded-full transition-all duration-500"
+                            style={{ width: `${Math.min(100, (latestSleep / 8) * 100)}%` }}
+                          />
+                        </div>
+                        <p className="text-[10px] text-[#A1A1AA] mt-1 font-bold">
+                          {sleepPercentage}% OF OPTIMAL BIOMETRIC RECOVERY
+                        </p>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* 4. Habits completion rate */}
+                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <span className="text-[9px] font-bold text-amber-400 uppercase tracking-widest block">HABIT ADAPTION</span>
+                      <h4 className="text-sm font-black text-white uppercase tracking-tight mt-1">Habits Mastery Rate</h4>
+                    </div>
+                    <Check className="w-5 h-5 text-amber-400" />
+                  </div>
+
+                  {(() => {
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    const todayStatus = habitStatuses.find(s => s.id === todayStr);
+                    const completedCount = todayStatus?.completedHabitIds?.length || 0;
+                    const totalCount = habits.length || 1;
+                    const completionPercentage = Math.round((completedCount / totalCount) * 100);
+                    return (
+                      <div className="space-y-2 mt-4">
+                        <div className="flex justify-between text-xs font-mono font-bold">
+                          <span className="text-[#A1A1AA]">Done: {completedCount}/{totalCount}</span>
+                          <span className="text-amber-400">Streak Level: {profile?.streak || 3} days</span>
+                        </div>
+                        <div className="h-2 w-full bg-[#09090B] rounded-full overflow-hidden border border-white/[0.02]">
+                          <div 
+                            className="h-full bg-amber-400 rounded-full transition-all duration-500"
+                            style={{ width: `${Math.min(100, completionPercentage)}%` }}
+                          />
+                        </div>
+                        <p className="text-[10px] text-[#A1A1AA] mt-1 font-bold">
+                          {completionPercentage}% DAILY HABITS SUCCESS RATE
+                        </p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
             </div>
           </motion.div>
         )}

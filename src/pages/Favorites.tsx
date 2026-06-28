@@ -136,6 +136,40 @@ export const Favorites: React.FC<FavoritesProps> = ({ onNavigate }) => {
           ))}
         </div>
       )}
+
+      {/* Recently Viewed Section */}
+      {profile?.recentlyViewed && profile.recentlyViewed.length > 0 && (
+        <div className="pt-10 border-t border-zinc-100 dark:border-zinc-800/50 mt-10">
+          <div className="flex items-center gap-2 mb-6">
+            <BookOpen className="w-6 h-6 text-indigo-500" />
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-white uppercase tracking-tight">Recently Viewed Routines</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {exercises
+              .filter(e => profile.recentlyViewed?.includes(e.id))
+              .sort((a, b) => {
+                const idxA = profile.recentlyViewed?.indexOf(a.id) ?? 0;
+                const idxB = profile.recentlyViewed?.indexOf(b.id) ?? 0;
+                return idxA - idxB;
+              })
+              .slice(0, 3)
+              .map((exercise) => (
+                <div 
+                  key={exercise.id}
+                  className="bg-zinc-50 dark:bg-zinc-900/20 border border-zinc-200/80 dark:border-zinc-800/80 rounded-xl p-4 flex items-center justify-between hover:border-indigo-500/40 transition-all cursor-pointer group"
+                  onClick={() => onNavigate('details', exercise.id)}
+                >
+                  <div className="space-y-1 min-w-0 flex-1 pr-2">
+                    <span className="text-[9px] font-bold text-indigo-500 uppercase tracking-widest">{exercise.muscleGroup}</span>
+                    <h4 className="text-xs font-bold text-zinc-900 dark:text-white truncate group-hover:text-indigo-500 transition-colors">{exercise.name}</h4>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

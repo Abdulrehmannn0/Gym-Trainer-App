@@ -16,9 +16,13 @@ import {
   Plus,
   Play,
   CalendarDays,
-  Utensils,
-  ArrowRight,
-  UserCheck
+  Activity,
+  Moon,
+  Zap,
+  RotateCcw,
+  CheckCircle2,
+  Trophy,
+  Compass
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { updateUserProfile } from '../services/userService';
@@ -70,6 +74,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
   const streak = profile?.streak ?? 5;
   const completedCount = profile?.completedWorkoutsCount ?? 4;
+
+  // Derive sleep & recovery scores dynamically for UI depth
+  const sleepHours = 7.5;
+  const sleepScore = Math.round((sleepHours / 8) * 100); // 94%
+  const recoveryScore = Math.round(85 + (streak % 3) * 4); // ~85-93% depending on streak
+
+  // Ring calculation: (Calories burned + Water + Duration completion averages) / 3
+  const calPercentage = Math.min((todayCalories / caloriesGoal) * 100, 100);
+  const waterPercentage = Math.min((todayWater / waterGoal) * 100, 100);
+  const overallCompletionRate = Math.round((calPercentage + waterPercentage + (todayDuration > 0 ? 100 : 0)) / 3);
 
   // Filter exercises
   const filteredExercises = exercises.filter(exercise => {
@@ -137,252 +151,363 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
   // Pre-selected workouts
   const todayWorkout = exercises[0] || null;
-  const upcomingWorkout = exercises[1] || null;
+  const continueWorkout = exercises[2] || exercises[1] || null;
 
   return (
-    <div className="space-y-8">
-      {/* Personalized Greeting with premium background */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 via-indigo-950 to-zinc-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-indigo-900/10">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-violet-500/10 rounded-full blur-[100px] -mr-16 -mt-16" />
-        <div className="absolute -bottom-10 left-1/3 w-64 h-64 bg-indigo-500/10 rounded-full blur-[80px]" />
+    <div className="space-y-8 pb-12">
+      
+      {/* 1. HERO WELCOME BANNER */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#111827] via-[#111827] to-[#09090B] border border-white/[0.08] text-white rounded-3xl p-6 sm:p-8 shadow-2xl">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-[#7C3AED]/20 to-[#4F46E5]/10 rounded-full blur-[120px] -mr-16 -mt-16 pointer-events-none" />
+        <div className="absolute -bottom-20 left-1/4 w-80 h-80 bg-violet-600/10 rounded-full blur-[100px] pointer-events-none" />
         
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="space-y-3">
-            <div className="inline-flex items-center space-x-1.5 bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 px-3.5 py-1 rounded-full text-xs font-semibold tracking-wide">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>ATHLETE DESK INITIATED</span>
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
+          <div className="space-y-4 max-w-xl">
+            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-[#7C3AED]/20 to-[#4F46E5]/20 border border-[#7C3AED]/30 text-[#A1A1AA] px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase">
+              <Sparkles className="w-3.5 h-3.5 text-[#7C3AED]" />
+              <span>ATHLETE DESK ACTIVE</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Welcome back, <span className="bg-gradient-to-r from-indigo-400 to-violet-300 bg-clip-text text-transparent">{profile?.name || 'Athlete'}</span>!
+            
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-none text-white">
+              Welcome back, <br className="sm:hidden" />
+              <span className="bg-gradient-to-r from-[#7C3AED] via-[#4F46E5] to-[#22C55E] bg-clip-text text-transparent">
+                {profile?.name || 'Athlete'}
+              </span>!
             </h1>
-            <p className="text-zinc-400 text-sm max-w-md">
-              Your biometric modules are synchronized. Take a quick action or launch today's training split.
+            
+            <p className="text-[#A1A1AA] text-sm sm:text-base font-medium leading-relaxed">
+              You are crushing your split! Your current streak is <span className="text-white font-extrabold">{streak} days</span>. Today's target is <span className="text-white font-bold">{todayWorkout?.name || 'Loading splits...'}</span>.
             </p>
+
+            {todayWorkout && (
+              <div className="flex flex-wrap gap-4 pt-2">
+                <button
+                  onClick={() => onNavigate('details', todayWorkout.id)}
+                  className="bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] hover:opacity-90 text-white font-bold text-xs px-6 py-3.5 rounded-2xl transition-all shadow-lg shadow-[#7C3AED]/25 flex items-center gap-2 cursor-pointer"
+                >
+                  <Play className="w-4 h-4 fill-white" />
+                  <span>START TODAY'S SPLIT</span>
+                </button>
+                <div className="flex items-center space-x-2 text-xs text-[#A1A1AA] bg-white/[0.03] border border-white/[0.08] px-4 py-3 rounded-2xl">
+                  <CheckCircle2 className="w-4 h-4 text-[#22C55E]" />
+                  <span>Completion status: {overallCompletionRate}%</span>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center space-x-4 bg-zinc-900/60 border border-zinc-800 p-4 rounded-2xl self-start md:self-auto min-w-[200px]">
-            <div className="bg-orange-500/15 p-3 rounded-xl text-orange-400 border border-orange-500/10">
-              <Flame className="w-6 h-6" />
+          {/* Large dynamic visual dial / Streak score widget */}
+          <div className="flex items-center space-x-6 bg-white/[0.02] border border-white/[0.06] p-6 rounded-3xl self-start lg:self-auto shrink-0 min-w-[260px]">
+            <div className="relative flex items-center justify-center shrink-0">
+              <svg className="w-20 h-20 transform -rotate-90">
+                <circle cx="40" cy="40" r="34" stroke="rgba(255,255,255,.03)" strokeWidth="6" fill="transparent" />
+                <circle cx="40" cy="40" r="34" stroke="url(#streakGrad)" strokeWidth="6" fill="transparent"
+                  strokeDasharray={`${2 * Math.PI * 34}`}
+                  strokeDashoffset={`${2 * Math.PI * 34 * (1 - Math.min(streak / 10, 1))}`}
+                  strokeLinecap="round"
+                />
+                <defs>
+                  <linearGradient id="streakGrad" x1="1" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#7C3AED" />
+                    <stop offset="100%" stopColor="#22C55E" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="absolute text-center">
+                <p className="text-lg font-black text-white">{streak}</p>
+                <p className="text-[8px] font-bold text-[#A1A1AA] uppercase tracking-wider">Days</p>
+              </div>
             </div>
             <div>
-              <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase">ACTIVE STREAK</p>
-              <p className="text-xl font-black text-white">{streak} DAYS</p>
+              <p className="text-[10px] text-[#A1A1AA] font-black tracking-widest uppercase">ACTIVE STREAK</p>
+              <p className="text-lg font-black text-white mt-0.5">UNSTOPPABLE</p>
+              <p className="text-xs text-[#22C55E] font-medium flex items-center gap-1 mt-1">
+                <Flame className="w-4 h-4 text-orange-500 fill-orange-500" />
+                <span>Streak on fire!</span>
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Goal Completion & Biometrics Tracker Ring Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Calories Card */}
-        <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+      {/* 2. DYNAMIC GOAL COMPLETION CARD GRID (BENTO BOX LAYOUT) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        {/* Workout Completion Ring Card */}
+        <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between hover:border-[#7C3AED]/40 transition-all duration-300 group">
           <div className="flex justify-between items-start">
-            <div>
-              <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Calories Burned</span>
-              <span className="text-2xl font-black text-zinc-900 dark:text-white mt-1 block">
-                {todayCalories} <span className="text-xs font-normal text-zinc-400">kcal</span>
-              </span>
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-wider block">COMPLETION RING</span>
+              <span className="text-2xl font-black text-white block mt-1">Daily Target</span>
             </div>
-            <div className="p-2.5 bg-orange-50 dark:bg-orange-500/10 text-orange-500 rounded-xl border border-orange-500/10">
-              <Flame className="w-4 h-4" />
+            <div className="p-2.5 bg-[#7C3AED]/10 text-[#7C3AED] rounded-2xl border border-[#7C3AED]/20">
+              <Activity className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800/40">
-            <div className="flex justify-between text-[10px] text-zinc-400 font-semibold mb-1">
-              <span>Goal: {caloriesGoal} kcal</span>
-              <span>{Math.round((todayCalories / caloriesGoal) * 100)}%</span>
+
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/[0.06]">
+            <div className="relative w-16 h-16 transform -rotate-90 shrink-0">
+              <svg className="w-full h-full">
+                <circle cx="32" cy="32" r="26" stroke="rgba(255,255,255,.03)" strokeWidth="5.5" fill="transparent" />
+                <circle cx="32" cy="32" r="26" stroke="#7C3AED" strokeWidth="5.5" fill="transparent"
+                  strokeDasharray={`${2 * Math.PI * 26}`}
+                  strokeDashoffset={`${2 * Math.PI * 26 * (1 - overallCompletionRate / 100)}`}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center rotate-90">
+                <span className="text-xs font-black text-white">{overallCompletionRate}%</span>
+              </div>
             </div>
-            <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
-              <div className="bg-orange-500 h-full rounded-full transition-all duration-300" style={{ width: `${Math.min((todayCalories / caloriesGoal) * 100, 100)}%` }} />
+            <div className="text-right">
+              <p className="text-xs font-bold text-[#A1A1AA]">Biometrics</p>
+              <p className="text-[10px] text-[#22C55E] font-bold mt-1">Synchronized</p>
             </div>
           </div>
         </div>
 
-        {/* Workout Duration Card */}
-        <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Calories Burned Card */}
+        <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between hover:border-orange-500/40 transition-all duration-300 group">
           <div className="flex justify-between items-start">
-            <div>
-              <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Workout Duration</span>
-              <span className="text-2xl font-black text-zinc-900 dark:text-white mt-1 block">
-                {todayDuration} <span className="text-xs font-normal text-zinc-400">mins</span>
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-wider block">CALORIES BURNED</span>
+              <span className="text-2xl font-black text-white block mt-1">
+                {todayCalories} <span className="text-xs font-normal text-[#A1A1AA]">kcal</span>
               </span>
             </div>
-            <div className="p-2.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-500 rounded-xl border border-indigo-500/10">
-              <Clock className="w-4 h-4" />
+            <div className="p-2.5 bg-orange-500/10 text-orange-500 rounded-2xl border border-orange-500/20 group-hover:scale-110 transition-transform">
+              <Flame className="w-5 h-5 fill-orange-500" />
             </div>
           </div>
-          <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800/40">
-            <div className="flex justify-between text-[10px] text-zinc-400 font-semibold mb-1">
-              <span>Goal: {durationGoal} mins</span>
-              <span>{Math.round((todayDuration / durationGoal) * 100)}%</span>
+
+          <div className="mt-6 pt-4 border-t border-white/[0.06]">
+            <div className="flex justify-between text-[10px] text-[#A1A1AA] font-extrabold mb-1.5 uppercase">
+              <span>Goal: {caloriesGoal} kcal</span>
+              <span className="text-orange-400">{Math.round(calPercentage)}%</span>
             </div>
-            <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
-              <div className="bg-indigo-500 h-full rounded-full transition-all duration-300" style={{ width: `${Math.min((todayDuration / durationGoal) * 100, 100)}%` }} />
+            <div className="w-full bg-white/[0.04] h-2 rounded-full overflow-hidden">
+              <div className="bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full transition-all duration-500" style={{ width: `${calPercentage}%` }} />
             </div>
           </div>
         </div>
 
         {/* Water Intake Card */}
-        <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between hover:border-blue-500/40 transition-all duration-300 group">
           <div className="flex justify-between items-start">
-            <div>
-              <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Water Intake</span>
-              <span className="text-2xl font-black text-zinc-900 dark:text-white mt-1 block">
-                {todayWater} <span className="text-xs font-normal text-zinc-400">ml</span>
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-wider block">WATER INTAKE</span>
+              <span className="text-2xl font-black text-white block mt-1">
+                {todayWater} <span className="text-xs font-normal text-[#A1A1AA]">ml</span>
               </span>
             </div>
-            <div className="p-2.5 bg-blue-50 dark:bg-blue-500/10 text-blue-500 rounded-xl border border-blue-500/10">
-              <Droplet className="w-4 h-4" />
+            <div className="p-2.5 bg-blue-500/10 text-blue-400 rounded-2xl border border-blue-500/20 group-hover:scale-110 transition-transform">
+              <Droplet className="w-5 h-5 fill-blue-500" />
             </div>
           </div>
-          <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800/40">
-            <div className="flex justify-between text-[10px] text-zinc-400 font-semibold mb-1">
+
+          <div className="mt-6 pt-4 border-t border-white/[0.06]">
+            <div className="flex justify-between text-[10px] text-[#A1A1AA] font-extrabold mb-1.5 uppercase">
               <span>Goal: {waterGoal} ml</span>
-              <span>{Math.round((todayWater / waterGoal) * 100)}%</span>
+              <span className="text-blue-400">{Math.round(waterPercentage)}%</span>
             </div>
-            <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-2 rounded-full overflow-hidden">
-              <div className="bg-blue-500 h-full rounded-full transition-all duration-300" style={{ width: `${Math.min((todayWater / waterGoal) * 100, 100)}%` }} />
+            <div className="w-full bg-white/[0.04] h-2 rounded-full overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-600 to-blue-400 h-full rounded-full transition-all duration-500" style={{ width: `${waterPercentage}%` }} />
             </div>
           </div>
         </div>
 
-        {/* Workout Streak Card */}
-        <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Sleep & Recovery Card */}
+        <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between hover:border-[#4F46E5]/40 transition-all duration-300 group">
           <div className="flex justify-between items-start">
-            <div>
-              <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Finished Workouts</span>
-              <span className="text-2xl font-black text-zinc-900 dark:text-white mt-1 block">
-                {completedCount} <span className="text-xs font-normal text-zinc-400">completed</span>
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-wider block">WELLNESS METRICS</span>
+              <span className="text-2xl font-black text-white block mt-1">
+                {sleepScore} <span className="text-xs font-normal text-[#A1A1AA]">Sleep Score</span>
               </span>
             </div>
-            <div className="p-2.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded-xl border border-emerald-500/10">
-              <Award className="w-4 h-4" />
+            <div className="p-2.5 bg-[#4F46E5]/10 text-[#4F46E5] rounded-2xl border border-[#4F46E5]/20">
+              <Moon className="w-5 h-5" />
             </div>
           </div>
-          <div className="mt-4 pt-4 border-t border-zinc-100 dark:border-zinc-800/40">
-            <span className="text-[10px] text-zinc-500 font-bold block uppercase tracking-wider">TROPHIES EARNED</span>
-            <span className="text-xs font-bold text-emerald-500 block mt-1">Excellent Level 14 Conditioning</span>
+
+          <div className="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-between">
+            <div>
+              <p className="text-[10px] text-[#A1A1AA] font-bold uppercase tracking-wider">RECOVERY RATE</p>
+              <p className="text-sm font-black text-[#22C55E] mt-0.5">{recoveryScore}% READY</p>
+            </div>
+            <div className="bg-white/[0.04] border border-white/[0.08] px-3 py-1.5 rounded-xl text-[10px] font-mono text-[#A1A1AA]">
+              PRIME STATE
+            </div>
           </div>
         </div>
+
       </div>
 
-      {/* Quick Action Buttons & Today's Workout Layout Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* 3. QUICK START, CONTINUE LAST WORKOUT & QUICK BIOMETRIC ACTIONS */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Today's Workout Card (Takes 2 columns) */}
-        <div className="lg:col-span-2 bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 shadow-sm flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
-          <div className="space-y-3 flex-1">
-            <span className="text-[10px] font-black text-indigo-500 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1 rounded-full uppercase tracking-wider">
-              RECOMMENDED TODAY'S WORKOUT
-            </span>
+        {/* Quick Start Today's Split Card */}
+        <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between hover:shadow-xl transition-all duration-300">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2 text-[10px] font-black text-[#7C3AED] bg-[#7C3AED]/10 px-3.5 py-1.5 rounded-full uppercase tracking-widest w-fit">
+              <Zap className="w-3.5 h-3.5 fill-[#7C3AED]" />
+              <span>LAUNCH QUICK START</span>
+            </div>
+
             {todayWorkout ? (
-              <>
-                <h3 className="text-2xl font-bold text-zinc-900 dark:text-white">
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-white group-hover:text-[#7C3AED] transition-colors">
                   {todayWorkout.name}
                 </h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-[#A1A1AA] line-clamp-3 leading-relaxed">
                   {todayWorkout.description}
                 </p>
-                <div className="flex items-center gap-4 text-xs font-semibold text-zinc-400 pt-1">
-                  <span className="bg-zinc-100 dark:bg-zinc-950 px-2.5 py-1 rounded-md">{todayWorkout.muscleGroup}</span>
-                  <span className="bg-zinc-100 dark:bg-zinc-950 px-2.5 py-1 rounded-md">{todayWorkout.difficulty}</span>
+                <div className="flex items-center gap-3 pt-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-white/[0.03] border border-white/[0.08] px-2.5 py-1 rounded-lg text-[#A1A1AA]">
+                    {todayWorkout.muscleGroup}
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-[#22C55E]/10 border border-[#22C55E]/20 px-2.5 py-1 rounded-lg text-[#22C55E]">
+                    {todayWorkout.difficulty}
+                  </span>
                 </div>
-              </>
+              </div>
             ) : (
-              <div className="h-20 flex items-center text-zinc-400">No recommended workout loaded yet.</div>
+              <p className="text-xs text-[#A1A1AA]">Your recommended workout splits are generating...</p>
             )}
           </div>
 
-          <div className="flex flex-col gap-2 w-full sm:w-auto shrink-0">
+          <div className="mt-8 pt-4 border-t border-white/[0.06]">
             {todayWorkout && (
               <button
                 onClick={() => onNavigate('details', todayWorkout.id)}
-                className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm py-3.5 px-6 rounded-2xl shadow-lg shadow-indigo-600/10 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full bg-[#7C3AED] hover:bg-violet-600 text-white font-bold text-xs py-3.5 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Play className="w-4 h-4 fill-white" />
-                <span>Launch Quick Start</span>
+                <Play className="w-3.5 h-3.5 fill-white" />
+                <span>START TRAINING</span>
               </button>
             )}
-            <button
-              onClick={() => onNavigate('workout-plans')}
-              className="w-full sm:w-auto border border-zinc-200 dark:border-zinc-800 dark:hover:bg-zinc-900 font-bold text-sm py-3.5 px-6 rounded-2xl text-zinc-700 dark:text-zinc-300 transition-all flex items-center justify-center gap-1 cursor-pointer"
-            >
-              <span>Explore Plans</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
           </div>
         </div>
 
-        {/* Quick Action Panel (Takes 1 column) */}
-        <div className="lg:col-span-1 bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
-          <div>
-            <h3 className="text-base font-bold text-zinc-900 dark:text-white">Quick Biometric Actions</h3>
-            <p className="text-xs text-zinc-500 mt-1">Directly append logs to your metrics today.</p>
+        {/* Continue Last Workout Card */}
+        <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between hover:shadow-xl transition-all duration-300">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2 text-[10px] font-black text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full uppercase tracking-widest w-fit">
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>CONTINUE LAST WORKOUT</span>
+            </div>
+
+            {continueWorkout ? (
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-white">
+                  {continueWorkout.name}
+                </h3>
+                <p className="text-xs text-[#A1A1AA] line-clamp-3 leading-relaxed">
+                  {continueWorkout.description}
+                </p>
+                <div className="flex items-center gap-3 pt-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-white/[0.03] border border-white/[0.08] px-2.5 py-1 rounded-lg text-[#A1A1AA]">
+                    {continueWorkout.muscleGroup}
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-lg text-indigo-400">
+                    {continueWorkout.difficulty}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs text-[#A1A1AA]">History of splits will organize here.</p>
+            )}
           </div>
 
-          <div className="space-y-2 mt-4">
+          <div className="mt-8 pt-4 border-t border-white/[0.06]">
+            {continueWorkout && (
+              <button
+                onClick={() => onNavigate('details', continueWorkout.id)}
+                className="w-full border border-white/[0.08] hover:bg-white/[0.03] text-white font-bold text-xs py-3.5 rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>RESUME SPLIT</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Quick Action Biometrics Panel */}
+        <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between">
+          <div>
+            <h3 className="text-base font-bold text-white flex items-center gap-2 uppercase tracking-wide">
+              <Sparkles className="w-4.5 h-4.5 text-[#7C3AED]" />
+              <span>BIOMETRIC ACTION HUD</span>
+            </h3>
+            <p className="text-xs text-[#A1A1AA] mt-1">Directly append logs to your metrics today.</p>
+          </div>
+
+          <div className="space-y-3 mt-6">
             <button
               onClick={handleQuickWaterLog}
               disabled={loggingWater}
-              className="w-full flex items-center justify-between p-3.5 bg-blue-50/50 hover:bg-blue-50 dark:bg-blue-500/5 dark:hover:bg-blue-500/10 border border-blue-100 dark:border-blue-500/10 rounded-2xl text-xs font-bold text-blue-600 dark:text-blue-400 cursor-pointer disabled:opacity-50"
+              className="w-full flex items-center justify-between p-4 bg-blue-500/5 hover:bg-blue-500/10 border border-blue-500/20 rounded-2xl text-xs font-bold text-blue-400 cursor-pointer disabled:opacity-50 transition-all"
             >
               <span className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                <span>LOG 250ML WATER</span>
+                <Plus className="w-4 h-4 text-blue-400" />
+                <span>LOG +250ML HYDRATION</span>
               </span>
-              <Droplet className="w-4 h-4" />
+              <Droplet className="w-4 h-4 fill-blue-400" />
             </button>
 
             <button
               onClick={handleQuickCalLog}
               disabled={loggingCal}
-              className="w-full flex items-center justify-between p-3.5 bg-orange-50/50 hover:bg-orange-50 dark:bg-orange-500/5 dark:hover:bg-orange-500/10 border border-orange-100 dark:border-orange-500/10 rounded-2xl text-xs font-bold text-orange-600 dark:text-orange-400 cursor-pointer disabled:opacity-50"
+              className="w-full flex items-center justify-between p-4 bg-orange-500/5 hover:bg-orange-500/10 border border-orange-500/20 rounded-2xl text-xs font-bold text-orange-400 cursor-pointer disabled:opacity-50 transition-all"
             >
               <span className="flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                <span>LOG 100 KCAL BURNED</span>
+                <Plus className="w-4 h-4 text-orange-400" />
+                <span>LOG +100 KCAL ACTIVITY</span>
               </span>
-              <Flame className="w-4 h-4" />
+              <Flame className="w-4 h-4 fill-orange-400" />
             </button>
           </div>
         </div>
 
       </div>
 
-      {/* Up Next & Active Workouts List Slider */}
-      <div className="space-y-4 pt-4">
+      {/* 4. EXERCISE TARGETED SPLITS WITH ADVANCED FILTERING & SEARCH */}
+      <div className="space-y-6 pt-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h2 className="text-2xl font-extrabold text-zinc-900 dark:text-white flex items-center gap-2">
-            <span>Explore Targeted Routines</span>
-            <span className="text-xs font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-500 px-3 py-1 rounded-full">{filteredExercises.length} Units</span>
-          </h2>
+          <div className="space-y-1">
+            <h2 className="text-2xl font-black text-white flex items-center gap-3">
+              <Trophy className="w-6 h-6 text-[#7C3AED]" />
+              <span>Explore Targeted Routines</span>
+            </h2>
+            <p className="text-xs text-[#A1A1AA]">Instant autocomplete lookup across target muscle groups.</p>
+          </div>
 
-          {/* Search Box */}
+          {/* Autocomplete Search Input */}
           <div className="relative w-full md:w-80">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-zinc-400">
-              <Search className="w-4.5 h-4.5" />
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#A1A1AA]">
+              <Search className="w-4.5 h-4.5 text-[#A1A1AA]" />
             </span>
             <input
               type="text"
-              placeholder="Filter by muscle or name..."
+              placeholder="Filter by muscle group, name, equipment..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl py-2.5 pl-10 pr-4 text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full bg-[#111827] border border-white/[0.08] text-white rounded-2xl py-3 pl-10 pr-4 text-xs font-semibold outline-none focus:ring-2 focus:ring-[#7C3AED] transition-all"
             />
           </div>
         </div>
 
-        {/* Categories slider */}
+        {/* Category chips */}
         <div className="flex space-x-2 overflow-x-auto pb-2 scrollbar-none">
           {CATEGORIES.map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
               className={`
-                px-4 py-2 text-xs font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer
+                px-5 py-2.5 text-xs font-bold rounded-2xl transition-all whitespace-nowrap cursor-pointer
                 ${selectedCategory === category
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/15'
-                  : 'bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50'
+                  ? 'bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] text-white shadow-lg shadow-[#7C3AED]/15'
+                  : 'bg-[#111827] border border-white/[0.08] text-[#A1A1AA] hover:bg-white/[0.04] hover:text-white'
                 }
               `}
             >
@@ -391,83 +516,84 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
           ))}
         </div>
 
-        {/* Exercise Grid */}
+        {/* Exercise list grid */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, idx) => (
-              <div key={idx} className="bg-white dark:bg-zinc-900/20 border border-zinc-100 dark:border-zinc-900 rounded-2xl p-6 h-56 animate-pulse flex flex-col justify-between">
+              <div key={idx} className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 h-60 animate-pulse flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded-md w-1/3" />
-                  <div className="h-6 bg-zinc-200 dark:bg-zinc-800 rounded-md w-2/3" />
-                  <div className="h-10 bg-zinc-200 dark:bg-zinc-800 rounded-md w-full" />
+                  <div className="h-4 bg-white/10 rounded-md w-1/3" />
+                  <div className="h-6 bg-white/10 rounded-md w-2/3" />
+                  <div className="h-12 bg-white/10 rounded-md w-full" />
                 </div>
-                <div className="h-8 bg-zinc-200 dark:bg-zinc-800 rounded-md w-1/4" />
+                <div className="h-8 bg-white/10 rounded-md w-1/4" />
               </div>
             ))}
           </div>
         ) : filteredExercises.length === 0 ? (
-          <div className="text-center py-16 bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-8">
-            <p className="text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-wider text-xs">No matching workouts discovered.</p>
+          <div className="text-center py-16 bg-[#111827] border border-white/[0.08] rounded-3xl p-8">
+            <Compass className="w-10 h-10 text-[#A1A1AA] mx-auto mb-3" />
+            <p className="text-[#A1A1AA] font-bold uppercase tracking-wider text-xs">No matching splits discovered.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredExercises.map((exercise, index) => {
+            {filteredExercises.map((exercise) => {
               const isFav = (profile?.favorites || []).includes(exercise.id);
               return (
                 <motion.div
                   key={exercise.id}
-                  whileHover={{ y: -4 }}
-                  className="group bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between"
+                  whileHover={{ y: -5 }}
+                  className="group bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-md hover:border-[#7C3AED]/40 transition-all flex flex-col justify-between"
                 >
                   <div>
-                    {/* Badge and Level header */}
+                    {/* Card Badge and Level Header */}
                     <div className="flex items-center justify-between mb-4">
-                      <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      <span className="text-[10px] font-black text-white bg-gradient-to-r from-[#7C3AED]/30 to-[#4F46E5]/30 border border-[#7C3AED]/20 px-3 py-1 rounded-lg uppercase tracking-wider">
                         {exercise.muscleGroup}
                       </span>
                       <div className="flex items-center gap-1.5">
                         <span className={`
-                          text-[10px] font-bold uppercase px-2 py-0.5 rounded-md
-                          ${exercise.difficulty === 'Beginner' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' : ''}
-                          ${exercise.difficulty === 'Intermediate' ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' : ''}
-                          ${exercise.difficulty === 'Advanced' ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400' : ''}
+                          text-[10px] font-black uppercase px-2.5 py-1 rounded-lg border
+                          ${exercise.difficulty === 'Beginner' ? 'bg-[#22C55E]/10 text-[#22C55E] border-[#22C55E]/20' : ''}
+                          ${exercise.difficulty === 'Intermediate' ? 'bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/20' : ''}
+                          ${exercise.difficulty === 'Advanced' ? 'bg-[#EF4444]/10 text-[#EF4444] border-[#EF4444]/20' : ''}
                         `}>
                           {exercise.difficulty}
                         </span>
 
                         <button
                           onClick={() => handleToggleFavorite(exercise.id)}
-                          className={`p-1 rounded-full transition-colors cursor-pointer ${
-                            isFav ? 'text-rose-500' : 'text-zinc-300 dark:text-zinc-600 hover:text-rose-500'
+                          className={`p-1.5 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:bg-[#EF4444]/15 hover:border-[#EF4444]/20 transition-all cursor-pointer ${
+                            isFav ? 'text-[#EF4444] bg-[#EF4444]/10' : 'text-[#A1A1AA] hover:text-[#EF4444]'
                           }`}
                         >
-                          <Heart className={`w-4 h-4 ${isFav ? 'fill-rose-500' : ''}`} />
+                          <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-[#EF4444]' : ''}`} />
                         </button>
                       </div>
                     </div>
 
-                    <h3 className="text-lg font-bold text-zinc-900 dark:text-white group-hover:text-indigo-500 transition-colors line-clamp-1 uppercase">
+                    <h3 className="text-xl font-bold text-white group-hover:text-[#7C3AED] transition-colors leading-snug line-clamp-1 uppercase tracking-tight">
                       {exercise.name}
                     </h3>
 
-                    <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase mt-1 tracking-wider">
+                    <p className="text-[9px] text-[#A1A1AA] font-black uppercase mt-1 tracking-widest">
                       EQUIPMENT: {exercise.equipment}
                     </p>
 
-                    <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-3 line-clamp-3 leading-relaxed">
+                    <p className="text-[#A1A1AA] text-xs mt-3 line-clamp-3 leading-relaxed">
                       {exercise.description}
                     </p>
                   </div>
 
-                  {/* Actions */}
-                  <div className="mt-5 pt-4 border-t border-zinc-100 dark:border-zinc-800/50 flex items-center justify-between">
-                    <span className="text-xs font-mono font-semibold text-zinc-400">
-                      {exercise.recommendedSets} TARGET
+                  {/* Sets indicator and details CTA button */}
+                  <div className="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-between">
+                    <span className="text-xs font-mono font-bold text-[#A1A1AA]">
+                      {exercise.recommendedSets} TARGET SPLIT
                     </span>
 
                     <button
                       onClick={() => onNavigate('details', exercise.id)}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-zinc-900 dark:text-white group-hover:text-indigo-500 transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1 text-xs font-bold text-white group-hover:text-[#7C3AED] transition-all cursor-pointer"
                     >
                       <span>DETAILS</span>
                       <ChevronRight className="w-4 h-4" />
