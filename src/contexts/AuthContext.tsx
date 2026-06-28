@@ -4,9 +4,15 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+  deleteUser,
   User as FirebaseUser
 } from 'firebase/auth';
-import { auth } from '../firebase';
+import { doc, deleteDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 import { UserProfile } from '../types';
 import { getUserProfile, createUserProfile } from '../services/userService';
 
@@ -16,6 +22,10 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
+  sendPasswordReset: (email: string) => Promise<void>;
+  sendEmailVerificationLink: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -78,6 +88,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginWithGoogle = async () => {
+    setLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      // Fetch or create profile
+      let prof = await getUserProfile(userCredential.user.uid);
+      if (!prof) {
+        await createUserProfile(userCredential.user, userCredential.user.displayName || 'Gym Member');
+      }
+    } catch (error) {
+      setLoading(false);
+      throw error;
+    }
+  };
+
+  const sendPasswordReset = async (email: string) => {
+    await sendPasswordResetEmail(auth, email);
+  };
+
+  const sendEmailVerificationLink = async () => {
+    if (auth.currentUser) {
+      await sendEmailVerification(auth.currentUser);
+    } else {
+      throw new Error('No user is currently authenticated.');
+    }
+  };
+
+  const deleteAccount = async () => {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error('No authenticated user found.');
+    setLoading(true);
+    try {
+      // 1. Delete Firestore profile doc
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await deleteDoc(userDocRef);
+      // 2. Delete auth user
+      await deleteUser(currentUser);
+      // 3. Clear states
+      setUser(null);
+      setProfile(null);
+    } catch (error) {
+      setLoading(false);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async () => {
     setLoading(true);
     await signOut(auth);
@@ -87,7 +146,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, login, register, logout, refreshProfile }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      profile, 
+      loading, 
+      login, 
+      register, 
+      loginWithGoogle, 
+      sendPasswordReset, 
+      sendEmailVerificationLink, 
+      deleteAccount, 
+      logout, 
+      refreshProfile 
+    }}>
       {children}
     </AuthContext.Provider>
   );

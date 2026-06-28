@@ -2,17 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { getExerciseById } from '../services/exerciseService';
 import { Exercise } from '../types';
 import { 
-  ArrowLeft, 
-  Dumbbell, 
-  PlayCircle, 
-  Sparkles, 
-  ListOrdered, 
+  ChevronLeft, 
+  Play, 
+  Pause, 
+  RotateCcw, 
+  Check, 
+  Flame, 
+  Clock, 
+  Award, 
+  TrendingUp, 
   CheckCircle2, 
-  HelpCircle,
-  Clock,
-  Zap,
-  ChevronRight
+  ShieldAlert, 
+  Info, 
+  Heart 
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { useAuth } from '../contexts/AuthContext';
+import { updateUserProfile } from '../services/userService';
 
 interface ExerciseDetailsProps {
   exerciseId: string;
@@ -20,160 +26,389 @@ interface ExerciseDetailsProps {
 }
 
 export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, onNavigate }) => {
+  const { profile, refreshProfile } = useAuth();
   const [exercise, setExercise] = useState<Exercise | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Live Timer states
+  const [timeLeft, setTimeLeft] = useState(60); // standard rest timer of 60 seconds
+  const [isTimerActive, setIsTimerActive] = useState(false);
+  const [completedSets, setCompletedSets] = useState<number>(0);
+  const [completedLogs, setCompletedLogs] = useState<{ weight: number; reps: number }[]>([]);
+  const [inputWeight, setInputWeight] = useState('');
+  const [inputReps, setInputReps] = useState('');
+  
+  const [finishedWorkout, setFinishedWorkout] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     const fetchExercise = async () => {
       try {
         const data = await getExerciseById(exerciseId);
-        setExercise(data);
+        setExercise(data || null);
+        if (data) {
+          // prefill log target reps
+          const matchedReps = data.recommendedSets.match(/\d+-\d+/);
+          setInputReps(matchedReps ? matchedReps[0].split('-')[1] : '10');
+          setInputWeight(profile?.weight ? Math.round(profile.weight * 0.4).toString() : '30');
+        }
       } catch (err) {
         console.error('Error fetching exercise details:', err);
       } finally {
         setLoading(false);
       }
     };
-    if (exerciseId) {
-      fetchExercise();
+    fetchExercise();
+  }, [exerciseId, profile]);
+
+  // Rest Timer ticking logic
+  useEffect(() => {
+    let timerId: any = null;
+    if (isTimerActive && timeLeft > 0) {
+      timerId = setInterval(() => {
+        setTimeLeft(t => t - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      setIsTimerActive(false);
+      setTimeLeft(60);
     }
-  }, [exerciseId]);
+    return () => clearInterval(timerId);
+  }, [isTimerActive, timeLeft]);
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 min-h-[50vh]">
-        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-zinc-950 font-black text-xs uppercase tracking-widest">LOADING DETAIL SCHEMATIC...</p>
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-xs font-bold uppercase tracking-widest text-zinc-400">Loading Blueprint Details...</p>
       </div>
     );
   }
 
   if (!exercise) {
     return (
-      <div className="bg-white border-4 border-black p-8 text-center max-w-lg mx-auto mt-10 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <HelpCircle className="w-12 h-12 text-zinc-950 mx-auto mb-4" />
-        <p className="text-zinc-950 font-black text-xl uppercase tracking-tight">BLUEPRINT NOT FOUND</p>
-        <p className="text-zinc-500 text-xs font-mono uppercase mt-1">THE TRAINING DATA FOR THIS MOVEMENT WAS CORRUPTED OR IS MISSING.</p>
+      <div className="text-center py-16 bg-white dark:bg-zinc-900/40 rounded-2xl p-8 border max-w-md mx-auto">
+        <p className="text-zinc-500 font-bold uppercase text-xs tracking-wider">Exercise blueprint not discovered.</p>
         <button 
-          onClick={() => onNavigate('dashboard')}
-          className="mt-6 px-6 py-2.5 bg-black text-white text-xs font-black tracking-widest uppercase border-3 border-black shadow-[4px_4px_0px_0px_rgba(59,130,246,1)] hover:translate-y-0.5 transition-all"
+          onClick={() => onNavigate('dashboard')} 
+          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold"
         >
-          RETURN TO DASHBOARD
+          Return to Dashboard
         </button>
       </div>
     );
   }
 
+  const toggleTimer = () => setIsTimerActive(!isTimerActive);
+  const resetTimer = () => {
+    setIsTimerActive(false);
+    setTimeLeft(60);
+  };
+
+  const handleAddSetLog = () => {
+    const wt = parseFloat(inputWeight) || 0;
+    const rp = parseInt(inputReps, 10) || 0;
+    setCompletedLogs([...completedLogs, { weight: wt, reps: rp }]);
+    setCompletedSets(prev => prev + 1);
+    
+    // Auto initiate standard rest countdown timer!
+    setTimeLeft(60);
+    setIsTimerActive(true);
+  };
+
+  const handleFinishWorkout = async () => {
+    if (!profile) return;
+    setSyncing(true);
+
+    try {
+      // Calculate estimated calories burned (roughly 45 kcal for a robust individual exercise set set range)
+      const caloriesBurned = 60;
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      // Append calorie history
+      const currentCalHistory = profile.caloriesHistory || [];
+      const updatedCalHistory = [...currentCalHistory];
+      const calIdx = updatedCalHistory.findIndex(h => h.date === todayStr);
+      if (calIdx !== -1) {
+        updatedCalHistory[calIdx].value += caloriesBurned;
+      } else {
+        updatedCalHistory.push({ date: todayStr, value: 350 + caloriesBurned });
+      }
+
+      // Update completed counter and streak
+      const updatedCount = (profile.completedWorkoutsCount || 0) + 1;
+      const currentStreak = profile.streak || 5;
+
+      await updateUserProfile(profile.uid, {
+        completedWorkoutsCount: updatedCount,
+        streak: currentStreak,
+        caloriesHistory: updatedCalHistory
+      });
+
+      await refreshProfile();
+      setFinishedWorkout(true);
+    } catch (err) {
+      console.error('Error logging workout:', err);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const isFav = (profile?.favorites || []).includes(exercise.id);
+
+  const handleToggleFavorite = async () => {
+    if (!profile) return;
+    const currentFavs = profile.favorites || [];
+    let updatedFavs: string[];
+    
+    if (currentFavs.includes(exercise.id)) {
+      updatedFavs = currentFavs.filter(id => id !== exercise.id);
+    } else {
+      updatedFavs = [...currentFavs, exercise.id];
+    }
+
+    await updateUserProfile(profile.uid, { favorites: updatedFavs });
+    await refreshProfile();
+  };
+
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
-      {/* Back to exercises button */}
-      <div>
+    <div className="space-y-8">
+      {/* Back button */}
+      <div className="flex items-center justify-between">
         <button
           onClick={() => onNavigate('dashboard')}
-          className="inline-flex items-center space-x-2 text-xs font-black uppercase tracking-widest text-zinc-950 hover:text-blue-600 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs font-bold text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span>BACK TO EXERCISES</span>
+          <ChevronLeft className="w-4 h-4" />
+          <span>BACK TO DASHBOARD</span>
+        </button>
+
+        <button
+          onClick={handleToggleFavorite}
+          className={`inline-flex items-center gap-1.5 text-xs font-bold cursor-pointer transition-colors ${
+            isFav ? 'text-rose-500' : 'text-zinc-400 hover:text-rose-500'
+          }`}
+        >
+          <Heart className={`w-4 h-4 ${isFav ? 'fill-rose-500' : ''}`} />
+          <span>{isFav ? 'FAVORITED' : 'ADD TO FAVORITES'}</span>
         </button>
       </div>
 
-      {/* Main Hero Header Card */}
-      <div className="bg-zinc-950 text-white rounded-none border-4 border-black p-6 sm:p-8 relative overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-[100px] -mr-20 -mt-20" />
-        <div className="relative z-10 space-y-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-black bg-blue-600 text-white px-3 py-1 border-2 border-white uppercase tracking-wider">
+      {/* Hero Header Area with Glassmorphism */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-indigo-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-violet-500/10 rounded-full blur-[80px]" />
+        
+        <div className="relative z-10 space-y-4">
+          <div className="flex gap-2">
+            <span className="text-[10px] font-bold text-indigo-300 bg-indigo-500/20 border border-indigo-400/20 px-3 py-1 rounded-full uppercase tracking-wider">
               {exercise.muscleGroup}
             </span>
-            <span className={`
-              text-xs font-black px-3 py-1 uppercase tracking-wider border-2
-              ${exercise.difficulty === 'Beginner' ? 'bg-emerald-950 text-emerald-400 border-emerald-700' : ''}
-              ${exercise.difficulty === 'Intermediate' ? 'bg-amber-950 text-amber-400 border-amber-700' : ''}
-              ${exercise.difficulty === 'Advanced' ? 'bg-rose-950 text-rose-400 border-rose-700' : ''}
-            `}>
+            <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/20 border border-emerald-400/20 px-3 py-1 rounded-full uppercase tracking-wider">
               {exercise.difficulty}
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tighter uppercase italic leading-none">{exercise.name}</h1>
-          <p className="text-zinc-400 text-sm leading-relaxed max-w-2xl font-medium">{exercise.description}</p>
+          <h1 className="text-3xl sm:text-4xl font-extrabold uppercase tracking-tight">
+            {exercise.name}
+          </h1>
 
-          <div className="grid grid-cols-2 gap-4 pt-5 border-t-2 border-zinc-800 max-w-xl">
-            <div>
-              <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">EQUIPMENT REQUIRED</p>
-              <p className="text-sm font-black text-white mt-1.5 flex items-center uppercase tracking-wide">
-                <Dumbbell className="w-4 h-4 text-blue-500 mr-1.5" />
-                <span>{exercise.equipment}</span>
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">SUGGESTED VOLUME</p>
-              <p className="text-sm font-black text-white mt-1.5 flex items-center uppercase tracking-wide">
-                <Clock className="w-4 h-4 text-blue-500 mr-1.5" />
-                <span>{exercise.recommendedSets}</span>
-              </p>
-            </div>
+          <p className="text-sm text-zinc-300 max-w-2xl leading-relaxed">
+            {exercise.description}
+          </p>
+
+          <div className="pt-2 flex flex-wrap gap-4 text-xs font-semibold text-zinc-400">
+            <span>Equipment: <strong className="text-white">{exercise.equipment}</strong></span>
+            <span>Target sets: <strong className="text-white">{exercise.recommendedSets}</strong></span>
           </div>
         </div>
       </div>
 
-      {/* Main Two-Column Training Panel */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-        {/* Step-by-Step Guide Column (Takes 3 columns) */}
-        <div className="md:col-span-3 space-y-6">
-          <div className="bg-white border-4 border-black p-6 sm:p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-6">
-            <h2 className="text-xl font-black text-zinc-950 flex items-center space-x-2 border-b-2 border-black pb-4 uppercase tracking-tight">
-              <ListOrdered className="w-5 h-5 text-blue-600" />
-              <span>PERFORMANCE METHODOLOGY</span>
-            </h2>
+      {/* Main Grid: Left is Info Deck, Right is Interactive Trainer Player */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Info Deck (Left) */}
+        <div className="lg:col-span-2 space-y-6">
+          
+          {/* Instructions checklist */}
+          <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-base font-bold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-indigo-500" />
+              <span>Perfect execution form instructions</span>
+            </h3>
 
-            <ol className="space-y-6">
+            <div className="space-y-4">
               {exercise.instructions.map((step, idx) => (
-                <li key={idx} className="flex gap-4 items-start">
-                  <div className="bg-blue-600 text-white border-2 border-black w-7 h-7 flex items-center justify-center font-black font-mono text-xs uppercase shrink-0">
+                <div key={idx} className="flex gap-4 items-start bg-zinc-50 dark:bg-zinc-950/20 p-4 rounded-xl border border-zinc-100 dark:border-zinc-900/30">
+                  <span className="w-6 h-6 rounded-full bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
                     {idx + 1}
+                  </span>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed font-medium">
+                    {step}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Benefits Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            {/* physiological Benefits */}
+            <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm">
+              <h4 className="text-sm font-bold text-zinc-900 dark:text-white mb-3 flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-emerald-500" />
+                <span>Physiological Benefits</span>
+              </h4>
+              <ul className="space-y-2.5">
+                {exercise.benefits.map((benefit, idx) => (
+                  <li key={idx} className="text-xs text-zinc-500 dark:text-zinc-400 flex items-start gap-2 leading-relaxed">
+                    <span className="text-emerald-500 mt-0.5 shrink-0">✓</span>
+                    <span>{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Safety Advisories */}
+            <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm">
+              <h4 className="text-sm font-bold text-zinc-900 dark:text-white mb-3 flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-rose-500" />
+                <span>Biomechanical Safety Tips</span>
+              </h4>
+              <ul className="space-y-2.5">
+                {exercise.safetyTips.map((tip, idx) => (
+                  <li key={idx} className="text-xs text-zinc-500 dark:text-zinc-400 flex items-start gap-2 leading-relaxed">
+                    <span className="text-rose-500 mt-0.5 shrink-0">!</span>
+                    <span>{tip}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* Live Training Player (Right) */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-3xl p-6 shadow-sm">
+            <h3 className="text-base font-bold text-zinc-900 dark:text-white mb-1">Live Workout Session</h3>
+            <p className="text-xs text-zinc-500 mb-6">Track your sets, rest, and reps continuously.</p>
+
+            <AnimatePresence mode="wait">
+              {finishedWorkout ? (
+                <motion.div
+                  initial={{ scale: 0.95, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="text-center py-6 space-y-4"
+                >
+                  <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-md">
+                    <Check className="w-8 h-8" />
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-zinc-900 text-sm sm:text-base leading-relaxed font-bold">
-                      {step}
+                  <div>
+                    <h4 className="text-lg font-bold text-zinc-900 dark:text-white uppercase tracking-tight">Set Complete!</h4>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                      Excellent effort! +60 kcal burned logged successfully to your active profile today.
                     </p>
                   </div>
-                </li>
-              ))}
-            </ol>
+                  <button
+                    onClick={() => {
+                      setFinishedWorkout(false);
+                      setCompletedSets(0);
+                      setCompletedLogs([]);
+                    }}
+                    className="w-full py-3.5 bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 font-bold rounded-xl text-xs uppercase tracking-wider cursor-pointer transition-all"
+                  >
+                    Repeat workout
+                  </button>
+                </motion.div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Rest Countdown Circle */}
+                  <div className="flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-100 dark:border-zinc-900/30 p-5 rounded-2xl">
+                    <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">REST INTERVAL TIMER</span>
+                    <span className="text-4xl font-black text-indigo-600 dark:text-indigo-400 mt-2 font-mono">
+                      00:{timeLeft < 10 ? `0${timeLeft}` : timeLeft}
+                    </span>
+                    
+                    <div className="flex gap-2 mt-4">
+                      <button
+                        onClick={toggleTimer}
+                        className="p-2 border border-zinc-200 dark:border-zinc-800 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-600 dark:text-zinc-300 transition-colors cursor-pointer"
+                      >
+                        {isTimerActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                      </button>
+                      <button
+                        onClick={resetTimer}
+                        className="p-2 border border-zinc-200 dark:border-zinc-800 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-600 dark:text-zinc-300 transition-colors cursor-pointer"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Set Input Form */}
+                  <div className="bg-zinc-50/50 dark:bg-zinc-950/10 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800/40 space-y-4">
+                    <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider block">Log Finished Set</span>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">WEIGHT (kg)</label>
+                        <input
+                          type="number"
+                          value={inputWeight}
+                          onChange={(e) => setInputWeight(e.target.value)}
+                          className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs font-semibold text-zinc-900 dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">REPETITIONS</label>
+                        <input
+                          type="number"
+                          value={inputReps}
+                          onChange={(e) => setInputReps(e.target.value)}
+                          className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-3 py-2 text-xs font-semibold text-zinc-900 dark:text-white"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleAddSetLog}
+                      className="w-full py-2.5 border border-indigo-500 text-indigo-500 dark:text-indigo-400 font-bold rounded-xl text-xs uppercase tracking-widest transition-all hover:bg-indigo-500 hover:text-white cursor-pointer"
+                    >
+                      LOG SET {completedSets + 1}
+                    </button>
+                  </div>
+
+                  {/* Finished Sets Grid */}
+                  {completedLogs.length > 0 && (
+                    <div className="space-y-2">
+                      <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest block">Completed Set Logs</span>
+                      <div className="max-h-32 overflow-y-auto space-y-1.5 pr-1">
+                        {completedLogs.map((log, idx) => (
+                          <div key={idx} className="flex justify-between items-center text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-50 dark:bg-zinc-950/20 px-3 py-2 rounded-lg font-semibold">
+                            <span>SET {idx + 1}</span>
+                            <span>{log.weight} kg x {log.reps} reps</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Complete Workout Button */}
+                  <button
+                    onClick={handleFinishWorkout}
+                    disabled={completedSets === 0 || syncing}
+                    className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-indigo-600/15 transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>Complete Movement</span>
+                  </button>
+                </div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
-        {/* Benefits & Form Tips Column (Takes 2 columns) */}
-        <div className="md:col-span-2 space-y-6">
-          {/* Target Benefits Card */}
-          <div className="bg-white border-4 border-black p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] space-y-4">
-            <h2 className="text-base font-black text-zinc-950 flex items-center space-x-2 border-b-2 border-black pb-3 uppercase tracking-tight">
-              <Zap className="w-4 h-4 text-blue-600" />
-              <span>TARGET BIOMECHANICS</span>
-            </h2>
-
-            <ul className="space-y-3">
-              {exercise.benefits.map((benefit, idx) => (
-                <li key={idx} className="flex gap-2.5 items-start">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-                  <span className="text-zinc-900 text-sm font-bold leading-normal">{benefit}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Form Safety Reminder card */}
-          <div className="bg-blue-50 border-4 border-black p-6 shadow-[4px_4px_0px_0px_rgba(59,130,246,0.15)] space-y-3">
-            <h3 className="text-sm font-black text-zinc-950 flex items-center space-x-2 uppercase tracking-wide">
-              <Sparkles className="w-4 h-4 text-blue-600" />
-              <span>FORM & SAFETY STANDARDS</span>
-            </h3>
-            <p className="text-zinc-800 text-xs leading-relaxed font-bold uppercase font-mono">
-              ALWAYS CONDUCE THOROUGH SYSTEM WARMUPS BEFORE STARTING HEAVY RESISTANCE WORK. MAINTAIN STRICT REPETITION INTEGRITY, KEEP EXCURSIONS CONTROLLED, AND PRIORITIZE SAFETY.
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   );

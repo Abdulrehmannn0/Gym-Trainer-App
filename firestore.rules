@@ -1,8 +1,8 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users Collection
-    match /users/{uid} {
+    // Users Collection (Recursive match for all subcollections)
+    match /users/{uid}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
 
@@ -10,6 +10,18 @@ service cloud.firestore {
     match /exercises/{exerciseId} {
       allow read: if true;
       allow write: if request.auth != null;
+    }
+
+    // Support Tickets Collection
+    match /support_tickets/{ticketId} {
+      allow create: if request.auth != null;
+      allow read, update, delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+
+    // System Errors Collection for Telemetry
+    match /system_errors/{errorId} {
+      allow create: if true;
+      allow read, update, delete: if false;
     }
   }
 }
