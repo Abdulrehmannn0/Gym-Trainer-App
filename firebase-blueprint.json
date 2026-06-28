@@ -1,0 +1,44 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile in GymTrainer Pro",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "name": { "type": "string", "description": "User's display name" },
+        "email": { "type": "string", "description": "User's email" },
+        "photoURL": { "type": "string", "description": "User's profile photo URL" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation date" }
+      },
+      "required": ["uid", "name", "email"]
+    },
+    "Exercise": {
+      "title": "Exercise",
+      "description": "A single gym exercise in the exercise library",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Exercise unique ID" },
+        "name": { "type": "string", "description": "Exercise Name" },
+        "muscleGroup": { "type": "string", "description": "Primary muscle group targeted" },
+        "difficulty": { "type": "string", "description": "Difficulty level: Beginner, Intermediate, Advanced" },
+        "equipment": { "type": "string", "description": "Equipment needed" },
+        "description": { "type": "string", "description": "Short description of the exercise" },
+        "instructions": { "type": "array", "description": "Step-by-step instructions" },
+        "recommendedSets": { "type": "string", "description": "Recommended sets and reps, e.g., '3 sets of 10-12 reps'" },
+        "benefits": { "type": "array", "description": "Benefits of performing this exercise" }
+      },
+      "required": ["id", "name", "muscleGroup", "difficulty", "equipment", "description", "instructions", "recommendedSets", "benefits"]
+    }
+  },
+  "firestore": {
+    "users/{uid}": {
+      "schema": "User",
+      "description": "User documents containing personal profile details and settings."
+    },
+    "exercises/{exerciseId}": {
+      "schema": "Exercise",
+      "description": "Sample exercise library synced across all users."
+    }
+  }
+}

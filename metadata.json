@@ -1,0 +1,6 @@
+{
+  "name": "GymTrainer Pro",
+  "description": "A modern web application for personalized fitness training, exercise library management, and progress tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
