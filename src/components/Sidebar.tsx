@@ -75,9 +75,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile Top Header Bar */}
       <div className="md:hidden flex items-center justify-between bg-white dark:bg-[#09090B] border-b border-zinc-200 dark:border-white/[0.08] text-zinc-900 dark:text-white p-4 sticky top-0 z-50 shadow-sm">
         <div className="flex items-center space-x-2">
-          <div className="p-1.5 bg-gradient-to-br from-[#7C3AED] to-[#4F46E5] rounded-xl text-white shadow-md shadow-[#7C3AED]/20">
-            <Dumbbell className="w-5 h-5" />
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="AzharFit AI" 
+            className="w-8 h-8 object-cover rounded-xl shadow-md"
+            referrerPolicy="no-referrer"
+          />
           <span className="font-extrabold text-xl tracking-tight text-zinc-900 dark:text-white">
             AzharFit<span className="text-[#7C3AED]">AI</span>
           </span>
@@ -102,9 +105,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* App Brand Title (Desktop Only) */}
         <div className="hidden md:flex items-center justify-between px-6 py-6 border-b border-zinc-200 dark:border-white/[0.08] relative">
           <div className="flex items-center space-x-3 overflow-hidden">
-            <div className="p-2.5 bg-gradient-to-br from-[#7C3AED] to-[#4F46E5] rounded-2xl text-white shadow-lg shadow-[#7C3AED]/20 shrink-0">
-              <Dumbbell className="w-5 h-5" />
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="AzharFit AI" 
+              className="w-10 h-10 object-cover rounded-2xl shadow-lg shadow-[#7C3AED]/10 shrink-0"
+              referrerPolicy="no-referrer"
+            />
             {!isCollapsed && (
               <motion.div
                 initial={{ opacity: 0, x: -10 }}

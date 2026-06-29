@@ -3,12 +3,12 @@
   "name": "AzharFit AI - Train Smart. Live Strong.",
   "icons": [
     {
-      "src": "https://api.dicebear.com/7.x/identicon/png?seed=AzharFitAI&backgroundColor=7c3aed",
+      "src": "/logo.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "https://api.dicebear.com/7.x/identicon/png?seed=AzharFitAI&backgroundColor=7c3aed",
+      "src": "/logo.png",
       "type": "image/png",
       "sizes": "512x512"
     }

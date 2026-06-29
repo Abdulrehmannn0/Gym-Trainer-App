@@ -28,14 +28,14 @@ async function startServer() {
     res.json({ status: "ok", apiKeyConfigured: !!apiKey });
   });
 
-  // 1. AI COACH: Chat completion
+  // 1. AI COACH: Chat completion with real-time SSE streaming support
   app.post("/api/coach/chat", async (req, res) => {
     try {
       if (!apiKey) {
         return res.status(500).json({ error: "Gemini API key is missing on the server configuration." });
       }
 
-      const { messages, profile } = req.body;
+      const { messages, profile, stream } = req.body;
       const recentMessages = messages || [];
       const userProfile = profile || {};
 
@@ -56,12 +56,78 @@ Format your responses with clean, readable Markdown (headings, lists, bold keywo
 Never use dry or robotic language. Focus on physical performance, progressive overload, and solid metabolic nutrition.
 Keep your answers comprehensive and tailored to the questions. Address pain points such as knee pain or equipment limitations immediately and offer actionable modifications.`;
 
-      // Format messages into chat contents for Gemini API
-      const chatContents = recentMessages.map((m: any) => ({
-        role: m.sender === "user" ? "user" : "model",
-        parts: [{ text: m.text }]
-      }));
+      // Sanitize and format messages into chat contents for Gemini API
+      // Rules:
+      // 1. Must alternate roles: user, model, user, model
+      // 2. Must start with "user" role
+      // 3. Must end with "user" role
+      let chatContents: any[] = [];
+      for (const m of recentMessages) {
+        if (!m.text || !m.text.trim()) continue;
+        const role = m.sender === "user" ? "user" : "model";
+        
+        if (chatContents.length > 0 && chatContents[chatContents.length - 1].role === role) {
+          // Merge text if role matches the last one to preserve alternation
+          chatContents[chatContents.length - 1].parts[0].text += "\n" + m.text;
+        } else {
+          chatContents.push({
+            role: role,
+            parts: [{ text: m.text }]
+          });
+        }
+      }
 
+      // Ensure start with user
+      while (chatContents.length > 0 && chatContents[0].role !== "user") {
+        chatContents.shift();
+      }
+
+      // Ensure end with user
+      while (chatContents.length > 0 && chatContents[chatContents.length - 1].role !== "user") {
+        chatContents.pop();
+      }
+
+      // Fallback if empty
+      if (chatContents.length === 0) {
+        const lastUserText = recentMessages.reverse().find((m: any) => m.sender === "user")?.text || "Hello Coach!";
+        chatContents.push({
+          role: "user",
+          parts: [{ text: lastUserText }]
+        });
+      }
+
+      if (stream) {
+        // Set up SSE headers
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        
+        try {
+          const responseStream = await ai.models.generateContentStream({
+            model: "gemini-3.5-flash",
+            contents: chatContents,
+            config: {
+              systemInstruction: systemInstruction,
+              temperature: 0.7,
+            }
+          });
+
+          for await (const chunk of responseStream) {
+            const chunkText = chunk.text || "";
+            res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
+          }
+          res.write('data: [DONE]\n\n');
+          res.end();
+          return;
+        } catch (streamErr: any) {
+          console.error("Gemini Streaming Error:", streamErr);
+          res.write(`data: ${JSON.stringify({ error: streamErr.message || "Streaming error occurred." })}\n\n`);
+          res.end();
+          return;
+        }
+      }
+
+      // Non-streaming fallback
       const response = await ai.models.generateContent({
         model: "gemini-3.5-flash",
         contents: chatContents,

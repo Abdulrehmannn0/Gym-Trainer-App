@@ -2,7 +2,7 @@
   "entities": {
     "User": {
       "title": "User",
-      "description": "User profile in GymTrainer Pro",
+      "description": "User profile in AzharFit AI",
       "type": "object",
       "properties": {
         "uid": { "type": "string", "description": "Firebase Auth UID" },

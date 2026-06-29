@@ -198,7 +198,7 @@ export const AICoach: React.FC = () => {
     }
   };
 
-  // 1. CHAT COMPLETION
+  // 1. CHAT COMPLETION WITH REAL-TIME STREAMING & ROBUST ERROR HANDLING
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim() || !profile?.uid) return;
@@ -217,54 +217,136 @@ export const AICoach: React.FC = () => {
     setMessages(prev => [...prev, savedUser]);
     setIsTyping(true);
 
+    let aiText = '';
+    
+    // Add temporary AI message to state for streaming
+    const tempAiMsg: AIChatMessage = {
+      sender: 'ai',
+      text: '',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      category: 'general'
+    };
+    
+    setMessages(prev => [...prev, tempAiMsg]);
+
     try {
       const response = await fetch('/api/coach/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: [...messages, savedUser],
-          profile: profile
+          profile: profile,
+          stream: true
         })
       });
 
-      let data: any = {};
-      const contentType = response.headers.get('content-type') || '';
-      
-      if (contentType.includes('application/json')) {
-        try {
-          data = await response.json();
-        } catch (jsonErr) {
-          console.error("JSON parse failure on /api/coach/chat:", jsonErr);
-          throw new Error("Received an invalid response format from the server.");
-        }
-      } else {
-        const textResponse = await response.text();
-        console.error("Received non-JSON response:", textResponse);
-        throw new Error(`The training server returned an error page (${response.status}). This can occur if your network is unstable or your backend service is restarting.`);
+      if (!response.ok) {
+        throw new Error("Failed response status from server");
       }
 
-      if (response.ok && data.text) {
-        const aiMsg: AIChatMessage = {
+      const contentType = response.headers.get('content-type') || '';
+      
+      if (contentType.includes('text/event-stream')) {
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        if (!reader) {
+          throw new Error("Streaming connection could not be established.");
+        }
+
+        setIsTyping(false); // Done initializing, now streaming
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep partial line in buffer
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const dataStr = line.slice(6).trim();
+              if (dataStr === '[DONE]') continue;
+              
+              try {
+                const parsed = JSON.parse(dataStr);
+                if (parsed.error) {
+                  throw new Error(parsed.error);
+                }
+                if (parsed.text) {
+                  aiText += parsed.text;
+                  setMessages(prev => {
+                    const nextMsgs = [...prev];
+                    if (nextMsgs.length > 0) {
+                      nextMsgs[nextMsgs.length - 1] = {
+                        ...nextMsgs[nextMsgs.length - 1],
+                        text: aiText
+                      };
+                    }
+                    return nextMsgs;
+                  });
+                }
+              } catch (parseErr) {
+                // Ignore partial JSON chunks
+              }
+            }
+          }
+        }
+
+        // Complete response - Save to database
+        const finalAiMsg: AIChatMessage = {
           sender: 'ai',
-          text: data.text,
+          text: aiText || "I'm sorry, I couldn't compute a proper response.",
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           category: 'general'
         };
-        // Save AI response to Firestore
-        const savedAi = await saveAIChatMessage(profile.uid, aiMsg);
-        setMessages(prev => [...prev, savedAi]);
+        await saveAIChatMessage(profile.uid, finalAiMsg);
       } else {
-        throw new Error(data.error || 'The system could not compute a plan.');
+        // Fallback for non-streaming response if returned as standard JSON
+        const data = await response.json();
+        if (response.ok && data.text) {
+          aiText = data.text;
+          setMessages(prev => {
+            const nextMsgs = [...prev];
+            if (nextMsgs.length > 0) {
+              nextMsgs[nextMsgs.length - 1] = {
+                ...nextMsgs[nextMsgs.length - 1],
+                text: aiText
+              };
+            }
+            return nextMsgs;
+          });
+          const finalAiMsg: AIChatMessage = {
+            sender: 'ai',
+            text: aiText,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            category: 'general'
+          };
+          await saveAIChatMessage(profile.uid, finalAiMsg);
+        } else {
+          throw new Error(data.error || 'Server returned invalid text.');
+        }
       }
     } catch (err: any) {
-      console.error(err);
-      const errorMsg: AIChatMessage = {
-        sender: 'ai',
-        text: `Sorry, Coach AzharFit encountered a connection hurdle: ${err.message || 'connection issue'}. Let's re-try this rep!`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isError: true
-      };
-      setMessages(prev => [...prev, errorMsg]);
+      console.error("AI Chat Error:", err);
+      
+      // Friendly User-Facing Error
+      const friendlyError = "I'm having trouble reaching the AI server. Please try again.";
+      
+      setMessages(prev => {
+        const nextMsgs = [...prev];
+        if (nextMsgs.length > 0) {
+          nextMsgs[nextMsgs.length - 1] = {
+            sender: 'ai',
+            text: friendlyError,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            isError: true
+          };
+        }
+        return nextMsgs;
+      });
     } finally {
       setIsTyping(false);
     }
