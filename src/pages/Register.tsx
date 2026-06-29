@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Mail, Lock, User, Eye, EyeOff, Loader2, ArrowRight, Dumbbell } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Loader2, ArrowRight, Dumbbell, Award } from 'lucide-react';
 import { motion } from 'motion/react';
+import { updateUserProfile } from '../services/userService';
+import { auth } from '../firebase';
 
 interface RegisterProps {
   onNavigate: (page: string) => void;
@@ -13,10 +15,20 @@ export const Register: React.FC<RegisterProps> = ({ onNavigate }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [referredBy, setReferredBy] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [googleSubmitting, setGoogleSubmitting] = useState(false);
+
+  // Check for url ref code on load
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const refCode = params.get('ref') || params.get('referral');
+    if (refCode) {
+      setReferredBy(refCode.toUpperCase());
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +48,13 @@ export const Register: React.FC<RegisterProps> = ({ onNavigate }) => {
     setSubmitting(true);
     try {
       await register(email, password, name);
+      
+      // Save referral relationship if provided
+      const currentUser = auth.currentUser;
+      if (currentUser && referredBy.trim()) {
+        await updateUserProfile(currentUser.uid, { referredBy: referredBy.trim().toUpperCase() });
+      }
+      
       onNavigate('dashboard');
     } catch (err: any) {
       console.error(err);
@@ -190,6 +209,32 @@ export const Register: React.FC<RegisterProps> = ({ onNavigate }) => {
                   placeholder="••••••••"
                   className="w-full bg-zinc-950/60 border border-zinc-800 focus:border-indigo-500 text-white font-semibold text-xs py-3.5 pl-11 pr-11 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
                   required
+                />
+              </div>
+            </div>
+
+            {/* Referral Code (Optional) */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between">
+                <label className="block text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                  REFERRAL CODE (OPTIONAL)
+                </label>
+                {referredBy && (
+                  <span className="text-[9px] font-black text-[#22C55E] tracking-widest uppercase">
+                    Code Applied!
+                  </span>
+                )}
+              </div>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-zinc-500">
+                  <Award className="w-4.5 h-4.5 text-zinc-500" />
+                </span>
+                <input
+                  type="text"
+                  value={referredBy}
+                  onChange={(e) => setReferredBy(e.target.value.toUpperCase())}
+                  placeholder="E.G. AZHAR1234"
+                  className="w-full bg-zinc-950/60 border border-zinc-800 focus:border-indigo-500 text-white font-semibold text-xs py-3.5 pl-11 pr-4 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all"
                 />
               </div>
             </div>

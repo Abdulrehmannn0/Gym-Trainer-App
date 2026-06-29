@@ -549,7 +549,7 @@ export const Progress: React.FC = () => {
           
           <button
             onClick={() => window.print()}
-            className="px-4 py-2.5 bg-[#111827] border border-white/[0.08] hover:border-[#7C3AED]/30 text-white rounded-xl hover:bg-zinc-900 transition-all flex items-center gap-2 cursor-pointer text-xs font-bold no-print self-start sm:self-auto shrink-0"
+            className="px-4 py-2.5 bg-card-custom border border-border-custom hover:border-[#7C3AED]/30 text-text-custom-primary rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all flex items-center gap-2 cursor-pointer text-xs font-bold no-print self-start sm:self-auto shrink-0"
           >
             <Printer className="w-4 h-4 text-[#7C3AED]" />
             <span>Print Report (PDF)</span>
@@ -558,7 +558,7 @@ export const Progress: React.FC = () => {
       </div>
 
       {/* Tab Selector Buttons Container */}
-      <div className="tab-selector-container flex p-1 bg-[#111827] border border-white/[0.08] rounded-2xl gap-1 self-start shrink-0 overflow-x-auto max-w-full">
+      <div className="tab-selector-container flex p-1 bg-card-custom border border-border-custom rounded-2xl gap-1 self-start shrink-0 overflow-x-auto max-w-full">
         {[
           { id: 'analytics', label: 'Analytics' },
           { id: 'measurements', label: 'Body Stats' },
@@ -575,7 +575,7 @@ export const Progress: React.FC = () => {
             className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all shrink-0 cursor-pointer ${
               activeTab === tab.id 
                 ? 'bg-[#7C3AED] text-white shadow-md' 
-                : 'text-[#A1A1AA] hover:text-white hover:bg-white/[0.02]'
+                : 'text-text-custom-secondary hover:text-text-custom-primary hover:bg-zinc-100 dark:hover:bg-white/[0.02]'
             }`}
           >
             {tab.label}
@@ -599,16 +599,16 @@ export const Progress: React.FC = () => {
             <div className="lg:col-span-2 space-y-6">
               
               {/* Weight Progression custom line chart */}
-              <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl">
+              <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl">
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <span className="text-[10px] font-bold text-[#A1A1AA] block uppercase tracking-wider">ATHLETE WEIGHT GRAPH</span>
-                    <h3 className="text-base font-black text-white flex items-center gap-1.5 mt-1">
+                    <span className="text-[10px] font-bold text-text-custom-secondary block uppercase tracking-wider">ATHLETE WEIGHT GRAPH</span>
+                    <h3 className="text-base font-black text-text-custom-primary flex items-center gap-1.5 mt-1">
                       <Scale className="w-4 h-4 text-emerald-400" />
                       <span>Weight Progression (kg)</span>
                     </h3>
                   </div>
-                  <span className="text-2xl font-black text-emerald-400 tracking-tight">{latestWeight.toFixed(1)} <span className="text-xs font-normal text-[#A1A1AA]">kg</span></span>
+                  <span className="text-2xl font-black text-emerald-400 tracking-tight">{latestWeight.toFixed(1)} <span className="text-xs font-normal text-text-custom-secondary">kg</span></span>
                 </div>
 
                 <div className="h-40 w-full relative">
@@ -630,7 +630,7 @@ export const Progress: React.FC = () => {
                       points={generateLinePoints(weightData, 500, 140, getMinMax(weightData).min, getMinMax(weightData).max)}
                     />
                   </svg>
-                  <div className="flex justify-between text-[10px] text-[#A1A1AA] font-bold tracking-widest uppercase mt-3 font-mono">
+                  <div className="flex justify-between text-[10px] text-text-custom-secondary font-bold tracking-widest uppercase mt-3 font-mono">
                     {weightData.map((w, idx) => (
                       <span key={idx}>{w.date}</span>
                     ))}
@@ -639,17 +639,17 @@ export const Progress: React.FC = () => {
               </div>
 
               {/* Calories Burned Line Area chart */}
-              <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl">
+              <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl">
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <span className="text-[10px] font-bold text-[#A1A1AA] block uppercase tracking-wider">CALORIE INCINERATOR INDEX</span>
-                    <h3 className="text-base font-black text-white flex items-center gap-1.5 mt-1">
+                    <span className="text-[10px] font-bold text-text-custom-secondary block uppercase tracking-wider">CALORIE INCINERATOR INDEX</span>
+                    <h3 className="text-base font-black text-text-custom-primary flex items-center gap-1.5 mt-1">
                       <Flame className="w-4 h-4 text-orange-400" />
                       <span>Calories Burned History (kcal)</span>
                     </h3>
                   </div>
                   <span className="text-2xl font-black text-orange-400 tracking-tight">
-                    {caloriesData[caloriesData.length - 1]?.value || 0} <span className="text-xs font-normal text-[#A1A1AA]">kcal</span>
+                    {caloriesData[caloriesData.length - 1]?.value || 0} <span className="text-xs font-normal text-text-custom-secondary">kcal</span>
                   </span>
                 </div>
 
@@ -672,7 +672,7 @@ export const Progress: React.FC = () => {
                       points={generateLinePoints(caloriesData, 500, 140, getMinMax(caloriesData).min, getMinMax(caloriesData).max)}
                     />
                   </svg>
-                  <div className="flex justify-between text-[10px] text-[#A1A1AA] font-bold tracking-widest uppercase mt-3 font-mono">
+                  <div className="flex justify-between text-[10px] text-text-custom-secondary font-bold tracking-widest uppercase mt-3 font-mono">
                     {caloriesData.map((c, idx) => (
                       <span key={idx}>{c.date}</span>
                     ))}
@@ -683,10 +683,10 @@ export const Progress: React.FC = () => {
               {/* Workout frequency and BMI classifying cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
-                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl">
+                <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl">
                   <div className="mb-4">
-                    <span className="text-[10px] font-bold text-[#A1A1AA] block uppercase tracking-wider">WEEKLY SPLIT FREQUENCY</span>
-                    <h3 className="text-sm font-black text-white flex items-center gap-1.5 mt-1">
+                    <span className="text-[10px] font-bold text-text-custom-secondary block uppercase tracking-wider">WEEKLY SPLIT FREQUENCY</span>
+                    <h3 className="text-sm font-black text-text-custom-primary flex items-center gap-1.5 mt-1">
                       <Dumbbell className="w-4 h-4 text-[#7C3AED]" />
                       <span>Workout Frequency</span>
                     </h3>
@@ -698,10 +698,10 @@ export const Progress: React.FC = () => {
                       const pct = Math.min((val / 8) * 100, 100);
                       return (
                         <div key={idx} className="flex flex-col items-center gap-2 flex-1">
-                          <div className="w-5 bg-[#09090B] border border-white/[0.04] rounded-full h-20 flex items-end overflow-hidden">
+                           <div className="w-5 bg-zinc-100 dark:bg-zinc-100 dark:bg-[#09090B] border border-border-custom-light rounded-full h-20 flex items-end overflow-hidden">
                             <div className="w-full bg-[#7C3AED] rounded-full" style={{ height: `${pct}%` }} />
                           </div>
-                          <span className="text-[10px] font-black text-[#A1A1AA]">{day}</span>
+                          <span className="text-[10px] font-black text-text-custom-secondary">{day}</span>
                         </div>
                       );
                     })}
@@ -709,27 +709,27 @@ export const Progress: React.FC = () => {
                 </div>
 
                 {/* BMI Index status classifications */}
-                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl flex flex-col justify-between">
+                <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl flex flex-col justify-between">
                   <div>
-                    <span className="text-[10px] font-bold text-[#A1A1AA] block uppercase tracking-wider">ATHLETIC BODY INDEX</span>
-                    <h3 className="text-sm font-black text-white flex items-center gap-1.5 mb-4 mt-1">
+                    <span className="text-[10px] font-bold text-text-custom-secondary block uppercase tracking-wider">ATHLETIC BODY INDEX</span>
+                    <h3 className="text-sm font-black text-text-custom-primary flex items-center gap-1.5 mb-4 mt-1">
                       <User className="w-4 h-4 text-[#7C3AED]" />
                       <span>BMI Classification Index</span>
                     </h3>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-black text-white tracking-tight">{currentBMI.toFixed(1)}</span>
+                      <span className="text-3xl font-black text-text-custom-primary tracking-tight">{currentBMI.toFixed(1)}</span>
                       <span className={`text-[10px] font-bold uppercase tracking-wider ${bmiColor}`}>{bmiStatus}</span>
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-white/[0.06]">
-                    <div className="w-full bg-[#09090B] h-2 rounded-full overflow-hidden flex">
+                  <div className="mt-4 pt-4 border-t border-border-custom-light">
+                    <div className="w-full bg-zinc-100 dark:bg-zinc-100 dark:bg-[#09090B] h-2 rounded-full overflow-hidden flex">
                       <div className="bg-blue-400 h-full" style={{ width: '18.5%' }} />
                       <div className="bg-emerald-400 h-full" style={{ width: '25%' }} />
                       <div className="bg-amber-400 h-full" style={{ width: '30%' }} />
                       <div className="bg-rose-400 h-full" style={{ width: '26.5%' }} />
                     </div>
-                    <div className="flex justify-between text-[8px] text-[#A1A1AA] font-bold uppercase tracking-widest mt-1.5">
+                    <div className="flex justify-between text-[8px] text-text-custom-secondary font-bold uppercase tracking-widest mt-1.5">
                       <span>UNDER</span><span>HEALTHY</span><span>OVER</span><span>OBESE</span>
                     </div>
                   </div>
@@ -741,13 +741,13 @@ export const Progress: React.FC = () => {
 
             {/* Metric logger form */}
             <div className="lg:col-span-1">
-              <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl space-y-5">
+              <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl space-y-5">
                 <div>
-                  <h3 className="text-base font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <h3 className="text-base font-bold text-text-custom-primary uppercase tracking-wider flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-[#7C3AED]" />
                     <span>Instant Metrics Syncer</span>
                   </h3>
-                  <p className="text-xs text-[#A1A1AA] mt-1">Directly log base biometrics to keep your records synchronized.</p>
+                  <p className="text-xs text-text-custom-secondary mt-1">Directly log base biometrics to keep your records synchronized.</p>
                 </div>
 
                 <form onSubmit={handleLogSubmit} className="space-y-4">
@@ -758,7 +758,7 @@ export const Progress: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-3 gap-1 bg-[#09090B] border border-white/[0.08] p-1 rounded-2xl">
+                  <div className="grid grid-cols-3 gap-1 bg-zinc-100 dark:bg-[#09090B] border border-border-custom p-1 rounded-2xl">
                     {['weight', 'calories', 'water'].map((btn) => (
                       <button
                         key={btn}
@@ -785,7 +785,7 @@ export const Progress: React.FC = () => {
                       value={logValue}
                       onChange={(e) => setLogValue(e.target.value)}
                       placeholder={logType === 'weight' ? 'e.g. 78.5' : logType === 'calories' ? 'e.g. 500' : 'e.g. 2500'}
-                      className="w-full bg-[#09090B] border border-white/[0.08] rounded-xl px-4 py-3 text-xs font-bold text-white outline-none focus:ring-1 focus:ring-[#7C3AED]"
+                      className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom rounded-xl px-4 py-3 text-xs font-bold text-white outline-none focus:ring-1 focus:ring-[#7C3AED]"
                       required
                     />
                   </div>
@@ -813,7 +813,7 @@ export const Progress: React.FC = () => {
             className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           >
             {/* Dimensions form logger */}
-            <div className="lg:col-span-1 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl h-fit">
+            <div className="lg:col-span-1 bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl h-fit">
               <h3 className="text-base font-bold text-white uppercase tracking-tight flex items-center gap-1.5 mb-2">
                 <Layers className="w-5 h-5 text-[#7C3AED]" />
                 <span>Dimensions Logger</span>
@@ -824,35 +824,35 @@ export const Progress: React.FC = () => {
                 <div className="grid grid-cols-2 gap-3.5">
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Chest</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mChest} onChange={(e) => setMChest(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
+                    <input type="number" step="0.1" placeholder="cm" value={mChest} onChange={(e) => setMChest(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Waist</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mWaist} onChange={(e) => setMWaist(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
+                    <input type="number" step="0.1" placeholder="cm" value={mWaist} onChange={(e) => setMWaist(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Arm Right</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mArmsRight} onChange={(e) => setMArmsRight(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
+                    <input type="number" step="0.1" placeholder="cm" value={mArmsRight} onChange={(e) => setMArmsRight(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Arm Left</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mArmsLeft} onChange={(e) => setMArmsLeft(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
+                    <input type="number" step="0.1" placeholder="cm" value={mArmsLeft} onChange={(e) => setMArmsLeft(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Hips</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mHips} onChange={(e) => setMHips(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
+                    <input type="number" step="0.1" placeholder="cm" value={mHips} onChange={(e) => setMHips(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Thigh Right</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mThighsRight} onChange={(e) => setMThighsRight(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
+                    <input type="number" step="0.1" placeholder="cm" value={mThighsRight} onChange={(e) => setMThighsRight(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Thigh Left</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mThighsLeft} onChange={(e) => setMThighsLeft(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
+                    <input type="number" step="0.1" placeholder="cm" value={mThighsLeft} onChange={(e) => setMThighsLeft(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Calves</label>
-                    <input type="number" step="0.1" placeholder="cm" value={mCalves} onChange={(e) => setMCalves(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
+                    <input type="number" step="0.1" placeholder="cm" value={mCalves} onChange={(e) => setMCalves(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" />
                   </div>
                 </div>
 
@@ -870,27 +870,27 @@ export const Progress: React.FC = () => {
               </h3>
 
               {measurementLogs.length === 0 ? (
-                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-12 text-center">
+                <div className="bg-card-custom border border-border-custom rounded-3xl p-12 text-center">
                   <p className="text-xs font-bold text-[#A1A1AA] uppercase tracking-widest">No dimension entries committed yet.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {measurementLogs.map((log) => (
-                    <div key={log.id} className="bg-[#111827] border border-white/[0.08] rounded-2xl p-4.5 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <div key={log.id} className="bg-card-custom border border-border-custom rounded-2xl p-4.5 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
                       <div>
                         <span className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest block">Entry Date</span>
                         <span className="text-xs font-bold text-white">{new Date(log.date).toLocaleDateString(undefined, { dateStyle: 'long' })}</span>
                       </div>
 
                       <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 text-center font-mono text-[10px]">
-                        {log.chest && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">CHST</span><span className="font-bold text-white">{log.chest}cm</span></div>}
-                        {log.waist && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">WST</span><span className="font-bold text-white">{log.waist}cm</span></div>}
-                        {log.armsRight && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">AR-R</span><span className="font-bold text-white">{log.armsRight}cm</span></div>}
-                        {log.armsLeft && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">AR-L</span><span className="font-bold text-white">{log.armsLeft}cm</span></div>}
-                        {log.hips && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">HIPS</span><span className="font-bold text-white">{log.hips}cm</span></div>}
-                        {log.thighsRight && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">TH-R</span><span className="font-bold text-white">{log.thighsRight}cm</span></div>}
-                        {log.thighsLeft && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">TH-L</span><span className="font-bold text-white">{log.thighsLeft}cm</span></div>}
-                        {log.calves && <div className="bg-[#09090B] p-2 rounded-xl border border-white/[0.04]"><span className="text-[#A1A1AA] block mb-0.5">CLFS</span><span className="font-bold text-white">{log.calves}cm</span></div>}
+                        {log.chest && <div className="bg-zinc-100 dark:bg-[#09090B] p-2 rounded-xl border border-border-custom-light"><span className="text-[#A1A1AA] block mb-0.5">CHST</span><span className="font-bold text-white">{log.chest}cm</span></div>}
+                        {log.waist && <div className="bg-zinc-100 dark:bg-[#09090B] p-2 rounded-xl border border-border-custom-light"><span className="text-[#A1A1AA] block mb-0.5">WST</span><span className="font-bold text-white">{log.waist}cm</span></div>}
+                        {log.armsRight && <div className="bg-zinc-100 dark:bg-[#09090B] p-2 rounded-xl border border-border-custom-light"><span className="text-[#A1A1AA] block mb-0.5">AR-R</span><span className="font-bold text-white">{log.armsRight}cm</span></div>}
+                        {log.armsLeft && <div className="bg-zinc-100 dark:bg-[#09090B] p-2 rounded-xl border border-border-custom-light"><span className="text-[#A1A1AA] block mb-0.5">AR-L</span><span className="font-bold text-white">{log.armsLeft}cm</span></div>}
+                        {log.hips && <div className="bg-zinc-100 dark:bg-[#09090B] p-2 rounded-xl border border-border-custom-light"><span className="text-[#A1A1AA] block mb-0.5">HIPS</span><span className="font-bold text-white">{log.hips}cm</span></div>}
+                        {log.thighsRight && <div className="bg-zinc-100 dark:bg-[#09090B] p-2 rounded-xl border border-border-custom-light"><span className="text-[#A1A1AA] block mb-0.5">TH-R</span><span className="font-bold text-white">{log.thighsRight}cm</span></div>}
+                        {log.thighsLeft && <div className="bg-zinc-100 dark:bg-[#09090B] p-2 rounded-xl border border-border-custom-light"><span className="text-[#A1A1AA] block mb-0.5">TH-L</span><span className="font-bold text-white">{log.thighsLeft}cm</span></div>}
+                        {log.calves && <div className="bg-zinc-100 dark:bg-[#09090B] p-2 rounded-xl border border-border-custom-light"><span className="text-[#A1A1AA] block mb-0.5">CLFS</span><span className="font-bold text-white">{log.calves}cm</span></div>}
                       </div>
                     </div>
                   ))}
@@ -910,7 +910,7 @@ export const Progress: React.FC = () => {
             className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           >
             {/* Habit checklist list */}
-            <div className="lg:col-span-2 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="lg:col-span-2 bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl space-y-4">
               <div>
                 <span className="text-[10px] font-black text-[#7C3AED] uppercase tracking-widest block">DAILY RECURRENCE METRIC</span>
                 <h3 className="text-base font-bold text-white flex items-center gap-1.5 mt-1">
@@ -930,7 +930,7 @@ export const Progress: React.FC = () => {
                         p-4.5 rounded-2xl border flex items-center justify-between transition-all cursor-pointer hover:bg-white/[0.02]
                         ${done 
                           ? 'bg-[#22C55E]/10 border-[#22C55E]/30 text-[#22C55E]' 
-                          : 'bg-[#09090B] border-white/[0.08] text-[#A1A1AA]'
+                          : 'bg-zinc-100 dark:bg-[#09090B] border-border-custom text-[#A1A1AA]'
                         }
                       `}
                     >
@@ -954,7 +954,7 @@ export const Progress: React.FC = () => {
             </div>
 
             {/* Add custom habits builder form */}
-            <div className="lg:col-span-1 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl h-fit">
+            <div className="lg:col-span-1 bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl h-fit">
               <h3 className="text-base font-bold text-white uppercase tracking-tight mb-2 flex items-center gap-1.5">
                 <Sparkle className="w-4 h-4 text-[#7C3AED]" />
                 <span>Habit Studio Builder</span>
@@ -969,7 +969,7 @@ export const Progress: React.FC = () => {
                     value={newHabitName}
                     onChange={(e) => setNewHabitName(e.target.value)}
                     placeholder="E.g. Take 10,000 steps"
-                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-bold text-white rounded-xl outline-none"
+                    className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3.5 py-3 text-xs font-bold text-white rounded-xl outline-none"
                     required
                   />
                 </div>
@@ -992,7 +992,7 @@ export const Progress: React.FC = () => {
             className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           >
             {/* Sleep log builder */}
-            <div className="lg:col-span-1 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl h-fit">
+            <div className="lg:col-span-1 bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl h-fit">
               <h3 className="text-base font-bold text-white uppercase tracking-tight flex items-center gap-1.5 mb-2">
                 <Moon className="w-5 h-5 text-indigo-400 animate-bounce" />
                 <span>Sleep Logger</span>
@@ -1007,7 +1007,7 @@ export const Progress: React.FC = () => {
                     step="0.5" 
                     value={sleepHours} 
                     onChange={(e) => setSleepHours(e.target.value)} 
-                    className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" 
+                    className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-mono font-bold text-white rounded-xl outline-none" 
                     required 
                   />
                 </div>
@@ -1017,12 +1017,12 @@ export const Progress: React.FC = () => {
                   <select 
                     value={sleepQuality} 
                     onChange={(e) => setSleepQuality(e.target.value)} 
-                    className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none cursor-pointer"
+                    className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none cursor-pointer"
                   >
-                    <option value="Poor" className="bg-[#111827]">Poor (Restless / Interrupted)</option>
-                    <option value="Fair" className="bg-[#111827]">Fair (Suboptimal depth)</option>
-                    <option value="Good" className="bg-[#111827]">Good (Refreshed / Calm)</option>
-                    <option value="Excellent" className="bg-[#111827]">Excellent (Deep REM / High HRV)</option>
+                    <option value="Poor" className="bg-card-custom">Poor (Restless / Interrupted)</option>
+                    <option value="Fair" className="bg-card-custom">Fair (Suboptimal depth)</option>
+                    <option value="Good" className="bg-card-custom">Good (Refreshed / Calm)</option>
+                    <option value="Excellent" className="bg-card-custom">Excellent (Deep REM / High HRV)</option>
                   </select>
                 </div>
 
@@ -1033,7 +1033,7 @@ export const Progress: React.FC = () => {
                     placeholder="Woke up refreshed." 
                     value={sleepNotes} 
                     onChange={(e) => setSleepNotes(e.target.value)} 
-                    className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none" 
+                    className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none" 
                   />
                 </div>
 
@@ -1051,20 +1051,20 @@ export const Progress: React.FC = () => {
               </h3>
 
               {sleepLogs.length === 0 ? (
-                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-12 text-center">
+                <div className="bg-card-custom border border-border-custom rounded-3xl p-12 text-center">
                   <p className="text-xs font-bold text-[#A1A1AA] uppercase tracking-widest">No sleep logs recorded yet.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {sleepLogs.map((log) => (
-                    <div key={log.id} className="bg-[#111827] border border-white/[0.08] rounded-2xl p-4.5 flex justify-between items-center gap-4">
+                    <div key={log.id} className="bg-card-custom border border-border-custom rounded-2xl p-4.5 flex justify-between items-center gap-4">
                       <div className="space-y-1">
                         <span className="text-[10px] font-bold text-[#A1A1AA] block">{new Date(log.date).toLocaleDateString(undefined, { dateStyle: 'long' })}</span>
                         {log.notes && <p className="text-xs italic text-[#A1A1AA]">"{log.notes}"</p>}
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <span className="bg-[#09090B] border border-white/[0.04] px-3.5 py-1.5 text-xs font-bold text-white rounded-lg">
+                        <span className="bg-zinc-100 dark:bg-[#09090B] border border-border-custom-light px-3.5 py-1.5 text-xs font-bold text-white rounded-lg">
                           {log.hours} Hours
                         </span>
                         <span className={`px-2.5 py-1 text-[10px] font-bold rounded-md uppercase tracking-wide ${
@@ -1094,7 +1094,7 @@ export const Progress: React.FC = () => {
             className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           >
             {/* Form settings */}
-            <div className="lg:col-span-1 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl space-y-5 h-fit">
+            <div className="lg:col-span-1 bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl space-y-5 h-fit">
               <div>
                 <h3 className="text-base font-bold text-white uppercase tracking-tight flex items-center gap-1.5">
                   <Calculator className="w-5 h-5 text-[#7C3AED]" />
@@ -1104,7 +1104,7 @@ export const Progress: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-2 bg-[#09090B] p-1 border border-white/[0.08] rounded-2xl">
+                <div className="grid grid-cols-2 gap-2 bg-zinc-100 dark:bg-[#09090B] p-1 border border-border-custom rounded-2xl">
                   <button 
                     onClick={() => setCalcGender('male')}
                     className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${calcGender === 'male' ? 'bg-[#7C3AED] text-white' : 'text-[#A1A1AA] hover:text-white'}`}
@@ -1121,36 +1121,36 @@ export const Progress: React.FC = () => {
 
                 <div className="space-y-1.5">
                   <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Age (Years)</label>
-                  <input type="number" value={calcAge} onChange={(e) => setCalcAge(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none" />
+                  <input type="number" value={calcAge} onChange={(e) => setCalcAge(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Weight (kg)</label>
-                    <input type="number" value={calcWeight} onChange={(e) => setCalcWeight(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none" />
+                    <input type="number" value={calcWeight} onChange={(e) => setCalcWeight(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Height (cm)</label>
-                    <input type="number" value={calcHeight} onChange={(e) => setCalcHeight(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none" />
+                    <input type="number" value={calcHeight} onChange={(e) => setCalcHeight(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none" />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Fitness Goal Target</label>
-                  <select value={calcGoal} onChange={(e: any) => setCalcGoal(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none cursor-pointer">
-                    <option value="lose" className="bg-[#111827]">Fat Loss Deficit (-500 kcal)</option>
-                    <option value="maintain" className="bg-[#111827]">Maintenance Equilibrium</option>
-                    <option value="gain" className="bg-[#111827]">Hypertrophic Surplus (+350 kcal)</option>
+                  <select value={calcGoal} onChange={(e: any) => setCalcGoal(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none cursor-pointer">
+                    <option value="lose" className="bg-card-custom">Fat Loss Deficit (-500 kcal)</option>
+                    <option value="maintain" className="bg-card-custom">Maintenance Equilibrium</option>
+                    <option value="gain" className="bg-card-custom">Hypertrophic Surplus (+350 kcal)</option>
                   </select>
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="text-[9px] font-bold text-[#A1A1AA] block uppercase">Activity Factor</label>
-                  <select value={calcActivity} onChange={(e) => setCalcActivity(e.target.value)} className="w-full bg-[#09090B] border border-white/[0.08] px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none cursor-pointer">
-                    <option value="1.2" className="bg-[#111827]">Sedentary (Office job, 0 training)</option>
-                    <option value="1.375" className="bg-[#111827]">Light Training (1-3 days/week)</option>
-                    <option value="1.55" className="bg-[#111827]">Moderate Training (3-5 days/week)</option>
-                    <option value="1.725" className="bg-[#111827]">Heavy Athlete (6-7 days intense splits)</option>
+                  <select value={calcActivity} onChange={(e) => setCalcActivity(e.target.value)} className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3 py-2.5 text-xs font-bold text-white rounded-xl outline-none cursor-pointer">
+                    <option value="1.2" className="bg-card-custom">Sedentary (Office job, 0 training)</option>
+                    <option value="1.375" className="bg-card-custom">Light Training (1-3 days/week)</option>
+                    <option value="1.55" className="bg-card-custom">Moderate Training (3-5 days/week)</option>
+                    <option value="1.725" className="bg-card-custom">Heavy Athlete (6-7 days intense splits)</option>
                   </select>
                 </div>
               </div>
@@ -1161,7 +1161,7 @@ export const Progress: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
                 {/* BMR card */}
-                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-5 shadow-sm space-y-2">
+                <div className="bg-card-custom border border-border-custom rounded-3xl p-5 shadow-sm space-y-2">
                   <span className="text-[10px] font-bold text-[#A1A1AA] block uppercase tracking-wider">BASAL METABOLIC RATE (BMR)</span>
                   <div className="flex items-baseline gap-1.5 mt-2">
                     <span className="text-3xl font-black text-[#7C3AED] tracking-tight">{Math.round(calculatedBMR)}</span>
@@ -1173,7 +1173,7 @@ export const Progress: React.FC = () => {
                 </div>
 
                 {/* BMI card */}
-                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-5 shadow-sm space-y-2">
+                <div className="bg-card-custom border border-border-custom rounded-3xl p-5 shadow-sm space-y-2">
                   <span className="text-[10px] font-bold text-[#A1A1AA] block uppercase tracking-wider">BODY MASS INDEX (BMI)</span>
                   <div className="flex items-baseline gap-1.5 mt-2">
                     <span className="text-3xl font-black text-violet-400 tracking-tight">{calculatedBMI.toFixed(1)}</span>
@@ -1187,8 +1187,8 @@ export const Progress: React.FC = () => {
               </div>
 
               {/* Macro breakdown percentage bars */}
-              <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl space-y-6">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-center pb-4 border-b border-white/[0.06] gap-2">
+              <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center pb-4 border-b border-border-custom-light gap-2">
                   <div>
                     <span className="text-[10px] font-black text-orange-400 uppercase tracking-widest block">TARGET TDEE OUTLET</span>
                     <h3 className="text-base font-black text-white uppercase tracking-tight mt-1">Daily Caloric Target</h3>
@@ -1204,19 +1204,19 @@ export const Progress: React.FC = () => {
                   <span className="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-widest block">Macromolecules Target splits</span>
                   
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-[#09090B] p-4 rounded-2xl text-center space-y-1 border border-white/[0.04]">
+                    <div className="bg-zinc-100 dark:bg-[#09090B] p-4 rounded-2xl text-center space-y-1 border border-border-custom-light">
                       <span className="text-[10px] text-[#A1A1AA] font-bold block">PROTEIN (30%)</span>
                       <span className="text-2xl font-black text-rose-500 block mt-1">{pTargetGram}g</span>
                       <span className="text-[9px] text-[#A1A1AA] font-mono block">{pTargetGram * 4} kcal</span>
                     </div>
 
-                    <div className="bg-[#09090B] p-4 rounded-2xl text-center space-y-1 border border-white/[0.04]">
+                    <div className="bg-zinc-100 dark:bg-[#09090B] p-4 rounded-2xl text-center space-y-1 border border-border-custom-light">
                       <span className="text-[10px] text-[#A1A1AA] font-bold block">CARBS (45%)</span>
                       <span className="text-2xl font-black text-emerald-500 block mt-1">{cTargetGram}g</span>
                       <span className="text-[9px] text-[#A1A1AA] font-mono block">{cTargetGram * 4} kcal</span>
                     </div>
 
-                    <div className="bg-[#09090B] p-4 rounded-2xl text-center space-y-1 border border-white/[0.04]">
+                    <div className="bg-zinc-100 dark:bg-[#09090B] p-4 rounded-2xl text-center space-y-1 border border-border-custom-light">
                       <span className="text-[10px] text-[#A1A1AA] font-bold block">FATS (25%)</span>
                       <span className="text-2xl font-black text-amber-500 block mt-1">{fTargetGram}g</span>
                       <span className="text-[9px] text-[#A1A1AA] font-mono block">{fTargetGram * 9} kcal</span>
@@ -1239,7 +1239,7 @@ export const Progress: React.FC = () => {
             className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           >
             {/* Form logger */}
-            <div className="lg:col-span-1 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl h-fit">
+            <div className="lg:col-span-1 bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl h-fit">
               <h3 className="text-base font-bold text-white uppercase tracking-tight flex items-center gap-1.5 mb-2">
                 <Award className="w-5 h-5 text-[#7C3AED]" />
                 <span>Log Personal Best</span>
@@ -1254,7 +1254,7 @@ export const Progress: React.FC = () => {
                     placeholder="E.g. Deadlift" 
                     value={prExercise} 
                     onChange={(e) => setPrExercise(e.target.value)} 
-                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-bold text-white rounded-xl outline-none" 
+                    className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3.5 py-3 text-xs font-bold text-white rounded-xl outline-none" 
                     required 
                   />
                 </div>
@@ -1267,7 +1267,7 @@ export const Progress: React.FC = () => {
                       placeholder="kg" 
                       value={prWeight} 
                       onChange={(e) => setPrWeight(e.target.value)} 
-                      className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-mono font-bold text-white rounded-xl outline-none" 
+                      className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3.5 py-3 text-xs font-mono font-bold text-white rounded-xl outline-none" 
                       required 
                     />
                   </div>
@@ -1277,7 +1277,7 @@ export const Progress: React.FC = () => {
                       type="number" 
                       value={prReps} 
                       onChange={(e) => setPrReps(e.target.value)} 
-                      className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-mono font-bold text-white rounded-xl outline-none" 
+                      className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3.5 py-3 text-xs font-mono font-bold text-white rounded-xl outline-none" 
                       required 
                     />
                   </div>
@@ -1297,13 +1297,13 @@ export const Progress: React.FC = () => {
               </h3>
 
               {personalRecords.length === 0 ? (
-                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-12 text-center">
+                <div className="bg-card-custom border border-border-custom rounded-3xl p-12 text-center">
                   <p className="text-xs font-bold text-[#A1A1AA] uppercase tracking-widest">No Personal Records entered yet.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {personalRecords.map((rec) => (
-                    <div key={rec.id} className="bg-[#111827] border border-white/[0.08] rounded-3xl p-5 flex flex-col justify-between relative overflow-hidden group">
+                    <div key={rec.id} className="bg-card-custom border border-border-custom rounded-3xl p-5 flex flex-col justify-between relative overflow-hidden group">
                       <div className="absolute top-0 right-0 p-3 text-[#7C3AED] opacity-10 group-hover:opacity-25 transition-opacity pointer-events-none">
                         <Award className="w-16 h-16" />
                       </div>
@@ -1314,7 +1314,7 @@ export const Progress: React.FC = () => {
                         <p className="text-xs text-[#A1A1AA] font-semibold mt-1">Rep Best: {rec.weight} kg x {rec.reps} reps</p>
                       </div>
 
-                      <div className="mt-4 pt-3 border-t border-white/[0.06] flex justify-between items-center">
+                      <div className="mt-4 pt-3 border-t border-border-custom-light flex justify-between items-center">
                         <span className="text-[10px] font-bold text-[#A1A1AA] uppercase">Calculated 1RM</span>
                         <span className="text-lg font-black text-[#7C3AED]">{rec.calculated1RM} kg</span>
                       </div>
@@ -1336,7 +1336,7 @@ export const Progress: React.FC = () => {
             className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           >
             {/* Left Column: Form Uploader */}
-            <div className="lg:col-span-1 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl h-fit">
+            <div className="lg:col-span-1 bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl h-fit">
               <h3 className="text-base font-bold text-white uppercase tracking-tight flex items-center gap-1.5 mb-2">
                 <Camera className="w-5 h-5 text-[#7C3AED]" />
                 <span>Add Progress Photo</span>
@@ -1351,7 +1351,7 @@ export const Progress: React.FC = () => {
                     placeholder="Enter image web URL" 
                     value={photoUrl} 
                     onChange={(e) => setPhotoUrl(e.target.value)} 
-                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-bold text-white rounded-xl outline-none" 
+                    className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3.5 py-3 text-xs font-bold text-white rounded-xl outline-none" 
                     required 
                   />
                 </div>
@@ -1363,21 +1363,21 @@ export const Progress: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setPhotoUrl('https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=800&auto=format&fit=crop')}
-                      className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-[9px] font-bold text-white rounded-lg border border-white/[0.04] cursor-pointer"
+                      className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-[9px] font-bold text-white rounded-lg border border-border-custom-light cursor-pointer"
                     >
                       Gym Split
                     </button>
                     <button
                       type="button"
                       onClick={() => setPhotoUrl('https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?q=80&w=800&auto=format&fit=crop')}
-                      className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-[9px] font-bold text-white rounded-lg border border-white/[0.04] cursor-pointer"
+                      className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-[9px] font-bold text-white rounded-lg border border-border-custom-light cursor-pointer"
                     >
                       Athletic Run
                     </button>
                     <button
                       type="button"
                       onClick={() => setPhotoUrl('https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=800&auto=format&fit=crop')}
-                      className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-[9px] font-bold text-white rounded-lg border border-white/[0.04] cursor-pointer"
+                      className="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-[9px] font-bold text-white rounded-lg border border-border-custom-light cursor-pointer"
                     >
                       Weight Lift
                     </button>
@@ -1390,7 +1390,7 @@ export const Progress: React.FC = () => {
                     type="date" 
                     value={photoDate} 
                     onChange={(e) => setPhotoDate(e.target.value)} 
-                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-bold text-white rounded-xl outline-none" 
+                    className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3.5 py-3 text-xs font-bold text-white rounded-xl outline-none" 
                     required 
                   />
                 </div>
@@ -1401,7 +1401,7 @@ export const Progress: React.FC = () => {
                     placeholder="Focus: chest fibers split, quad separation, lower back strength." 
                     value={photoCaption} 
                     onChange={(e) => setPhotoCaption(e.target.value)} 
-                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-bold text-white rounded-xl outline-none h-20 resize-none" 
+                    className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3.5 py-3 text-xs font-bold text-white rounded-xl outline-none h-20 resize-none" 
                   />
                 </div>
 
@@ -1430,7 +1430,7 @@ export const Progress: React.FC = () => {
                 return (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {photosToRender.map((pic) => (
-                      <div key={pic.id} className="bg-[#111827] border border-white/[0.08] rounded-3xl overflow-hidden shadow-2xl flex flex-col group relative">
+                      <div key={pic.id} className="bg-card-custom border border-border-custom rounded-3xl overflow-hidden shadow-2xl flex flex-col group relative">
                         <div className="h-48 w-full overflow-hidden bg-black relative">
                           <img 
                             src={pic.url} 
@@ -1439,7 +1439,7 @@ export const Progress: React.FC = () => {
                             referrerPolicy="no-referrer"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-transparent to-black/35 flex flex-col justify-between p-4">
-                            <span className="bg-black/45 backdrop-blur-md px-2.5 py-1 text-[9px] font-black text-[#7C3AED] rounded-md tracking-wider uppercase self-start border border-white/[0.04]">
+                            <span className="bg-black/45 backdrop-blur-md px-2.5 py-1 text-[9px] font-black text-[#7C3AED] rounded-md tracking-wider uppercase self-start border border-border-custom-light">
                               {pic.date}
                             </span>
                             
@@ -1476,7 +1476,7 @@ export const Progress: React.FC = () => {
             className="grid grid-cols-1 lg:grid-cols-3 gap-8"
           >
             {/* Quick Goals Log Card */}
-            <div className="lg:col-span-1 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl h-fit">
+            <div className="lg:col-span-1 bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl h-fit">
               <h3 className="text-base font-bold text-white uppercase tracking-tight flex items-center gap-1.5 mb-2">
                 <Target className="w-5 h-5 text-[#7C3AED]" />
                 <span>Adjust Target Goals</span>
@@ -1495,7 +1495,7 @@ export const Progress: React.FC = () => {
                       await updateUserProfile(profile.uid, { waterIntakeGoal: parseInt(e.target.value, 10) || 2500 });
                       await refreshProfile();
                     }}
-                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-mono font-bold text-white rounded-xl outline-none" 
+                    className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3.5 py-3 text-xs font-mono font-bold text-white rounded-xl outline-none" 
                   />
                 </div>
 
@@ -1509,7 +1509,7 @@ export const Progress: React.FC = () => {
                       await updateUserProfile(profile.uid, { caloriesBurnedGoal: parseInt(e.target.value, 10) || 600 });
                       await refreshProfile();
                     }}
-                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-mono font-bold text-white rounded-xl outline-none" 
+                    className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3.5 py-3 text-xs font-mono font-bold text-white rounded-xl outline-none" 
                   />
                 </div>
 
@@ -1523,11 +1523,11 @@ export const Progress: React.FC = () => {
                       await updateUserProfile(profile.uid, { workoutDurationGoal: parseInt(e.target.value, 10) || 45 });
                       await refreshProfile();
                     }}
-                    className="w-full bg-[#09090B] border border-white/[0.08] px-3.5 py-3 text-xs font-mono font-bold text-white rounded-xl outline-none" 
+                    className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom px-3.5 py-3 text-xs font-mono font-bold text-white rounded-xl outline-none" 
                   />
                 </div>
 
-                <div className="p-4 bg-zinc-900/50 rounded-2xl border border-white/[0.04] text-[10px] font-semibold text-[#A1A1AA] uppercase leading-relaxed">
+                <div className="p-4 bg-zinc-900/50 rounded-2xl border border-border-custom-light text-[10px] font-semibold text-[#A1A1AA] uppercase leading-relaxed">
                   💡 Updates made here automatically sync to your global Athlete profile settings.
                 </div>
               </div>
@@ -1542,7 +1542,7 @@ export const Progress: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* 1. Hydration Target */}
-                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+                <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <span className="text-[9px] font-bold text-sky-400 uppercase tracking-widest block">HYDRATION TRACKER</span>
@@ -1556,7 +1556,7 @@ export const Progress: React.FC = () => {
                       <span className="text-[#A1A1AA]">Current: {latestWater} ml</span>
                       <span className="text-sky-400">Target: {profile?.waterIntakeGoal || 2500} ml</span>
                     </div>
-                    <div className="h-2 w-full bg-[#09090B] rounded-full overflow-hidden border border-white/[0.02]">
+                    <div className="h-2 w-full bg-zinc-100 dark:bg-[#09090B] rounded-full overflow-hidden border border-white/[0.02]">
                       <div 
                         className="h-full bg-sky-400 rounded-full transition-all duration-500"
                         style={{ width: `${Math.min(100, (latestWater / (profile?.waterIntakeGoal || 2500)) * 100)}%` }}
@@ -1600,7 +1600,7 @@ export const Progress: React.FC = () => {
                 </div>
 
                 {/* 2. Calories burned Tracker */}
-                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+                <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest block">ENERGY EXPENDITURE</span>
@@ -1614,7 +1614,7 @@ export const Progress: React.FC = () => {
                       <span className="text-[#A1A1AA]">Current: {latestCalories} kcal</span>
                       <span className="text-emerald-400">Target: {profile?.caloriesBurnedGoal || 600} kcal</span>
                     </div>
-                    <div className="h-2 w-full bg-[#09090B] rounded-full overflow-hidden border border-white/[0.02]">
+                    <div className="h-2 w-full bg-zinc-100 dark:bg-[#09090B] rounded-full overflow-hidden border border-white/[0.02]">
                       <div 
                         className="h-full bg-emerald-400 rounded-full transition-all duration-500"
                         style={{ width: `${Math.min(100, (latestCalories / (profile?.caloriesBurnedGoal || 600)) * 100)}%` }}
@@ -1627,7 +1627,7 @@ export const Progress: React.FC = () => {
                 </div>
 
                 {/* 3. Sleep Tracker Hours */}
-                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+                <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest block">RECOVERY HYPNOS</span>
@@ -1645,7 +1645,7 @@ export const Progress: React.FC = () => {
                           <span className="text-[#A1A1AA]">Last Sleep: {latestSleep} hrs</span>
                           <span className="text-indigo-400">Standard: 8 hrs</span>
                         </div>
-                        <div className="h-2 w-full bg-[#09090B] rounded-full overflow-hidden border border-white/[0.02]">
+                        <div className="h-2 w-full bg-zinc-100 dark:bg-[#09090B] rounded-full overflow-hidden border border-white/[0.02]">
                           <div 
                             className="h-full bg-indigo-400 rounded-full transition-all duration-500"
                             style={{ width: `${Math.min(100, (latestSleep / 8) * 100)}%` }}
@@ -1660,7 +1660,7 @@ export const Progress: React.FC = () => {
                 </div>
 
                 {/* 4. Habits completion rate */}
-                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+                <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <span className="text-[9px] font-bold text-amber-400 uppercase tracking-widest block">HABIT ADAPTION</span>
@@ -1681,7 +1681,7 @@ export const Progress: React.FC = () => {
                           <span className="text-[#A1A1AA]">Done: {completedCount}/{totalCount}</span>
                           <span className="text-amber-400">Streak Level: {profile?.streak || 3} days</span>
                         </div>
-                        <div className="h-2 w-full bg-[#09090B] rounded-full overflow-hidden border border-white/[0.02]">
+                        <div className="h-2 w-full bg-zinc-100 dark:bg-[#09090B] rounded-full overflow-hidden border border-white/[0.02]">
                           <div 
                             className="h-full bg-amber-400 rounded-full transition-all duration-500"
                             style={{ width: `${Math.min(100, completionPercentage)}%` }}

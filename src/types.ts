@@ -30,6 +30,8 @@ export interface UserProfile {
   caloriesBurnedGoal?: number; // kcal
   workoutDurationGoal?: number; // mins
   workoutFrequency?: number[]; // [Mon, Tue, Wed, Thu, Fri, Sat, Sun] count
+  referralCode?: string;
+  referredBy?: string;
 }
 
 export interface Exercise {
@@ -139,4 +141,17 @@ export interface Challenge {
   completed: boolean;
   joined: boolean;
   deadline: string;
+}
+
+export interface Meal {
+  id: string;
+  name: string;
+  calories: number;
+  protein: number; // g
+  carbs: number; // g
+  fats: number; // g
+  fiber?: number; // g
+  type: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snack';
+  date: string; // YYYY-MM-DD
+  timestamp: string;
 }

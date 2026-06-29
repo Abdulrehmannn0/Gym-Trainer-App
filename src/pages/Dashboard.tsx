@@ -234,21 +234,21 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
         {/* Workout Completion Ring Card */}
-        <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between hover:border-[#7C3AED]/40 transition-all duration-300 group">
+        <div className="bg-card-custom border border-border-custom rounded-3xl p-6 flex flex-col justify-between hover:border-[#7C3AED]/40 transition-all duration-300 group">
           <div className="flex justify-between items-start">
             <div className="space-y-1">
-              <span className="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-wider block">COMPLETION RING</span>
-              <span className="text-2xl font-black text-white block mt-1">Daily Target</span>
+              <span className="text-[10px] font-bold text-text-custom-secondary uppercase tracking-wider block">COMPLETION RING</span>
+              <span className="text-2xl font-black text-text-custom-primary block mt-1">Daily Target</span>
             </div>
             <div className="p-2.5 bg-[#7C3AED]/10 text-[#7C3AED] rounded-2xl border border-[#7C3AED]/20">
               <Activity className="w-5 h-5" />
             </div>
           </div>
 
-          <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/[0.06]">
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-border-custom-light">
             <div className="relative w-16 h-16 transform -rotate-90 shrink-0">
               <svg className="w-full h-full">
-                <circle cx="32" cy="32" r="26" stroke="rgba(255,255,255,.03)" strokeWidth="5.5" fill="transparent" />
+                <circle cx="32" cy="32" r="26" stroke="rgba(128,128,128,.1)" strokeWidth="5.5" fill="transparent" />
                 <circle cx="32" cy="32" r="26" stroke="#7C3AED" strokeWidth="5.5" fill="transparent"
                   strokeDasharray={`${2 * Math.PI * 26}`}
                   strokeDashoffset={`${2 * Math.PI * 26 * (1 - overallCompletionRate / 100)}`}
@@ -256,23 +256,23 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center rotate-90">
-                <span className="text-xs font-black text-white">{overallCompletionRate}%</span>
+                <span className="text-xs font-black text-text-custom-primary">{overallCompletionRate}%</span>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-xs font-bold text-[#A1A1AA]">Biometrics</p>
+              <p className="text-xs font-bold text-text-custom-secondary">Biometrics</p>
               <p className="text-[10px] text-[#22C55E] font-bold mt-1">Synchronized</p>
             </div>
           </div>
         </div>
 
         {/* Calories Burned Card */}
-        <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between hover:border-orange-500/40 transition-all duration-300 group">
+        <div className="bg-card-custom border border-border-custom rounded-3xl p-6 flex flex-col justify-between hover:border-orange-500/40 transition-all duration-300 group">
           <div className="flex justify-between items-start">
             <div className="space-y-1">
-              <span className="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-wider block">CALORIES BURNED</span>
-              <span className="text-2xl font-black text-white block mt-1">
-                {todayCalories} <span className="text-xs font-normal text-[#A1A1AA]">kcal</span>
+              <span className="text-[10px] font-bold text-text-custom-secondary uppercase tracking-wider block">CALORIES BURNED</span>
+              <span className="text-2xl font-black text-text-custom-primary block mt-1">
+                {todayCalories} <span className="text-xs font-normal text-text-custom-secondary">kcal</span>
               </span>
             </div>
             <div className="p-2.5 bg-orange-500/10 text-orange-500 rounded-2xl border border-orange-500/20 group-hover:scale-110 transition-transform">
@@ -280,24 +280,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-white/[0.06]">
-            <div className="flex justify-between text-[10px] text-[#A1A1AA] font-extrabold mb-1.5 uppercase">
+          <div className="mt-6 pt-4 border-t border-border-custom-light">
+            <div className="flex justify-between text-[10px] text-text-custom-secondary font-extrabold mb-1.5 uppercase">
               <span>Goal: {caloriesGoal} kcal</span>
               <span className="text-orange-400">{Math.round(calPercentage)}%</span>
             </div>
-            <div className="w-full bg-white/[0.04] h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-zinc-100 dark:bg-white/[0.04] h-2 rounded-full overflow-hidden">
               <div className="bg-gradient-to-r from-orange-500 to-amber-500 h-full rounded-full transition-all duration-500" style={{ width: `${calPercentage}%` }} />
             </div>
           </div>
         </div>
 
         {/* Water Intake Card */}
-        <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between hover:border-blue-500/40 transition-all duration-300 group">
+        <div className="bg-card-custom border border-border-custom rounded-3xl p-6 flex flex-col justify-between hover:border-blue-500/40 transition-all duration-300 group">
           <div className="flex justify-between items-start">
             <div className="space-y-1">
-              <span className="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-wider block">WATER INTAKE</span>
-              <span className="text-2xl font-black text-white block mt-1">
-                {todayWater} <span className="text-xs font-normal text-[#A1A1AA]">ml</span>
+              <span className="text-[10px] font-bold text-text-custom-secondary uppercase tracking-wider block">WATER INTAKE</span>
+              <span className="text-2xl font-black text-text-custom-primary block mt-1">
+                {todayWater} <span className="text-xs font-normal text-text-custom-secondary">ml</span>
               </span>
             </div>
             <div className="p-2.5 bg-blue-500/10 text-blue-400 rounded-2xl border border-blue-500/20 group-hover:scale-110 transition-transform">
@@ -305,24 +305,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-white/[0.06]">
-            <div className="flex justify-between text-[10px] text-[#A1A1AA] font-extrabold mb-1.5 uppercase">
+          <div className="mt-6 pt-4 border-t border-border-custom-light">
+            <div className="flex justify-between text-[10px] text-text-custom-secondary font-extrabold mb-1.5 uppercase">
               <span>Goal: {waterGoal} ml</span>
               <span className="text-blue-400">{Math.round(waterPercentage)}%</span>
             </div>
-            <div className="w-full bg-white/[0.04] h-2 rounded-full overflow-hidden">
+            <div className="w-full bg-zinc-100 dark:bg-white/[0.04] h-2 rounded-full overflow-hidden">
               <div className="bg-gradient-to-r from-blue-600 to-blue-400 h-full rounded-full transition-all duration-500" style={{ width: `${waterPercentage}%` }} />
             </div>
           </div>
         </div>
 
         {/* Sleep & Recovery Card */}
-        <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between hover:border-[#4F46E5]/40 transition-all duration-300 group">
+        <div className="bg-card-custom border border-border-custom rounded-3xl p-6 flex flex-col justify-between hover:border-[#4F46E5]/40 transition-all duration-300 group">
           <div className="flex justify-between items-start">
             <div className="space-y-1">
-              <span className="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-wider block">WELLNESS METRICS</span>
-              <span className="text-2xl font-black text-white block mt-1">
-                {sleepScore} <span className="text-xs font-normal text-[#A1A1AA]">Sleep Score</span>
+              <span className="text-[10px] font-bold text-text-custom-secondary uppercase tracking-wider block">WELLNESS METRICS</span>
+              <span className="text-2xl font-black text-text-custom-primary block mt-1">
+                {sleepScore} <span className="text-xs font-normal text-text-custom-secondary">Sleep Score</span>
               </span>
             </div>
             <div className="p-2.5 bg-[#4F46E5]/10 text-[#4F46E5] rounded-2xl border border-[#4F46E5]/20">
@@ -330,12 +330,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-between">
+          <div className="mt-6 pt-4 border-t border-border-custom-light flex items-center justify-between">
             <div>
-              <p className="text-[10px] text-[#A1A1AA] font-bold uppercase tracking-wider">RECOVERY RATE</p>
+              <p className="text-[10px] text-text-custom-secondary font-bold uppercase tracking-wider">RECOVERY RATE</p>
               <p className="text-sm font-black text-[#22C55E] mt-0.5">{recoveryScore}% READY</p>
             </div>
-            <div className="bg-white/[0.04] border border-white/[0.08] px-3 py-1.5 rounded-xl text-[10px] font-mono text-[#A1A1AA]">
+            <div className="bg-zinc-100 dark:bg-white/[0.04] border border-border-custom px-3 py-1.5 rounded-xl text-[10px] font-mono text-text-custom-secondary">
               PRIME STATE
             </div>
           </div>
@@ -347,7 +347,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Quick Start Today's Split Card */}
-        <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between hover:shadow-xl transition-all duration-300">
+        <div className="bg-card-custom border border-border-custom rounded-3xl p-6 flex flex-col justify-between hover:shadow-xl transition-all duration-300">
           <div className="space-y-4">
             <div className="flex items-center space-x-2 text-[10px] font-black text-[#7C3AED] bg-[#7C3AED]/10 px-3.5 py-1.5 rounded-full uppercase tracking-widest w-fit">
               <Zap className="w-3.5 h-3.5 fill-[#7C3AED]" />
@@ -356,14 +356,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
             {todayWorkout ? (
               <div className="space-y-2">
-                <h3 className="text-xl font-bold text-white group-hover:text-[#7C3AED] transition-colors">
+                <h3 className="text-xl font-bold text-text-custom-primary group-hover:text-[#7C3AED] transition-colors">
                   {todayWorkout.name}
                 </h3>
-                <p className="text-xs text-[#A1A1AA] line-clamp-3 leading-relaxed">
+                <p className="text-xs text-text-custom-secondary line-clamp-3 leading-relaxed">
                   {todayWorkout.description}
                 </p>
                 <div className="flex items-center gap-3 pt-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-white/[0.03] border border-white/[0.08] px-2.5 py-1 rounded-lg text-[#A1A1AA]">
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-100 dark:bg-white/[0.03] border border-border-custom-light px-2.5 py-1 rounded-lg text-text-custom-secondary">
                     {todayWorkout.muscleGroup}
                   </span>
                   <span className="text-[10px] font-bold uppercase tracking-wider bg-[#22C55E]/10 border border-[#22C55E]/20 px-2.5 py-1 rounded-lg text-[#22C55E]">
@@ -372,11 +372,11 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-[#A1A1AA]">Your recommended workout splits are generating...</p>
+              <p className="text-xs text-text-custom-secondary">Your recommended workout splits are generating...</p>
             )}
           </div>
 
-          <div className="mt-8 pt-4 border-t border-white/[0.06]">
+          <div className="mt-8 pt-4 border-t border-border-custom-light">
             {todayWorkout && (
               <button
                 onClick={() => onNavigate('details', todayWorkout.id)}
@@ -390,7 +390,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         </div>
 
         {/* Continue Last Workout Card */}
-        <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between hover:shadow-xl transition-all duration-300">
+        <div className="bg-card-custom border border-border-custom rounded-3xl p-6 flex flex-col justify-between hover:shadow-xl transition-all duration-300">
           <div className="space-y-4">
             <div className="flex items-center space-x-2 text-[10px] font-black text-indigo-400 bg-indigo-500/10 px-3.5 py-1.5 rounded-full uppercase tracking-widest w-fit">
               <RotateCcw className="w-3.5 h-3.5" />
@@ -399,14 +399,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
             {continueWorkout ? (
               <div className="space-y-2">
-                <h3 className="text-xl font-bold text-white">
+                <h3 className="text-xl font-bold text-text-custom-primary">
                   {continueWorkout.name}
                 </h3>
-                <p className="text-xs text-[#A1A1AA] line-clamp-3 leading-relaxed">
+                <p className="text-xs text-text-custom-secondary line-clamp-3 leading-relaxed">
                   {continueWorkout.description}
                 </p>
                 <div className="flex items-center gap-3 pt-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-white/[0.03] border border-white/[0.08] px-2.5 py-1 rounded-lg text-[#A1A1AA]">
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-100 dark:bg-white/[0.03] border border-border-custom-light px-2.5 py-1 rounded-lg text-text-custom-secondary">
                     {continueWorkout.muscleGroup}
                   </span>
                   <span className="text-[10px] font-bold uppercase tracking-wider bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-lg text-indigo-400">
@@ -415,15 +415,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-[#A1A1AA]">History of splits will organize here.</p>
+              <p className="text-xs text-text-custom-secondary">History of splits will organize here.</p>
             )}
           </div>
 
-          <div className="mt-8 pt-4 border-t border-white/[0.06]">
+          <div className="mt-8 pt-4 border-t border-border-custom-light">
             {continueWorkout && (
               <button
                 onClick={() => onNavigate('details', continueWorkout.id)}
-                className="w-full border border-white/[0.08] hover:bg-white/[0.03] text-white font-bold text-xs py-3.5 rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full border border-border-custom hover:bg-zinc-100 dark:hover:bg-white/[0.03] text-text-custom-primary font-bold text-xs py-3.5 rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <span>RESUME SPLIT</span>
                 <ChevronRight className="w-4 h-4" />
@@ -433,13 +433,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         </div>
 
         {/* Quick Action Biometrics Panel */}
-        <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 flex flex-col justify-between">
+        <div className="bg-card-custom border border-border-custom rounded-3xl p-6 flex flex-col justify-between">
           <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2 uppercase tracking-wide">
+            <h3 className="text-base font-bold text-text-custom-primary flex items-center gap-2 uppercase tracking-wide">
               <Sparkles className="w-4.5 h-4.5 text-[#7C3AED]" />
               <span>BIOMETRIC ACTION HUD</span>
             </h3>
-            <p className="text-xs text-[#A1A1AA] mt-1">Directly append logs to your metrics today.</p>
+            <p className="text-xs text-text-custom-secondary mt-1">Directly append logs to your metrics today.</p>
           </div>
 
           <div className="space-y-3 mt-6">
@@ -475,24 +475,24 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       <div className="space-y-6 pt-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="space-y-1">
-            <h2 className="text-2xl font-black text-white flex items-center gap-3">
+            <h2 className="text-2xl font-black text-text-custom-primary flex items-center gap-3">
               <Trophy className="w-6 h-6 text-[#7C3AED]" />
               <span>Explore Targeted Routines</span>
             </h2>
-            <p className="text-xs text-[#A1A1AA]">Instant autocomplete lookup across target muscle groups.</p>
+            <p className="text-xs text-text-custom-secondary">Instant autocomplete lookup across target muscle groups.</p>
           </div>
 
           {/* Autocomplete Search Input */}
           <div className="relative w-full md:w-80">
-            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#A1A1AA]">
-              <Search className="w-4.5 h-4.5 text-[#A1A1AA]" />
+            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-text-custom-secondary">
+              <Search className="w-4.5 h-4.5 text-text-custom-secondary" />
             </span>
             <input
               type="text"
               placeholder="Filter by muscle group, name, equipment..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#111827] border border-white/[0.08] text-white rounded-2xl py-3 pl-10 pr-4 text-xs font-semibold outline-none focus:ring-2 focus:ring-[#7C3AED] transition-all"
+              className="w-full bg-card-custom border border-border-custom text-text-custom-primary placeholder-zinc-400 rounded-2xl py-3 pl-10 pr-4 text-xs font-semibold outline-none focus:ring-2 focus:ring-[#7C3AED] transition-all"
             />
           </div>
         </div>
@@ -507,7 +507,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 px-5 py-2.5 text-xs font-bold rounded-2xl transition-all whitespace-nowrap cursor-pointer
                 ${selectedCategory === category
                   ? 'bg-gradient-to-r from-[#7C3AED] to-[#4F46E5] text-white shadow-lg shadow-[#7C3AED]/15'
-                  : 'bg-[#111827] border border-white/[0.08] text-[#A1A1AA] hover:bg-white/[0.04] hover:text-white'
+                  : 'bg-card-custom border border-border-custom text-text-custom-secondary hover:bg-zinc-100 dark:hover:bg-white/[0.04] hover:text-text-custom-primary'
                 }
               `}
             >
@@ -520,20 +520,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, idx) => (
-              <div key={idx} className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 h-60 animate-pulse flex flex-col justify-between">
+              <div key={idx} className="bg-card-custom border border-border-custom rounded-3xl p-6 h-60 animate-pulse flex flex-col justify-between">
                 <div className="space-y-3">
-                  <div className="h-4 bg-white/10 rounded-md w-1/3" />
-                  <div className="h-6 bg-white/10 rounded-md w-2/3" />
-                  <div className="h-12 bg-white/10 rounded-md w-full" />
+                  <div className="h-4 bg-zinc-200 dark:bg-white/10 rounded-md w-1/3" />
+                  <div className="h-6 bg-zinc-200 dark:bg-white/10 rounded-md w-2/3" />
+                  <div className="h-12 bg-zinc-200 dark:bg-white/10 rounded-md w-full" />
                 </div>
-                <div className="h-8 bg-white/10 rounded-md w-1/4" />
+                <div className="h-8 bg-zinc-200 dark:bg-white/10 rounded-md w-1/4" />
               </div>
             ))}
           </div>
         ) : filteredExercises.length === 0 ? (
-          <div className="text-center py-16 bg-[#111827] border border-white/[0.08] rounded-3xl p-8">
-            <Compass className="w-10 h-10 text-[#A1A1AA] mx-auto mb-3" />
-            <p className="text-[#A1A1AA] font-bold uppercase tracking-wider text-xs">No matching splits discovered.</p>
+          <div className="text-center py-16 bg-card-custom border border-border-custom rounded-3xl p-8">
+            <Compass className="w-10 h-10 text-text-custom-secondary mx-auto mb-3" />
+            <p className="text-text-custom-secondary font-bold uppercase tracking-wider text-xs">No matching splits discovered.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -543,7 +543,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 <motion.div
                   key={exercise.id}
                   whileHover={{ y: -5 }}
-                  className="group bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-md hover:border-[#7C3AED]/40 transition-all flex flex-col justify-between"
+                  className="group bg-card-custom border border-border-custom rounded-3xl p-6 shadow-md hover:border-[#7C3AED]/40 transition-all flex flex-col justify-between"
                 >
                   <div>
                     {/* Card Badge and Level Header */}
@@ -562,38 +562,38 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                         </span>
 
                         <button
-                          onClick={() => handleToggleFavorite(exercise.id)}
-                          className={`p-1.5 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:bg-[#EF4444]/15 hover:border-[#EF4444]/20 transition-all cursor-pointer ${
-                            isFav ? 'text-[#EF4444] bg-[#EF4444]/10' : 'text-[#A1A1AA] hover:text-[#EF4444]'
-                          }`}
+                           onClick={() => handleToggleFavorite(exercise.id)}
+                           className={`p-1.5 rounded-xl bg-zinc-50 dark:bg-white/[0.02] border border-border-custom hover:bg-[#EF4444]/15 hover:border-[#EF4444]/20 transition-all cursor-pointer ${
+                             isFav ? 'text-[#EF4444] bg-[#EF4444]/10' : 'text-text-custom-secondary hover:text-[#EF4444]'
+                           }`}
                         >
                           <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-[#EF4444]' : ''}`} />
                         </button>
                       </div>
                     </div>
 
-                    <h3 className="text-xl font-bold text-white group-hover:text-[#7C3AED] transition-colors leading-snug line-clamp-1 uppercase tracking-tight">
+                    <h3 className="text-xl font-bold text-text-custom-primary group-hover:text-[#7C3AED] transition-colors leading-snug line-clamp-1 uppercase tracking-tight">
                       {exercise.name}
                     </h3>
 
-                    <p className="text-[9px] text-[#A1A1AA] font-black uppercase mt-1 tracking-widest">
+                    <p className="text-[9px] text-text-custom-secondary font-black uppercase mt-1 tracking-widest">
                       EQUIPMENT: {exercise.equipment}
                     </p>
 
-                    <p className="text-[#A1A1AA] text-xs mt-3 line-clamp-3 leading-relaxed">
+                    <p className="text-text-custom-secondary text-xs mt-3 line-clamp-3 leading-relaxed">
                       {exercise.description}
                     </p>
                   </div>
 
                   {/* Sets indicator and details CTA button */}
-                  <div className="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-between">
-                    <span className="text-xs font-mono font-bold text-[#A1A1AA]">
+                  <div className="mt-6 pt-4 border-t border-border-custom-light flex items-center justify-between">
+                    <span className="text-xs font-mono font-bold text-text-custom-secondary">
                       {exercise.recommendedSets} TARGET SPLIT
                     </span>
 
                     <button
                       onClick={() => onNavigate('details', exercise.id)}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-white group-hover:text-[#7C3AED] transition-all cursor-pointer"
+                      className="inline-flex items-center gap-1 text-xs font-bold text-text-custom-primary group-hover:text-[#7C3AED] transition-all cursor-pointer"
                     >
                       <span>DETAILS</span>
                       <ChevronRight className="w-4 h-4" />

@@ -45,8 +45,36 @@ export const Settings: React.FC = () => {
   // Settings States
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [langCode, setLangCode] = useState(localStorage.getItem('gymtrainer_lang') || 'en');
+  const [langCode, setLangCode] = useState(localStorage.getItem('azharfit_lang') || 'en');
   const [langSuccess, setLangSuccess] = useState(false);
+
+  // Notification states
+  const [workoutReminder, setWorkoutReminder] = useState(localStorage.getItem('notif_workout') !== 'false');
+  const [mealReminder, setMealReminder] = useState(localStorage.getItem('notif_meal') !== 'false');
+  const [waterReminder, setWaterReminder] = useState(localStorage.getItem('notif_water') !== 'false');
+  const [sleepReminder, setSleepReminder] = useState(localStorage.getItem('notif_sleep') !== 'false');
+  const [goalCompleted, setGoalCompleted] = useState(localStorage.getItem('notif_goal') !== 'false');
+  const [achievementUnlocked, setAchievementUnlocked] = useState(localStorage.getItem('notif_achievement') !== 'false');
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const handleToggleNotif = (key: string, value: boolean, setter: (v: boolean) => void) => {
+    setter(value);
+    localStorage.setItem(key, value.toString());
+  };
+
+  const triggerTestNotif = (type: string) => {
+    let msg = '';
+    if (type === 'workout') msg = '🏋️ Workout Reminder: It is time for your Upper Body Hypertrophy session!';
+    else if (type === 'meal') msg = '🥗 Nutrition Alert: Time to log your post-workout lunch and macro metrics!';
+    else if (type === 'water') msg = '💧 Hydration Prompt: Drink 250ml of water to maintain active cellular performance!';
+    else if (type === 'sleep') msg = '🌙 Circadian Rhythm Alert: Wind down in 30 mins to hit your 8-hour sleep target!';
+    else if (type === 'goal') msg = '🏆 Goal Completed! You have smashed your daily 600 kcal burning limit!';
+    else if (type === 'achievement') msg = '🌟 Achievement Unlocked: Smashed "Macro Master" badge for 7-day perfect logs!';
+    
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
 
   // Danger Zone States
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
@@ -79,7 +107,7 @@ export const Settings: React.FC = () => {
 
   const handleLanguageChange = (code: string) => {
     setLangCode(code);
-    localStorage.setItem('gymtrainer_lang', code);
+    localStorage.setItem('azharfit_lang', code);
     setLangSuccess(true);
     setTimeout(() => setLangSuccess(false), 3000);
   };
@@ -139,7 +167,17 @@ export const Settings: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto pb-12">
+    <div className="space-y-8 max-w-4xl mx-auto pb-12 relative">
+      {/* Toast Alert overlay */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 max-w-sm bg-indigo-600 dark:bg-indigo-500 text-white rounded-2xl shadow-2xl border border-white/10 p-4 font-semibold text-xs flex items-center gap-3">
+          <div className="bg-white/15 p-2 rounded-xl shrink-0">
+            <SettingsIcon className="w-5 h-5 text-white animate-spin" />
+          </div>
+          <p className="leading-relaxed">{toastMessage}</p>
+        </div>
+      )}
+
       {/* Header */}
       <div>
         <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 dark:text-white flex items-center gap-3">
@@ -309,6 +347,164 @@ export const Settings: React.FC = () => {
                 <span>Save Targets</span>
               </button>
             </form>
+          </div>
+
+          {/* Custom Notification & Reminders Setup */}
+          <div className="bg-white dark:bg-zinc-900/40 dark:backdrop-blur-md border border-zinc-200/80 dark:border-zinc-800/80 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-sm font-bold text-zinc-900 dark:text-white uppercase tracking-wider mb-1">In-App Reminders & Notification Toggles</h3>
+            <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-widest mb-6">Manage alert prompts, tracking cues, and achievements</p>
+
+            <div className="space-y-4">
+              {/* Workout Reminders */}
+              <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+                <div className="space-y-0.5 pr-2">
+                  <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">Workout Sessions Alert</span>
+                  <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-widest">Reminders to trigger daily workout schedules</span>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <button
+                    onClick={() => triggerTestNotif('workout')}
+                    className="px-2.5 py-1 text-[9px] font-black uppercase text-indigo-500 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-lg transition-all border border-indigo-500/15 cursor-pointer"
+                  >
+                    Test Notif
+                  </button>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={workoutReminder}
+                      onChange={(e) => handleToggleNotif('notif_workout', e.target.checked, setWorkoutReminder)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-zinc-300 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Meal Reminders */}
+              <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+                <div className="space-y-0.5 pr-2">
+                  <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">Nutrition & Meal Prompts</span>
+                  <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-widest">Cues to log breakfast, lunch, dinners, and snack macros</span>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <button
+                    onClick={() => triggerTestNotif('meal')}
+                    className="px-2.5 py-1 text-[9px] font-black uppercase text-indigo-500 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-lg transition-all border border-indigo-500/15 cursor-pointer"
+                  >
+                    Test Notif
+                  </button>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={mealReminder}
+                      onChange={(e) => handleToggleNotif('notif_meal', e.target.checked, setMealReminder)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-zinc-300 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Water Reminders */}
+              <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+                <div className="space-y-0.5 pr-2">
+                  <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">Hydration Notifications</span>
+                  <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-widest">Reminders to drink water throughout your training splits</span>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <button
+                    onClick={() => triggerTestNotif('water')}
+                    className="px-2.5 py-1 text-[9px] font-black uppercase text-indigo-500 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-lg transition-all border border-indigo-500/15 cursor-pointer"
+                  >
+                    Test Notif
+                  </button>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={waterReminder}
+                      onChange={(e) => handleToggleNotif('notif_water', e.target.checked, setWaterReminder)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-zinc-300 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Sleep Toggles */}
+              <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+                <div className="space-y-0.5 pr-2">
+                  <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">Circadian Rhythm & Sleep Cues</span>
+                  <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-widest">Bedtime alerts to optimize physical muscle recovery</span>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <button
+                    onClick={() => triggerTestNotif('sleep')}
+                    className="px-2.5 py-1 text-[9px] font-black uppercase text-indigo-500 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-lg transition-all border border-indigo-500/15 cursor-pointer"
+                  >
+                    Test Notif
+                  </button>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={sleepReminder}
+                      onChange={(e) => handleToggleNotif('notif_sleep', e.target.checked, setSleepReminder)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-zinc-300 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Goal Toggles */}
+              <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+                <div className="space-y-0.5 pr-2">
+                  <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">Daily Target Goal Completed</span>
+                  <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-widest">Celebrate when daily calorie or hydration goals are completed</span>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <button
+                    onClick={() => triggerTestNotif('goal')}
+                    className="px-2.5 py-1 text-[9px] font-black uppercase text-indigo-500 bg-indigo-500/10 hover:bg-indigo-500/20 rounded-lg transition-all border border-indigo-500/15 cursor-pointer"
+                  >
+                    Test Notif
+                  </button>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={goalCompleted}
+                      onChange={(e) => handleToggleNotif('notif_goal', e.target.checked, setGoalCompleted)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-zinc-300 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Achievement Toggles */}
+              <div className="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+                <div className="space-y-0.5 pr-2">
+                  <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 block">Achievement Badges Unlocked</span>
+                  <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-widest">Instant celebration triggers when a milestone badge is unlocked</span>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                  <button
+                    onClick={() => triggerTestNotif('achievement')}
+                    className="px-2.5 py-1 text-[9px] font-black uppercase text-indigo-500 bg-indigo-500/10 hover:bg-[#7C3AED]/20 rounded-lg transition-all border border-indigo-500/15 cursor-pointer"
+                  >
+                    Test Notif
+                  </button>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={achievementUnlocked}
+                      onChange={(e) => handleToggleNotif('notif_achievement', e.target.checked, setAchievementUnlocked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-9 h-5 bg-zinc-300 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Data Backup & Export Channels */}

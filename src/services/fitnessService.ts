@@ -20,7 +20,8 @@ import {
   HabitStatus, 
   PersonalRecord, 
   AppNotification, 
-  Challenge 
+  Challenge,
+  Meal
 } from '../types';
 
 // Custom Workout Plans
@@ -398,3 +399,40 @@ export async function updateChallengeProgress(uid: string, challengeId: string, 
     console.error('Error updating challenge:', err);
   }
 }
+
+// Meal CRUD & Nutrition Hub
+export async function getMeals(uid: string, dateStr?: string): Promise<Meal[]> {
+  try {
+    const ref = collection(db, 'users', uid, 'meals');
+    const q = query(ref, orderBy('timestamp', 'asc'));
+    const snap = await getDocs(q);
+    const meals: Meal[] = [];
+    snap.forEach((d) => {
+      const data = d.data() as Meal;
+      if (!dateStr || data.date === dateStr) {
+        meals.push({ id: d.id, ...data });
+      }
+    });
+    return meals;
+  } catch (error) {
+    console.error('Error getting meals from Firestore:', error);
+    return [];
+  }
+}
+
+export async function createMeal(uid: string, meal: Omit<Meal, 'id'>): Promise<Meal> {
+  const ref = collection(db, 'users', uid, 'meals');
+  const newDoc = doc(ref);
+  const fullMeal: Meal = {
+    id: newDoc.id,
+    ...meal
+  };
+  await setDoc(newDoc, fullMeal);
+  return fullMeal;
+}
+
+export async function deleteMeal(uid: string, mealId: string): Promise<void> {
+  const docRef = doc(db, 'users', uid, 'meals', mealId);
+  await deleteDoc(docRef);
+}
+

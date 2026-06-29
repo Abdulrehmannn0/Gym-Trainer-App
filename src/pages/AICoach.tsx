@@ -54,7 +54,7 @@ const renderInlineMarkdown = (text: string) => {
     if (match.index > lastIndex) {
       parts.push(text.substring(lastIndex, match.index));
     }
-    parts.push(<strong key={match.index} className="font-bold text-white">{match[1]}</strong>);
+    parts.push(<strong key={match.index} className="font-bold text-text-custom-primary">{match[1]}</strong>);
     lastIndex = boldRegex.lastIndex;
   }
   if (lastIndex < text.length) {
@@ -67,11 +67,11 @@ const MarkdownText: React.FC<{ text: string }> = ({ text }) => {
   if (!text) return null;
   const lines = text.split('\n');
   return (
-    <div className="space-y-2 text-xs text-[#A1A1AA]">
+    <div className="space-y-2 text-xs text-text-custom-secondary">
       {lines.map((line, idx) => {
         if (line.startsWith('### ')) {
           return (
-            <h3 key={idx} className="text-xs font-black text-white mt-4 first:mt-0 uppercase tracking-wider flex items-center gap-1.5 border-b border-white/[0.06] pb-1">
+            <h3 key={idx} className="text-xs font-black text-text-custom-primary mt-4 first:mt-0 uppercase tracking-wider flex items-center gap-1.5 border-b border-border-custom-light pb-1">
               <Sparkles className="w-3.5 h-3.5 text-[#7C3AED]" />
               {line.slice(4)}
             </h3>
@@ -81,7 +81,7 @@ const MarkdownText: React.FC<{ text: string }> = ({ text }) => {
           return <h2 key={idx} className="text-sm font-black text-[#7C3AED] mt-5 first:mt-0">{line.slice(3)}</h2>;
         }
         if (line.startsWith('# ')) {
-          return <h1 key={idx} className="text-base font-black text-white mt-6 first:mt-0">{line.slice(2)}</h1>;
+          return <h1 key={idx} className="text-base font-black text-text-custom-primary mt-6 first:mt-0">{line.slice(2)}</h1>;
         }
         if (line.startsWith('• ') || line.startsWith('- ') || line.startsWith('* ')) {
           return (
@@ -170,7 +170,7 @@ export const AICoach: React.FC = () => {
       const experience = profile?.experienceLevel || 'Intermediate';
       const greeting1: AIChatMessage = {
         sender: 'ai',
-        text: `Hello ${profile?.name || 'Athlete'}! I am Coach GymTrainer, your dedicated performance counselor and metabolic conditioning AI Coach.`,
+        text: `Hello ${profile?.name || 'Athlete'}! I am Coach AzharFit, your dedicated performance counselor and metabolic conditioning AI Coach.`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         category: 'general'
       };
@@ -502,7 +502,7 @@ export const AICoach: React.FC = () => {
     <div className="space-y-6">
       
       {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#111827] text-white rounded-3xl p-6 shadow-xl border border-white/[0.08] relative overflow-hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card-custom text-white rounded-3xl p-6 shadow-xl border border-border-custom relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#7C3AED]/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
         <div className="z-10">
           <h1 className="text-2xl font-black tracking-tight flex items-center gap-2.5">
@@ -522,7 +522,7 @@ export const AICoach: React.FC = () => {
       </div>
 
       {/* Tabs Navigation */}
-      <div className="grid grid-cols-5 gap-1.5 bg-[#111827] border border-white/[0.08] p-1.5 rounded-2xl">
+      <div className="grid grid-cols-5 gap-1.5 bg-card-custom border border-border-custom p-1.5 rounded-2xl">
         {[
           { id: 'chat', label: 'AI Chat Coach', icon: Bot },
           { id: 'workout', label: 'Workout Gen', icon: Dumbbell },
@@ -563,10 +563,10 @@ export const AICoach: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-270px)] min-h-[500px]">
               
               {/* Main Chat Box */}
-              <div className="lg:col-span-2 bg-white dark:bg-[#111827] border border-zinc-200 dark:border-white/[0.08] rounded-3xl flex flex-col justify-between overflow-hidden shadow-2xl h-full">
+              <div className="lg:col-span-2 bg-white dark:bg-card-custom border border-zinc-200 dark:border-border-custom rounded-3xl flex flex-col justify-between overflow-hidden shadow-2xl h-full">
                 
                 {/* Header info */}
-                <div className="px-6 py-4 border-b border-zinc-100 dark:border-white/[0.06] bg-zinc-50 dark:bg-[#09090B] flex items-center justify-between">
+                <div className="px-6 py-4 border-b border-zinc-100 dark:border-border-custom-light bg-zinc-50 dark:bg-zinc-100 dark:bg-[#09090B] flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-2xl bg-[#7C3AED]/10 border border-[#7C3AED]/20 text-[#7C3AED] flex items-center justify-center">
                       <Bot className="w-5 h-5 animate-pulse" />
@@ -587,7 +587,7 @@ export const AICoach: React.FC = () => {
                 </div>
 
                 {/* Message Log */}
-                <div className="flex-1 p-6 overflow-y-auto space-y-4 scrollbar-none bg-zinc-50/30 dark:bg-[#09090B]/30">
+                <div className="flex-1 p-6 overflow-y-auto space-y-4 scrollbar-none bg-zinc-50/30 dark:bg-zinc-100 dark:bg-[#09090B]/30">
                   {messages.map((msg, index) => (
                     <div
                       key={msg.id || index}
@@ -607,7 +607,7 @@ export const AICoach: React.FC = () => {
                             ? 'bg-[#7C3AED] text-white rounded-tr-none shadow-md font-bold'
                             : msg.isError
                               ? 'bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 rounded-tl-none font-medium'
-                              : 'bg-zinc-100 dark:bg-[#111827] border border-zinc-200 dark:border-white/[0.06] text-zinc-900 dark:text-white rounded-tl-none font-medium'
+                              : 'bg-zinc-100 dark:bg-card-custom border border-zinc-200 dark:border-border-custom-light text-zinc-900 dark:text-white rounded-tl-none font-medium'
                         }`}>
                           <MarkdownText text={msg.text} />
                           {msg.isError && (
@@ -638,7 +638,7 @@ export const AICoach: React.FC = () => {
                       <div className="w-8 h-8 rounded-full bg-[#7C3AED]/15 border border-[#7C3AED]/25 text-[#7C3AED] flex items-center justify-center shrink-0">
                         <Bot className="w-4.5 h-4.5 animate-pulse" />
                       </div>
-                      <div className="bg-zinc-100 dark:bg-[#111827] border border-zinc-200 dark:border-white/[0.06] px-4 py-3.5 rounded-2xl rounded-tl-none flex items-center gap-1">
+                      <div className="bg-zinc-100 dark:bg-card-custom border border-zinc-200 dark:border-border-custom-light px-4 py-3.5 rounded-2xl rounded-tl-none flex items-center gap-1">
                         <span className="w-1.5 h-1.5 bg-[#7C3AED] rounded-full animate-bounce" />
                         <span className="w-1.5 h-1.5 bg-[#7C3AED] rounded-full animate-bounce delay-100" />
                         <span className="w-1.5 h-1.5 bg-[#7C3AED] rounded-full animate-bounce delay-200" />
@@ -649,13 +649,13 @@ export const AICoach: React.FC = () => {
                 </div>
 
                 {/* Form Input */}
-                <form onSubmit={handleSendMessage} className="p-4 border-t border-zinc-200 dark:border-white/[0.06] bg-zinc-50 dark:bg-[#09090B]/50 flex gap-3">
+                <form onSubmit={handleSendMessage} className="p-4 border-t border-zinc-200 dark:border-border-custom-light bg-zinc-50 dark:bg-zinc-100 dark:bg-[#09090B]/50 flex gap-3">
                   <input
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder="Type natural queries: 'I want to lose 10 kg' or 'I have knee pain'..."
-                    className="flex-1 bg-white dark:bg-[#09090B] border border-zinc-200 dark:border-white/[0.08] rounded-2xl px-4 py-3.5 text-xs text-zinc-900 dark:text-white font-bold outline-none focus:ring-1 focus:ring-[#7C3AED] transition-all"
+                    className="flex-1 bg-white dark:bg-zinc-100 dark:bg-[#09090B] border border-zinc-200 dark:border-border-custom rounded-2xl px-4 py-3.5 text-xs text-zinc-900 dark:text-white font-bold outline-none focus:ring-1 focus:ring-[#7C3AED] transition-all"
                   />
                   <button
                     type="submit"
@@ -668,7 +668,7 @@ export const AICoach: React.FC = () => {
 
               {/* Suggestions Side Bar */}
               <div className="lg:col-span-1 space-y-6 flex flex-col justify-between">
-                <div className="bg-white dark:bg-[#111827] border border-zinc-200 dark:border-white/[0.08] rounded-3xl p-5 shadow-xl space-y-4">
+                <div className="bg-white dark:bg-card-custom border border-zinc-200 dark:border-border-custom rounded-3xl p-5 shadow-xl space-y-4">
                   <h3 className="text-sm font-black text-zinc-900 dark:text-white flex items-center gap-2">
                     <Sparkle className="w-4 h-4 text-[#7C3AED]" />
                     <span>Quick Coaching Queries</span>
@@ -683,7 +683,7 @@ export const AICoach: React.FC = () => {
                       <button
                         key={idx}
                         onClick={() => setInputValue(prompt.q)}
-                        className="w-full text-left bg-zinc-50 dark:bg-[#09090B] border border-zinc-100 dark:border-white/[0.04] p-3 rounded-xl hover:border-[#7C3AED] hover:bg-zinc-100 dark:hover:bg-white/[0.02] transition-all flex items-start gap-3 cursor-pointer group"
+                        className="w-full text-left bg-zinc-50 dark:bg-zinc-100 dark:bg-[#09090B] border border-zinc-100 dark:border-white/[0.04] p-3 rounded-xl hover:border-[#7C3AED] hover:bg-zinc-100 dark:hover:bg-white/[0.02] transition-all flex items-start gap-3 cursor-pointer group"
                       >
                         <div className="p-1.5 bg-[#7C3AED]/10 border border-[#7C3AED]/20 rounded-lg text-[#7C3AED] group-hover:bg-[#7C3AED] group-hover:text-white transition-all">
                           <Bot className="w-3.5 h-3.5" />
@@ -713,7 +713,7 @@ export const AICoach: React.FC = () => {
           {activeTab === 'workout' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Form Input Parameters */}
-              <div className="lg:col-span-5 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-xl space-y-5">
+              <div className="lg:col-span-5 bg-card-custom border border-border-custom rounded-3xl p-6 shadow-xl space-y-5">
                 <h2 className="text-base font-black text-white flex items-center gap-2">
                   <Dumbbell className="w-5 h-5 text-[#7C3AED]" />
                   <span>AI Workout Generator</span>
@@ -730,7 +730,7 @@ export const AICoach: React.FC = () => {
                       value={workoutPrompt}
                       onChange={(e) => setWorkoutPrompt(e.target.value)}
                       placeholder="e.g. Hypertrophy, Powerlifting split, HIIT cardio..."
-                      className="w-full bg-[#09090B] border border-white/[0.08] rounded-xl px-3.5 py-3 text-xs text-white font-bold outline-none focus:ring-1 focus:ring-[#7C3AED]"
+                      className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom rounded-xl px-3.5 py-3 text-xs text-white font-bold outline-none focus:ring-1 focus:ring-[#7C3AED]"
                     />
                   </div>
 
@@ -744,7 +744,7 @@ export const AICoach: React.FC = () => {
                           className={`py-2 rounded-lg text-xs font-extrabold border transition-all cursor-pointer ${
                             daysCount === d
                               ? 'bg-[#7C3AED] border-[#7C3AED] text-white shadow-md'
-                              : 'bg-[#09090B] border-white/[0.08] text-[#A1A1AA] hover:bg-white/[0.02]'
+                              : 'bg-zinc-100 dark:bg-[#09090B] border-border-custom text-[#A1A1AA] hover:bg-white/[0.02]'
                           }`}
                         >
                           {d}d
@@ -763,7 +763,7 @@ export const AICoach: React.FC = () => {
                           className={`py-2 px-1 rounded-lg text-[10px] font-black border transition-all cursor-pointer truncate ${
                             workoutEquipment === eq
                               ? 'bg-[#7C3AED] border-[#7C3AED] text-white shadow-md'
-                              : 'bg-[#09090B] border-white/[0.08] text-[#A1A1AA] hover:bg-white/[0.02]'
+                              : 'bg-zinc-100 dark:bg-[#09090B] border-border-custom text-[#A1A1AA] hover:bg-white/[0.02]'
                           }`}
                         >
                           {eq}
@@ -779,7 +779,7 @@ export const AICoach: React.FC = () => {
                       value={workoutRestriction}
                       onChange={(e) => setWorkoutRestriction(e.target.value)}
                       placeholder="e.g. Knee pain, Lower back injury..."
-                      className="w-full bg-[#09090B] border border-white/[0.08] rounded-xl px-3.5 py-3 text-xs text-white font-bold outline-none focus:ring-1 focus:ring-[#7C3AED]"
+                      className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom rounded-xl px-3.5 py-3 text-xs text-white font-bold outline-none focus:ring-1 focus:ring-[#7C3AED]"
                     />
                   </div>
 
@@ -806,20 +806,20 @@ export const AICoach: React.FC = () => {
               {/* Output Panel display */}
               <div className="lg:col-span-7 space-y-4">
                 {generatingWorkout && (
-                  <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-xl space-y-4 animate-pulse">
+                  <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-xl space-y-4 animate-pulse">
                     <div className="h-4 bg-zinc-800 rounded w-1/3" />
                     <div className="h-3 bg-zinc-800 rounded w-2/3" />
                     <div className="space-y-2.5 pt-4">
-                      <div className="h-10 bg-[#09090B] rounded-xl" />
-                      <div className="h-10 bg-[#09090B] rounded-xl" />
-                      <div className="h-10 bg-[#09090B] rounded-xl" />
+                      <div className="h-10 bg-zinc-100 dark:bg-[#09090B] rounded-xl" />
+                      <div className="h-10 bg-zinc-100 dark:bg-[#09090B] rounded-xl" />
+                      <div className="h-10 bg-zinc-100 dark:bg-[#09090B] rounded-xl" />
                     </div>
                   </div>
                 )}
 
                 {!generatingWorkout && !generatedWorkout && (
-                  <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-12 text-center space-y-3 shadow-xl">
-                    <div className="w-12 h-12 rounded-2xl bg-[#09090B] border border-white/[0.04] text-zinc-600 flex items-center justify-center mx-auto">
+                  <div className="bg-card-custom border border-border-custom rounded-3xl p-12 text-center space-y-3 shadow-xl">
+                    <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-[#09090B] border border-white/[0.04] text-zinc-600 flex items-center justify-center mx-auto">
                       <Dumbbell className="w-6 h-6 text-[#7C3AED]" />
                     </div>
                     <h4 className="text-xs font-black text-white">Awaiting Program Parameters</h4>
@@ -830,7 +830,7 @@ export const AICoach: React.FC = () => {
                 )}
 
                 {!generatingWorkout && generatedWorkout && (
-                  <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-xl space-y-6">
+                  <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-xl space-y-6">
                     <div className="flex justify-between items-start gap-4">
                       <div>
                         <span className="text-[9px] bg-[#7C3AED]/15 border border-[#7C3AED]/20 text-[#7C3AED] px-2.5 py-1 rounded-full font-extrabold tracking-widest uppercase inline-block mb-2">
@@ -840,18 +840,18 @@ export const AICoach: React.FC = () => {
                         <p className="text-[11px] text-[#A1A1AA] mt-1 leading-relaxed">{generatedWorkout.description}</p>
                       </div>
 
-                      <div className="flex items-center gap-1.5 shrink-0 bg-[#09090B] px-3 py-1.5 rounded-xl border border-white/[0.04]">
+                      <div className="flex items-center gap-1.5 shrink-0 bg-zinc-100 dark:bg-[#09090B] px-3 py-1.5 rounded-xl border border-white/[0.04]">
                         <Flame className="w-3.5 h-3.5 text-orange-400" />
                         <span className="text-[10px] font-black text-white">{generatedWorkout.calories || 380} kcal</span>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-3 border-y border-white/[0.06] py-3.5">
+                    <div className="grid grid-cols-3 gap-3 border-y border-border-custom-light py-3.5">
                       <div className="text-center">
                         <span className="block text-[8px] text-[#A1A1AA] uppercase font-black tracking-widest">Duration</span>
                         <span className="text-xs font-extrabold text-white mt-0.5 block">{generatedWorkout.duration || 45} mins</span>
                       </div>
-                      <div className="text-center border-x border-white/[0.06]">
+                      <div className="text-center border-x border-border-custom-light">
                         <span className="block text-[8px] text-[#A1A1AA] uppercase font-black tracking-widest">Difficulty</span>
                         <span className="text-xs font-extrabold text-white mt-0.5 block">{generatedWorkout.difficulty || 'Intermediate'}</span>
                       </div>
@@ -867,7 +867,7 @@ export const AICoach: React.FC = () => {
                         {generatedWorkout.exercises?.map((ex: any, idx: number) => (
                           <div
                             key={idx}
-                            className="bg-[#09090B] border border-white/[0.04] p-3 rounded-xl flex items-center justify-between gap-4"
+                            className="bg-zinc-100 dark:bg-[#09090B] border border-white/[0.04] p-3 rounded-xl flex items-center justify-between gap-4"
                           >
                             <div className="flex items-center gap-3">
                               <span className="w-6 h-6 rounded-lg bg-[#7C3AED]/15 border border-[#7C3AED]/20 text-[#7C3AED] text-[10px] font-black flex items-center justify-center">
@@ -925,7 +925,7 @@ export const AICoach: React.FC = () => {
           {activeTab === 'meal' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Form Input Parameters */}
-              <div className="lg:col-span-5 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-xl space-y-5">
+              <div className="lg:col-span-5 bg-card-custom border border-border-custom rounded-3xl p-6 shadow-xl space-y-5">
                 <h2 className="text-base font-black text-white flex items-center gap-2">
                   <Utensils className="w-5 h-5 text-rose-400" />
                   <span>AI Nutrition Coach</span>
@@ -942,7 +942,7 @@ export const AICoach: React.FC = () => {
                       value={mealPrompt}
                       onChange={(e) => setMealPrompt(e.target.value)}
                       placeholder="e.g. High protein lean cut, Keto diet..."
-                      className="w-full bg-[#09090B] border border-white/[0.08] rounded-xl px-3.5 py-3 text-xs text-white font-bold outline-none focus:ring-1 focus:ring-[#7C3AED]"
+                      className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom rounded-xl px-3.5 py-3 text-xs text-white font-bold outline-none focus:ring-1 focus:ring-[#7C3AED]"
                     />
                   </div>
 
@@ -956,7 +956,7 @@ export const AICoach: React.FC = () => {
                           className={`py-2 px-1 rounded-lg text-[10px] font-black border transition-all cursor-pointer truncate ${
                             dietGoal === tg
                               ? 'bg-rose-500 border-rose-500 text-white shadow-md'
-                              : 'bg-[#09090B] border-white/[0.08] text-[#A1A1AA] hover:bg-white/[0.02]'
+                              : 'bg-zinc-100 dark:bg-[#09090B] border-border-custom text-[#A1A1AA] hover:bg-white/[0.02]'
                           }`}
                         >
                           {tg}
@@ -972,7 +972,7 @@ export const AICoach: React.FC = () => {
                       value={dietRestrictions}
                       onChange={(e) => setDietRestrictions(e.target.value)}
                       placeholder="e.g. Nut allergies, Dairy-free..."
-                      className="w-full bg-[#09090B] border border-white/[0.08] rounded-xl px-3.5 py-3 text-xs text-white font-bold outline-none focus:ring-1 focus:ring-[#7C3AED]"
+                      className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom rounded-xl px-3.5 py-3 text-xs text-white font-bold outline-none focus:ring-1 focus:ring-[#7C3AED]"
                     />
                   </div>
 
@@ -999,21 +999,21 @@ export const AICoach: React.FC = () => {
               {/* Output Display */}
               <div className="lg:col-span-7 space-y-4">
                 {generatingMeal && (
-                  <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-xl space-y-4 animate-pulse">
+                  <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-xl space-y-4 animate-pulse">
                     <div className="h-4 bg-zinc-850 rounded w-1/3" />
                     <div className="h-3 bg-zinc-850 rounded w-2/3" />
                     <div className="grid grid-cols-4 gap-2 py-4">
-                      <div className="h-12 bg-[#09090B] rounded-xl" />
-                      <div className="h-12 bg-[#09090B] rounded-xl" />
-                      <div className="h-12 bg-[#09090B] rounded-xl" />
-                      <div className="h-12 bg-[#09090B] rounded-xl" />
+                      <div className="h-12 bg-zinc-100 dark:bg-[#09090B] rounded-xl" />
+                      <div className="h-12 bg-zinc-100 dark:bg-[#09090B] rounded-xl" />
+                      <div className="h-12 bg-zinc-100 dark:bg-[#09090B] rounded-xl" />
+                      <div className="h-12 bg-zinc-100 dark:bg-[#09090B] rounded-xl" />
                     </div>
                   </div>
                 )}
 
                 {!generatingMeal && !generatedMeal && (
-                  <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-12 text-center space-y-3 shadow-xl">
-                    <div className="w-12 h-12 rounded-2xl bg-[#09090B] text-zinc-600 flex items-center justify-center mx-auto">
+                  <div className="bg-card-custom border border-border-custom rounded-3xl p-12 text-center space-y-3 shadow-xl">
+                    <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-[#09090B] text-zinc-600 flex items-center justify-center mx-auto">
                       <Utensils className="w-6 h-6 text-rose-400" />
                     </div>
                     <h4 className="text-xs font-black text-white">Awaiting Dietary Specifications</h4>
@@ -1024,7 +1024,7 @@ export const AICoach: React.FC = () => {
                 )}
 
                 {!generatingMeal && generatedMeal && (
-                  <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-xl space-y-6">
+                  <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-xl space-y-6">
                     <div>
                       <span className="text-[9px] bg-rose-500/10 border border-rose-500/20 text-rose-400 px-2.5 py-1 rounded-full font-extrabold tracking-widest uppercase inline-block mb-2">
                         Nutrition Blueprint
@@ -1033,20 +1033,20 @@ export const AICoach: React.FC = () => {
                       <p className="text-[11px] text-[#A1A1AA] mt-1 leading-relaxed">{generatedMeal.description}</p>
                     </div>
 
-                    <div className="grid grid-cols-4 gap-2 bg-[#09090B] p-3 rounded-2xl border border-white/[0.04]">
+                    <div className="grid grid-cols-4 gap-2 bg-zinc-100 dark:bg-[#09090B] p-3 rounded-2xl border border-white/[0.04]">
                       <div className="text-center p-1">
                         <span className="block text-[8px] text-[#A1A1AA] uppercase font-black tracking-widest">Calories</span>
                         <span className="text-[11px] font-black text-white mt-0.5 block">{generatedMeal.caloriesTarget || 2200} kcal</span>
                       </div>
-                      <div className="text-center p-1 border-l border-white/[0.06]">
+                      <div className="text-center p-1 border-l border-border-custom-light">
                         <span className="block text-[8px] text-[#A1A1AA] uppercase font-black tracking-widest">Protein</span>
                         <span className="text-[11px] font-black text-white mt-0.5 block">{generatedMeal.proteinTarget || 160}g</span>
                       </div>
-                      <div className="text-center p-1 border-l border-white/[0.06]">
+                      <div className="text-center p-1 border-l border-border-custom-light">
                         <span className="block text-[8px] text-[#A1A1AA] uppercase font-black tracking-widest">Carbs</span>
                         <span className="text-[11px] font-black text-white mt-0.5 block">{generatedMeal.carbsTarget || 200}g</span>
                       </div>
-                      <div className="text-center p-1 border-l border-white/[0.06]">
+                      <div className="text-center p-1 border-l border-border-custom-light">
                         <span className="block text-[8px] text-[#A1A1AA] uppercase font-black tracking-widest">Fats</span>
                         <span className="text-[11px] font-black text-white mt-0.5 block">{generatedMeal.fatsTarget || 70}g</span>
                       </div>
@@ -1058,7 +1058,7 @@ export const AICoach: React.FC = () => {
                         {generatedMeal.meals?.map((meal: any, idx: number) => (
                           <div
                             key={idx}
-                            className="bg-[#09090B] border border-white/[0.04] p-3.5 rounded-2xl flex items-center justify-between gap-4"
+                            className="bg-zinc-100 dark:bg-[#09090B] border border-white/[0.04] p-3.5 rounded-2xl flex items-center justify-between gap-4"
                           >
                             <div className="min-w-0">
                               <span className="text-[8px] bg-rose-500/15 text-rose-400 font-extrabold uppercase px-2 py-0.5 rounded-md inline-block mb-1">
@@ -1116,7 +1116,7 @@ export const AICoach: React.FC = () => {
           {activeTab === 'form' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Form Input Variables */}
-              <div className="lg:col-span-5 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-xl space-y-5">
+              <div className="lg:col-span-5 bg-card-custom border border-border-custom rounded-3xl p-6 shadow-xl space-y-5">
                 <h2 className="text-base font-black text-white flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-[#7C3AED]" />
                   <span>AI Form Correction Guide</span>
@@ -1131,19 +1131,19 @@ export const AICoach: React.FC = () => {
                     <select
                       value={selectedExName}
                       onChange={(e) => setSelectedExName(e.target.value)}
-                      className="w-full bg-[#09090B] border border-white/[0.08] rounded-xl px-3.5 py-3 text-xs text-white font-bold outline-none focus:ring-1 focus:ring-[#7C3AED]"
+                      className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom rounded-xl px-3.5 py-3 text-xs text-white font-bold outline-none focus:ring-1 focus:ring-[#7C3AED]"
                     >
                       {exercisesList.map((ex) => (
-                        <option key={ex.id} value={ex.name} className="bg-[#111827]">
+                        <option key={ex.id} value={ex.name} className="bg-card-custom">
                           {ex.name} ({ex.muscleGroup})
                         </option>
                       ))}
                       {exercisesList.length === 0 && (
                         <>
-                          <option value="Squat" className="bg-[#111827]">Squat</option>
-                          <option value="Deadlift" className="bg-[#111827]">Deadlift</option>
-                          <option value="Bench Press" className="bg-[#111827]">Bench Press</option>
-                          <option value="Overhead Press" className="bg-[#111827]">Overhead Press</option>
+                          <option value="Squat" className="bg-card-custom">Squat</option>
+                          <option value="Deadlift" className="bg-card-custom">Deadlift</option>
+                          <option value="Bench Press" className="bg-card-custom">Bench Press</option>
+                          <option value="Overhead Press" className="bg-card-custom">Overhead Press</option>
                         </>
                       )}
                     </select>
@@ -1156,7 +1156,7 @@ export const AICoach: React.FC = () => {
                       onChange={(e) => setFormDescription(e.target.value)}
                       rows={4}
                       placeholder="e.g. My knees cave inward slightly when coming out of the hole."
-                      className="w-full bg-[#09090B] border border-white/[0.08] rounded-xl px-3.5 py-3 text-xs text-white font-semibold outline-none focus:ring-1 focus:ring-[#7C3AED] resize-none"
+                      className="w-full bg-zinc-100 dark:bg-[#09090B] border border-border-custom rounded-xl px-3.5 py-3 text-xs text-white font-semibold outline-none focus:ring-1 focus:ring-[#7C3AED] resize-none"
                     />
                   </div>
 
@@ -1183,7 +1183,7 @@ export const AICoach: React.FC = () => {
               {/* Analysis Output display */}
               <div className="lg:col-span-7 space-y-4">
                 {analyzingForm && (
-                  <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-xl space-y-4 animate-pulse">
+                  <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-xl space-y-4 animate-pulse">
                     <div className="h-4 bg-zinc-850 rounded w-1/4" />
                     <div className="h-2.5 bg-zinc-850 rounded w-full" />
                     <div className="h-2.5 bg-zinc-850 rounded w-3/4" />
@@ -1192,8 +1192,8 @@ export const AICoach: React.FC = () => {
                 )}
 
                 {!analyzingForm && !formCorrectionResult && (
-                  <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-12 text-center space-y-3 shadow-xl">
-                    <div className="w-12 h-12 rounded-2xl bg-[#09090B] text-zinc-600 flex items-center justify-center mx-auto">
+                  <div className="bg-card-custom border border-border-custom rounded-3xl p-12 text-center space-y-3 shadow-xl">
+                    <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-[#09090B] text-zinc-600 flex items-center justify-center mx-auto">
                       <ShieldCheck className="w-6 h-6 text-[#7C3AED]" />
                     </div>
                     <h4 className="text-xs font-black text-white">Awaiting Technique Input</h4>
@@ -1204,8 +1204,8 @@ export const AICoach: React.FC = () => {
                 )}
 
                 {!analyzingForm && formCorrectionResult && (
-                  <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-xl space-y-4">
-                    <div className="flex items-center gap-2.5 pb-2 border-b border-white/[0.06]">
+                  <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-xl space-y-4">
+                    <div className="flex items-center gap-2.5 pb-2 border-b border-border-custom-light">
                       <div className="p-1.5 bg-[#7C3AED]/10 border border-[#7C3AED]/20 text-[#7C3AED] rounded-lg">
                         <ShieldCheck className="w-4 h-4" />
                       </div>
@@ -1215,7 +1215,7 @@ export const AICoach: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="bg-[#09090B] p-4 rounded-2xl border border-white/[0.04]">
+                    <div className="bg-zinc-100 dark:bg-[#09090B] p-4 rounded-2xl border border-white/[0.04]">
                       <MarkdownText text={formCorrectionResult} />
                     </div>
 
@@ -1235,7 +1235,7 @@ export const AICoach: React.FC = () => {
           {activeTab === 'progress' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Scan Trigger */}
-              <div className="lg:col-span-4 bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-xl space-y-5">
+              <div className="lg:col-span-4 bg-card-custom border border-border-custom rounded-3xl p-6 shadow-xl space-y-5">
                 <h2 className="text-base font-black text-white flex items-center gap-2">
                   <FileText className="w-5 h-5 text-[#7C3AED]" />
                   <span>Biometric Scanner</span>
@@ -1263,14 +1263,14 @@ export const AICoach: React.FC = () => {
                 </button>
 
                 {/* Saved Reports */}
-                <div className="space-y-3 pt-3 border-t border-white/[0.06]">
+                <div className="space-y-3 pt-3 border-t border-border-custom-light">
                   <h4 className="text-[10px] uppercase font-black tracking-widest text-[#A1A1AA]">Previous Coach Reports</h4>
                   <div className="space-y-2 max-h-[180px] overflow-y-auto scrollbar-none">
                     {savedReports.map((rep) => (
                       <button
                         key={rep.id}
                         onClick={() => setProgressReport(rep.content)}
-                        className="w-full text-left bg-[#09090B] border border-white/[0.04] p-3 rounded-xl hover:border-[#7C3AED] hover:bg-white/[0.02] transition-all flex items-center justify-between gap-3 cursor-pointer group"
+                        className="w-full text-left bg-zinc-100 dark:bg-[#09090B] border border-white/[0.04] p-3 rounded-xl hover:border-[#7C3AED] hover:bg-white/[0.02] transition-all flex items-center justify-between gap-3 cursor-pointer group"
                       >
                         <div className="min-w-0">
                           <h5 className="text-[10px] font-bold text-white truncate">{rep.title}</h5>
@@ -1289,7 +1289,7 @@ export const AICoach: React.FC = () => {
               {/* Scan Output display */}
               <div className="lg:col-span-8 space-y-4">
                 {analyzingProgress && (
-                  <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-xl space-y-4 animate-pulse">
+                  <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-xl space-y-4 animate-pulse">
                     <div className="h-4 bg-zinc-850 rounded w-1/4" />
                     <div className="space-y-3 pt-4">
                       <div className="h-3 bg-zinc-850 rounded w-full" />
@@ -1300,8 +1300,8 @@ export const AICoach: React.FC = () => {
                 )}
 
                 {!analyzingProgress && !progressReport && (
-                  <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-12 text-center space-y-3 shadow-xl">
-                    <div className="w-12 h-12 rounded-2xl bg-[#09090B] text-zinc-600 flex items-center justify-center mx-auto">
+                  <div className="bg-card-custom border border-border-custom rounded-3xl p-12 text-center space-y-3 shadow-xl">
+                    <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-[#09090B] text-zinc-600 flex items-center justify-center mx-auto">
                       <FileText className="w-6 h-6 text-[#7C3AED]" />
                     </div>
                     <h4 className="text-xs font-black text-white">Awaiting Biometric Compilation</h4>
@@ -1312,8 +1312,8 @@ export const AICoach: React.FC = () => {
                 )}
 
                 {!analyzingProgress && progressReport && (
-                  <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-xl space-y-4">
-                    <div className="flex items-center gap-2.5 pb-2 border-b border-white/[0.06]">
+                  <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-xl space-y-4">
+                    <div className="flex items-center gap-2.5 pb-2 border-b border-border-custom-light">
                       <div className="p-1.5 bg-[#7C3AED]/10 border border-[#7C3AED]/20 text-[#7C3AED] rounded-lg">
                         <Award className="w-4 h-4" />
                       </div>
@@ -1323,7 +1323,7 @@ export const AICoach: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="bg-[#09090B] p-5 rounded-2xl border border-white/[0.04] max-h-[500px] overflow-y-auto">
+                    <div className="bg-zinc-100 dark:bg-[#09090B] p-5 rounded-2xl border border-white/[0.04] max-h-[500px] overflow-y-auto">
                       <MarkdownText text={progressReport} />
                     </div>
                   </div>

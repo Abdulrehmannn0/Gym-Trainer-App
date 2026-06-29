@@ -73,7 +73,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <>
       {/* Mobile Top Header Bar */}
-      <div className="md:hidden flex items-center justify-between bg-white dark:bg-[#111827] border-b border-zinc-200 dark:border-white/[0.08] text-zinc-900 dark:text-white p-4 sticky top-0 z-50 shadow-sm">
+      <div className="md:hidden flex items-center justify-between bg-white dark:bg-[#09090B] border-b border-zinc-200 dark:border-white/[0.08] text-zinc-900 dark:text-white p-4 sticky top-0 z-50 shadow-sm">
         <div className="flex items-center space-x-2">
           <div className="p-1.5 bg-gradient-to-br from-[#7C3AED] to-[#4F46E5] rounded-xl text-white shadow-md shadow-[#7C3AED]/20">
             <Dumbbell className="w-5 h-5" />
@@ -93,7 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Desktop Sidebar & Mobile Drawer Navigation Container */}
       <aside
         className={`
-          fixed top-[64px] md:top-0 left-0 bottom-0 z-40 bg-white/95 dark:bg-[#111827]/90 backdrop-blur-xl text-zinc-900 dark:text-[#FFFFFF] flex flex-col border-r border-zinc-200 dark:border-white/[0.08] h-[calc(100vh-64px)] md:h-screen transition-all duration-300
+          fixed top-[64px] md:top-0 left-0 bottom-0 z-40 bg-white/95 dark:bg-[#09090B]/90 backdrop-blur-xl text-zinc-900 dark:text-[#FFFFFF] flex flex-col border-r border-zinc-200 dark:border-white/[0.08] h-[calc(100vh-64px)] md:h-screen transition-all duration-300
           ${isMobileOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0'}
           ${isCollapsed ? 'md:w-20' : 'md:w-64'}
         `}
@@ -122,7 +122,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {/* Collapse Trigger Toggle (Desktop only) */}
           <button
             onClick={onToggleCollapse}
-            className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white dark:bg-[#111827] border border-zinc-200 dark:border-white/[0.08] items-center justify-center text-[#A1A1AA] hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all shadow-md z-50"
+            className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white dark:bg-[#09090B] border border-zinc-200 dark:border-[#27272A] items-center justify-center text-[#A1A1AA] hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all shadow-md z-50"
           >
             {isCollapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
           </button>
@@ -138,7 +138,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 className="w-10 h-10 rounded-xl object-cover border border-[#7C3AED]/30 bg-zinc-100 dark:bg-[#09090B]"
                 referrerPolicy="no-referrer"
               />
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#22C55E] border-2 border-white dark:border-[#111827] rounded-full" />
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#22C55E] border-2 border-white dark:border-[#09090B] rounded-full" />
             </div>
             {!isCollapsed && (
               <motion.div
@@ -177,7 +177,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span className="transition-opacity">{item.name}</span>
                 ) : (
                   /* Tooltip for collapsed states */
-                  <div className="pointer-events-none opacity-0 group-hover:opacity-100 absolute left-full ml-3 px-3 py-1.5 bg-white dark:bg-[#111827] border border-zinc-200 dark:border-white/[0.08] rounded-xl text-xs font-extrabold text-zinc-900 dark:text-white whitespace-nowrap shadow-xl z-50 transition-all translate-x-2 group-hover:translate-x-0">
+                  <div className="pointer-events-none opacity-0 group-hover:opacity-100 absolute left-full ml-3 px-3 py-1.5 bg-white dark:bg-[#09090B] border border-zinc-200 dark:border-[#27272A] rounded-xl text-xs font-extrabold text-zinc-900 dark:text-white whitespace-nowrap shadow-xl z-50 transition-all translate-x-2 group-hover:translate-x-0">
                     {item.name}
                   </div>
                 )}

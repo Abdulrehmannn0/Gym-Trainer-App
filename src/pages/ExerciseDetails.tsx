@@ -118,7 +118,7 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
 
   if (!exercise) {
     return (
-      <div className="text-center py-16 bg-[#111827] border border-white/[0.08] rounded-3xl p-8 max-w-md mx-auto">
+      <div className="text-center py-16 bg-card-custom border border-border-custom rounded-3xl p-8 max-w-md mx-auto">
         <p className="text-[#A1A1AA] font-bold uppercase text-xs tracking-wider">Exercise blueprint not discovered.</p>
         <button 
           onClick={() => onNavigate('dashboard')} 
@@ -244,7 +244,7 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
 
         <button
           onClick={handleToggleFavorite}
-          className={`inline-flex items-center gap-2 text-xs font-bold cursor-pointer transition-colors px-4 py-2 bg-white/[0.02] border border-white/[0.08] rounded-2xl ${
+          className={`inline-flex items-center gap-2 text-xs font-bold cursor-pointer transition-colors px-4 py-2 bg-white/[0.02] border border-border-custom rounded-2xl ${
             isFav ? 'text-[#EF4444] border-[#EF4444]/30 bg-[#EF4444]/10' : 'text-[#A1A1AA] hover:text-[#EF4444]'
           }`}
         >
@@ -254,11 +254,11 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
       </div>
 
       {/* 2. MAJESTIC LARGE HERO BANNER IMAGE FRAME */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#111827] to-[#09090B] border border-white/[0.08] text-white rounded-3xl p-6 sm:p-10 shadow-2xl flex flex-col lg:flex-row gap-8 items-stretch">
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#111827] to-[#09090B] border border-border-custom text-white rounded-3xl p-6 sm:p-10 shadow-2xl flex flex-col lg:flex-row gap-8 items-stretch">
         <div className="absolute top-0 right-0 w-96 h-96 bg-violet-600/10 rounded-full blur-[120px] pointer-events-none" />
         
         {/* Banner image mockup representing the kinetic movement */}
-        <div className="w-full lg:w-1/3 h-56 lg:h-auto min-h-[220px] bg-[#09090B] rounded-2xl overflow-hidden relative border border-white/[0.06] shrink-0">
+        <div className="w-full lg:w-1/3 h-56 lg:h-auto min-h-[220px] bg-zinc-100 dark:bg-[#09090B] rounded-2xl overflow-hidden relative border border-border-custom-light shrink-0">
           <img 
             src={getIllustrationUrl(exercise.muscleGroup)} 
             alt={exercise.name}
@@ -297,10 +297,10 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
             </p>
           </div>
 
-          <div className="pt-4 border-t border-white/[0.06] flex flex-wrap gap-6 text-xs text-[#A1A1AA] font-mono">
+          <div className="pt-4 border-t border-border-custom-light flex flex-wrap gap-6 text-xs text-[#A1A1AA] font-mono">
             <div className="flex items-center gap-1.5">
               <span className="text-white font-extrabold uppercase">Equipment:</span>
-              <span className="bg-white/[0.02] border border-white/[0.08] px-2.5 py-1 rounded-lg text-white font-semibold">{exercise.equipment}</span>
+              <span className="bg-white/[0.02] border border-border-custom px-2.5 py-1 rounded-lg text-white font-semibold">{exercise.equipment}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-white font-extrabold uppercase">Routine targets:</span>
@@ -317,14 +317,14 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
         <div className="lg:col-span-2 space-y-6">
           
           {/* Custom preview player with tabbed GIF / Video Preview selector */}
-          <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-4 mb-5">
+          <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border-custom-light pb-4 mb-5">
               <span className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
                 <Video className="w-4 h-4 text-[#7C3AED]" />
                 <span>Routine Visual Form Simulator</span>
               </span>
               
-              <div className="flex bg-[#09090B] p-1 rounded-xl border border-white/[0.08]">
+              <div className="flex bg-zinc-100 dark:bg-[#09090B] p-1 rounded-xl border border-border-custom">
                 <button
                   onClick={() => { setMediaTab('gif'); setIsVideoPlaying(false); }}
                   className={`px-3 py-1 text-[10px] font-bold rounded-lg uppercase tracking-wide cursor-pointer transition-all ${
@@ -345,7 +345,7 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
             </div>
 
             {/* Immersive video simulator container frame */}
-            <div className="w-full h-72 sm:h-96 bg-[#09090B] rounded-2xl overflow-hidden relative border border-white/[0.06] flex items-center justify-center">
+            <div className="w-full h-72 sm:h-96 bg-zinc-100 dark:bg-[#09090B] rounded-2xl overflow-hidden relative border border-border-custom-light flex items-center justify-center">
               {mediaTab === 'gif' ? (
                 <>
                   <img 
@@ -401,7 +401,7 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
           </div>
 
           {/* Form instructions checklist */}
-          <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl">
+          <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl">
             <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2.5 uppercase tracking-wide">
               <CheckCircle2 className="w-5 h-5 text-[#7C3AED]" />
               <span>Execution Checklist</span>
@@ -409,7 +409,7 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
 
             <div className="space-y-3.5">
               {exercise.instructions.map((step, idx) => (
-                <div key={idx} className="flex gap-4 items-start bg-white/[0.02] p-4.5 rounded-2xl border border-white/[0.06] hover:border-white/[0.12] transition-colors">
+                <div key={idx} className="flex gap-4 items-start bg-white/[0.02] p-4.5 rounded-2xl border border-border-custom-light hover:border-white/[0.12] transition-colors">
                   <span className="w-6 h-6 rounded-lg bg-[#7C3AED]/20 text-[#7C3AED] border border-[#7C3AED]/30 flex items-center justify-center font-black text-xs shrink-0 mt-0.5">
                     {idx + 1}
                   </span>
@@ -425,7 +425,7 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             
             {/* Physiological Benefits */}
-            <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl">
+            <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl">
               <h4 className="text-sm font-bold text-white mb-4 flex items-center gap-2 uppercase tracking-wide">
                 <TrendingUp className="w-4.5 h-4.5 text-[#22C55E]" />
                 <span>Target Benefits</span>
@@ -441,7 +441,7 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
             </div>
 
             {/* Common Mistakes */}
-            <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl">
+            <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl">
               <h4 className="text-sm font-bold text-white mb-4 flex items-center gap-2 uppercase tracking-wide">
                 <XCircle className="w-4.5 h-4.5 text-[#EF4444]" />
                 <span>Common Mistakes</span>
@@ -469,7 +469,7 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
                   <div 
                     key={alt.id}
                     onClick={() => onNavigate('details', alt.id)}
-                    className="bg-[#111827] border border-white/[0.08] hover:border-[#7C3AED]/40 p-4 rounded-2xl cursor-pointer hover:scale-[1.02] transition-all flex flex-col justify-between h-36"
+                    className="bg-card-custom border border-border-custom hover:border-[#7C3AED]/40 p-4 rounded-2xl cursor-pointer hover:scale-[1.02] transition-all flex flex-col justify-between h-36"
                   >
                     <div>
                       <span className="text-[8px] font-black text-[#A1A1AA] uppercase">{alt.muscleGroup}</span>
@@ -490,8 +490,8 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
 
         {/* Right column: Rest Timer HUD & Logs */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-6 shadow-2xl sticky top-6">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 mb-5">
+          <div className="bg-card-custom border border-border-custom rounded-3xl p-6 shadow-2xl sticky top-6">
+            <div className="flex items-center justify-between border-b border-border-custom-light pb-3 mb-5">
               <div>
                 <h3 className="text-base font-bold text-white uppercase tracking-tight">Active Trainer HUD</h3>
                 <p className="text-[10px] text-[#A1A1AA] mt-0.5">Log completed repetitions & weight metrics.</p>
@@ -530,7 +530,7 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
                 <div className="space-y-6">
                   
                   {/* Rest countdown interval circle */}
-                  <div className="flex flex-col items-center justify-center bg-[#09090B] border border-white/[0.08] p-5 rounded-2xl text-center relative overflow-hidden">
+                  <div className="flex flex-col items-center justify-center bg-zinc-100 dark:bg-[#09090B] border border-border-custom p-5 rounded-2xl text-center relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-[#7C3AED]/5 rounded-full blur-[40px] pointer-events-none" />
                     <span className="text-[10px] text-[#A1A1AA] font-black uppercase tracking-wider">REST TIMER</span>
                     
@@ -541,13 +541,13 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
                     <div className="flex gap-2.5 mt-4">
                       <button
                         onClick={toggleTimer}
-                        className="p-2.5 border border-white/[0.08] rounded-xl hover:bg-white/10 text-[#A1A1AA] hover:text-white transition-colors cursor-pointer"
+                        className="p-2.5 border border-border-custom rounded-xl hover:bg-white/10 text-[#A1A1AA] hover:text-white transition-colors cursor-pointer"
                       >
                         {isTimerActive ? <Pause className="w-4.5 h-4.5" /> : <Play className="w-4.5 h-4.5" />}
                       </button>
                       <button
                         onClick={resetTimer}
-                        className="p-2.5 border border-white/[0.08] rounded-xl hover:bg-white/10 text-[#A1A1AA] hover:text-white transition-colors cursor-pointer"
+                        className="p-2.5 border border-border-custom rounded-xl hover:bg-white/10 text-[#A1A1AA] hover:text-white transition-colors cursor-pointer"
                       >
                         <RotateCcw className="w-4.5 h-4.5" />
                       </button>
@@ -555,7 +555,7 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
                   </div>
 
                   {/* Weight / Reps Set Logger Inputs */}
-                  <div className="bg-[#09090B] p-5 rounded-2xl border border-white/[0.08] space-y-4">
+                  <div className="bg-zinc-100 dark:bg-[#09090B] p-5 rounded-2xl border border-border-custom space-y-4">
                     <span className="text-[10px] text-[#A1A1AA] font-black uppercase tracking-widest block">Log Finished Set</span>
                     
                     <div className="grid grid-cols-2 gap-3.5">
@@ -565,7 +565,7 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
                           type="number"
                           value={inputWeight}
                           onChange={(e) => setInputWeight(e.target.value)}
-                          className="w-full bg-[#111827] border border-white/[0.08] rounded-xl px-3 py-2.5 text-xs font-bold text-white outline-none focus:ring-1 focus:ring-[#7C3AED]"
+                          className="w-full bg-card-custom border border-border-custom rounded-xl px-3 py-2.5 text-xs font-bold text-white outline-none focus:ring-1 focus:ring-[#7C3AED]"
                         />
                       </div>
                       <div>
@@ -574,7 +574,7 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
                           type="number"
                           value={inputReps}
                           onChange={(e) => setInputReps(e.target.value)}
-                          className="w-full bg-[#111827] border border-white/[0.08] rounded-xl px-3 py-2.5 text-xs font-bold text-white outline-none focus:ring-1 focus:ring-[#7C3AED]"
+                          className="w-full bg-card-custom border border-border-custom rounded-xl px-3 py-2.5 text-xs font-bold text-white outline-none focus:ring-1 focus:ring-[#7C3AED]"
                         />
                       </div>
                     </div>
@@ -593,7 +593,7 @@ export const ExerciseDetails: React.FC<ExerciseDetailsProps> = ({ exerciseId, on
                       <span className="text-[10px] text-[#A1A1AA] font-bold uppercase tracking-widest block">Session Set History</span>
                       <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
                         {completedLogs.map((log, idx) => (
-                          <div key={idx} className="flex justify-between items-center text-xs text-[#A1A1AA] bg-[#09090B] px-3.5 py-2.5 rounded-xl border border-white/[0.04] font-semibold font-mono">
+                          <div key={idx} className="flex justify-between items-center text-xs text-[#A1A1AA] bg-zinc-100 dark:bg-[#09090B] px-3.5 py-2.5 rounded-xl border border-white/[0.04] font-semibold font-mono">
                             <span>SET {idx + 1}</span>
                             <span className="text-white font-bold">{log.weight} kg x {log.reps} reps</span>
                           </div>

@@ -1,9 +1,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Poppins:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
+:root {
+  --brand-bg: #f9fafb;
+  --brand-card-bg: #ffffff;
+  --brand-border-color: #e5e7eb;
+  --brand-border-light: #f3f4f6;
+  --brand-text: #09090b;
+  --brand-subtext: #4b5563;
+  --brand-chat-ai-bg: #f3f4f6;
+  --brand-chat-user-bg: #e0e7ff;
+}
+
+.dark {
+  --brand-bg: #09090b;
+  --brand-card-bg: #111827;
+  --brand-border-color: rgba(255, 255, 255, 0.08);
+  --brand-border-light: rgba(255, 255, 255, 0.06);
+  --brand-text: #ffffff;
+  --brand-subtext: #a1a1aa;
+  --brand-chat-ai-bg: #1f2937;
+  --brand-chat-user-bg: #312e81;
+}
+
 @theme {
   --font-sans: "Plus Jakarta Sans", "Poppins", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: "Space Grotesk", monospace;
+  --color-card-custom: var(--brand-card-bg);
+  --color-border-custom: var(--brand-border-color);
+  --color-border-custom-light: var(--brand-border-light);
+  --color-text-custom-primary: var(--brand-text);
+  --color-text-custom-secondary: var(--brand-subtext);
+  --color-chat-ai-bg: var(--brand-chat-ai-bg);
+  --color-chat-user-bg: var(--brand-chat-user-bg);
 }
 
 /* Enable transitions for colors during theme updates */
