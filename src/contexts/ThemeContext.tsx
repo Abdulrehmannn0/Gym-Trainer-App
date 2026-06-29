@@ -12,7 +12,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>(() => {
-    const saved = localStorage.getItem('gymtrainer-theme');
+    const saved = localStorage.getItem('azharfit-theme');
     return (saved as Theme) || 'dark'; // default to premium dark theme
   });
 
@@ -20,7 +20,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem('gymtrainer-theme', newTheme);
+    localStorage.setItem('azharfit-theme', newTheme);
   };
 
   useEffect(() => {

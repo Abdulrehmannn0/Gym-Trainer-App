@@ -6,6 +6,13 @@
   --font-mono: "Space Grotesk", monospace;
 }
 
+/* Enable transitions for colors during theme updates */
+body, div, header, nav, aside, main, section, article, p, h1, h2, h3, h4, h5, h6, span, button, input, select, textarea, label, table, th, td, tr, svg {
+  transition-property: color, background-color, border-color, fill, stroke;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Custom scrollbar hides */
 .scrollbar-none::-webkit-scrollbar {
   display: none;
