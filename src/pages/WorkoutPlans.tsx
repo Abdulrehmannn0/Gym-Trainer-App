@@ -22,7 +22,8 @@ import {
   Pause,
   ChevronLeft,
   ChevronRightSquare,
-  Sparkle
+  Sparkle,
+  Pencil
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { updateUserProfile } from '../services/userService';
@@ -123,6 +124,7 @@ export const WorkoutPlans: React.FC = () => {
 
   // Custom plan creator state
   const [isCreatingPlan, setIsCreatingPlan] = useState(false);
+  const [editingPlanId, setEditingPlanId] = useState<string | null>(null);
   const [newPlanTitle, setNewPlanTitle] = useState('');
   const [newPlanDesc, setNewPlanDesc] = useState('');
   const [newPlanDuration, setNewPlanDuration] = useState('45');
@@ -351,30 +353,72 @@ export const WorkoutPlans: React.FC = () => {
     const filteredEx = newExercises.filter(ex => ex.name.trim() !== '');
     if (filteredEx.length === 0) return;
 
-    const planPayload = {
-      title: newPlanTitle,
-      description: newPlanDesc || 'A customized athlete workout plan.',
-      duration: parseInt(newPlanDuration, 10) || 45,
-      calories: parseInt(newPlanCalories, 10) || 400,
-      difficulty: newPlanDiff,
-      category: newPlanCat,
-      exercises: filteredEx,
-      createdAt: new Date().toISOString(),
-      scheduledDates: []
-    };
-
     try {
-      await createCustomWorkoutPlan(profile.uid, planPayload);
+      if (editingPlanId) {
+        const planPayload = {
+          title: newPlanTitle,
+          description: newPlanDesc || 'A customized athlete workout plan.',
+          duration: parseInt(newPlanDuration, 10) || 45,
+          calories: parseInt(newPlanCalories, 10) || 400,
+          difficulty: newPlanDiff,
+          category: newPlanCat,
+          exercises: filteredEx,
+        };
+        await updateCustomWorkoutPlan(profile.uid, editingPlanId, planPayload);
+        setEditingPlanId(null);
+      } else {
+        const planPayload = {
+          title: newPlanTitle,
+          description: newPlanDesc || 'A customized athlete workout plan.',
+          duration: parseInt(newPlanDuration, 10) || 45,
+          calories: parseInt(newPlanCalories, 10) || 400,
+          difficulty: newPlanDiff,
+          category: newPlanCat,
+          exercises: filteredEx,
+          createdAt: new Date().toISOString(),
+          scheduledDates: []
+        };
+        await createCustomWorkoutPlan(profile.uid, planPayload);
+      }
+      
       setNewPlanTitle('');
       setNewPlanDesc('');
+      setNewPlanDuration('45');
+      setNewPlanCalories('400');
+      setNewPlanDiff('Intermediate');
+      setNewPlanCat('Strength');
       setNewExercises([{ name: '', sets: 3, reps: '10' }]);
       setIsCreatingPlan(false);
       // Reload custom plans
       const cPlans = await getCustomWorkoutPlans(profile.uid);
       setCustomPlans(cPlans);
     } catch (err) {
-      console.error('Error creating custom plan:', err);
+      console.error('Error saving custom plan:', err);
     }
+  };
+
+  const handleEditPlanClick = (plan: CustomWorkoutPlan) => {
+    setEditingPlanId(plan.id);
+    setNewPlanTitle(plan.title);
+    setNewPlanDesc(plan.description);
+    setNewPlanDuration(String(plan.duration));
+    setNewPlanCalories(String(plan.calories));
+    setNewPlanDiff(plan.difficulty);
+    setNewPlanCat(plan.category);
+    setNewExercises(plan.exercises);
+    setIsCreatingPlan(true);
+  };
+
+  const handleCancelPlanEdit = () => {
+    setEditingPlanId(null);
+    setNewPlanTitle('');
+    setNewPlanDesc('');
+    setNewPlanDuration('45');
+    setNewPlanCalories('400');
+    setNewPlanDiff('Intermediate');
+    setNewPlanCat('Strength');
+    setNewExercises([{ name: '', sets: 3, reps: '10' }]);
+    setIsCreatingPlan(false);
   };
 
   const handleDeletePlan = async (id: string) => {
@@ -569,13 +613,15 @@ export const WorkoutPlans: React.FC = () => {
                       <div>
                         <h4 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-1.5">
                           <Sparkle className="w-4 h-4 text-indigo-500" />
-                          <span>Custom Blueprint Studio</span>
+                          <span>{editingPlanId ? 'Edit Blueprint Studio' : 'Custom Blueprint Studio'}</span>
                         </h4>
-                        <p className="text-xs text-zinc-500 mt-0.5">Design a target movement routine to save permanently.</p>
+                        <p className="text-xs text-zinc-500 mt-0.5">
+                          {editingPlanId ? 'Modify your custom blueprint settings and movements.' : 'Design a target movement routine to save permanently.'}
+                        </p>
                       </div>
                       <button
                         type="button"
-                        onClick={() => setIsCreatingPlan(false)}
+                        onClick={handleCancelPlanEdit}
                         className="text-zinc-400 hover:text-zinc-600 p-1.5 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-850"
                       >
                         <X className="w-5 h-5" />
@@ -706,12 +752,23 @@ export const WorkoutPlans: React.FC = () => {
                         </button>
                       </div>
 
-                      <button
-                        type="submit"
-                        className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-600/10 transition-all text-xs uppercase tracking-widest cursor-pointer"
-                      >
-                        Save Blueprint Plan
-                      </button>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <button
+                          type="submit"
+                          className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-indigo-600/10 transition-all text-xs uppercase tracking-widest cursor-pointer"
+                        >
+                          {editingPlanId ? 'Update Blueprint Plan' : 'Save Blueprint Plan'}
+                        </button>
+                        {editingPlanId && (
+                          <button
+                            type="button"
+                            onClick={handleCancelPlanEdit}
+                            className="bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-zinc-600 dark:text-zinc-350 font-bold py-3.5 px-6 rounded-xl transition-all text-xs uppercase tracking-widest cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
                     </form>
                   </motion.div>
                 )}
@@ -794,12 +851,22 @@ export const WorkoutPlans: React.FC = () => {
                         </button>
                         
                         {isCustom && (
-                          <button
-                            onClick={() => handleDeletePlan(plan.id)}
-                            className="text-rose-500 hover:text-rose-600 p-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/15 rounded-xl transition-all cursor-pointer hover:scale-105"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleEditPlanClick(plan)}
+                              className="text-indigo-500 hover:text-indigo-600 p-3 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/15 rounded-xl transition-all cursor-pointer hover:scale-105"
+                              title="Edit Plan"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeletePlan(plan.id)}
+                              className="text-rose-500 hover:text-rose-600 p-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/15 rounded-xl transition-all cursor-pointer hover:scale-105"
+                              title="Delete Plan"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         )}
                       </div>
                     </motion.div>

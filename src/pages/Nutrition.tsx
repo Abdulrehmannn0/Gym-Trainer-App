@@ -16,11 +16,12 @@ import {
   Grid,
   Check,
   TrendingUp,
-  Award
+  Award,
+  Pencil
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { updateUserProfile } from '../services/userService';
-import { getMeals, createMeal, deleteMeal } from '../services/fitnessService';
+import { getMeals, createMeal, deleteMeal, updateMeal } from '../services/fitnessService';
 import { Meal } from '../types';
 import { 
   ResponsiveContainer, 
@@ -51,6 +52,7 @@ export const Nutrition: React.FC = () => {
   // State
   const [meals, setMeals] = useState<Meal[]>([]);
   const [loadingMeals, setLoadingMeals] = useState(false);
+  const [editingMealId, setEditingMealId] = useState<string | null>(null);
   
   // Add Meal Form State
   const [newMealName, setNewMealName] = useState('');
@@ -126,26 +128,42 @@ export const Nutrition: React.FC = () => {
   const targetFats = Number(goalFats);
   const targetFiber = Number(goalFiber);
 
-  // Meal CRUD: Add Meal
+  // Meal CRUD: Add or Edit Meal
   const handleAddMeal = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile?.uid || !newMealName || !newMealCalories) return;
 
     try {
-      const added = await createMeal(profile.uid, {
-        name: newMealName,
-        calories: Number(newMealCalories) || 0,
-        protein: Number(newMealProtein) || 0,
-        carbs: Number(newMealCarbs) || 0,
-        fats: Number(newMealFats) || 0,
-        fiber: Number(newMealFiber) || 0,
-        type: newMealType,
-        date: selectedDate,
-        timestamp: new Date().toISOString()
-      });
+      if (editingMealId) {
+        const updatedPayload = {
+          name: newMealName,
+          calories: Number(newMealCalories) || 0,
+          protein: Number(newMealProtein) || 0,
+          carbs: Number(newMealCarbs) || 0,
+          fats: Number(newMealFats) || 0,
+          fiber: Number(newMealFiber) || 0,
+          type: newMealType,
+        };
+        await updateMeal(profile.uid, editingMealId, updatedPayload);
+        
+        setMeals(prev => prev.map(m => m.id === editingMealId ? { ...m, ...updatedPayload } : m));
+        setEditingMealId(null);
+      } else {
+        const added = await createMeal(profile.uid, {
+          name: newMealName,
+          calories: Number(newMealCalories) || 0,
+          protein: Number(newMealProtein) || 0,
+          carbs: Number(newMealCarbs) || 0,
+          fats: Number(newMealFats) || 0,
+          fiber: Number(newMealFiber) || 0,
+          type: newMealType,
+          date: selectedDate,
+          timestamp: new Date().toISOString()
+        });
 
-      // Optimistic update
-      setMeals(prev => [...prev, added]);
+        // Optimistic update
+        setMeals(prev => [...prev, added]);
+      }
       
       // Reset inputs
       setNewMealName('');
@@ -158,8 +176,29 @@ export const Nutrition: React.FC = () => {
       // Refresh user metrics and achievements if any
       await refreshProfile();
     } catch (err) {
-      console.error('Failed to log meal:', err);
+      console.error('Failed to save meal:', err);
     }
+  };
+
+  const handleEditClick = (meal: Meal) => {
+    setEditingMealId(meal.id);
+    setNewMealName(meal.name);
+    setNewMealCalories(String(meal.calories));
+    setNewMealProtein(String(meal.protein));
+    setNewMealCarbs(String(meal.carbs));
+    setNewMealFats(String(meal.fats));
+    setNewMealFiber(String(meal.fiber || ''));
+    setNewMealType(meal.type);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMealId(null);
+    setNewMealName('');
+    setNewMealCalories('');
+    setNewMealProtein('');
+    setNewMealCarbs('');
+    setNewMealFats('');
+    setNewMealFiber('');
   };
 
   // Meal CRUD: Delete Meal
@@ -502,12 +541,22 @@ export const Nutrition: React.FC = () => {
                             </div>
                             <div className="flex items-center gap-4">
                               <span className="text-sm font-black text-rose-500 font-mono">+{meal.calories} kcal</span>
-                              <button
-                                onClick={() => handleDeleteMeal(meal.id)}
-                                className="p-2 text-zinc-400 hover:text-rose-500 hover:bg-zinc-100 dark:hover:bg-zinc-850 rounded-xl transition-all cursor-pointer"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  onClick={() => handleEditClick(meal)}
+                                  className="p-2 text-zinc-400 hover:text-indigo-500 hover:bg-zinc-100 dark:hover:bg-zinc-850 rounded-xl transition-all cursor-pointer"
+                                  title="Edit Meal"
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteMeal(meal.id)}
+                                  className="p-2 text-zinc-400 hover:text-rose-500 hover:bg-zinc-100 dark:hover:bg-zinc-850 rounded-xl transition-all cursor-pointer"
+                                  title="Delete Meal"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -614,13 +663,24 @@ export const Nutrition: React.FC = () => {
                         </div>
                       </div>
 
-                      <button
-                        type="submit"
-                        className="w-full bg-rose-500 hover:bg-rose-400 text-white font-bold py-3.5 px-4 rounded-xl shadow-md shadow-rose-500/10 transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer mt-2"
-                      >
-                        <span>Add Intake Meal</span>
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
+                      <div className="flex flex-col gap-2 mt-2">
+                        <button
+                          type="submit"
+                          className="w-full bg-rose-500 hover:bg-rose-400 text-white font-bold py-3.5 px-4 rounded-xl shadow-md shadow-rose-500/10 transition-all text-xs uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer"
+                        >
+                          <span>{editingMealId ? 'Update Intake Meal' : 'Add Intake Meal'}</span>
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                        {editingMealId && (
+                          <button
+                            type="button"
+                            onClick={handleCancelEdit}
+                            className="w-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-750 text-zinc-600 dark:text-zinc-350 font-bold py-2 px-4 rounded-xl transition-all text-[10px] uppercase tracking-wider cursor-pointer text-center"
+                          >
+                            Cancel Edit
+                          </button>
+                        )}
+                      </div>
                     </form>
                   </div>
                 </div>

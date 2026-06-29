@@ -436,3 +436,24 @@ export async function deleteMeal(uid: string, mealId: string): Promise<void> {
   await deleteDoc(docRef);
 }
 
+export async function updateMeal(uid: string, mealId: string, updates: Partial<Meal>): Promise<void> {
+  const docRef = doc(db, 'users', uid, 'meals', mealId);
+  await updateDoc(docRef, updates as any);
+}
+
+export async function deleteSleepLog(uid: string, logId: string): Promise<void> {
+  const docRef = doc(db, 'users', uid, 'sleep_logs', logId);
+  await deleteDoc(docRef);
+}
+
+export async function deleteMeasurementLog(uid: string, logId: string): Promise<void> {
+  const docRef = doc(db, 'users', uid, 'measurement_logs', logId);
+  await deleteDoc(docRef);
+}
+
+export async function deletePersonalRecord(uid: string, recordId: string): Promise<void> {
+  const docRef = doc(db, 'users', uid, 'personal_records', recordId);
+  await deleteDoc(docRef);
+}
+
+
