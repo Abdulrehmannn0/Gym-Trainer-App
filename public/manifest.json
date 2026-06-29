@@ -1,21 +1,21 @@
 {
-  "short_name": "GymTrainerPro",
-  "name": "GymTrainer Pro - Hypertrophy Simulator",
+  "short_name": "AzharFitAI",
+  "name": "AzharFit AI - Train Smart. Live Strong.",
   "icons": [
     {
-      "src": "https://api.dicebear.com/7.x/identicon/png?seed=GymTrainerPro&backgroundColor=4f46e5",
+      "src": "https://api.dicebear.com/7.x/identicon/png?seed=AzharFitAI&backgroundColor=7c3aed",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "https://api.dicebear.com/7.x/identicon/png?seed=GymTrainerPro&backgroundColor=4f46e5",
+      "src": "https://api.dicebear.com/7.x/identicon/png?seed=AzharFitAI&backgroundColor=7c3aed",
       "type": "image/png",
       "sizes": "512x512"
     }
   ],
   "start_url": "/",
   "background_color": "#09090b",
-  "theme_color": "#4f46e5",
+  "theme_color": "#7c3aed",
   "display": "standalone",
   "orientation": "portrait"
 }

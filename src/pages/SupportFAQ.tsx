@@ -29,8 +29,8 @@ const FAQ_ITEMS: FAQItem[] = [
     answer: "The simulator recalibrates your athletic capability based on your daily biometric deck (body weight, gender, age) coupled with the intensity, volume, and repetition parameters logged in your workout plans. This provides a precise feedback loop for physical muscle loading."
   },
   {
-    question: "Can I use GymTrainer Pro offline on my device?",
-    answer: "Yes! GymTrainer Pro is a fully functional Progressive Web App (PWA). Once cached by your browser, you can load and run workouts, check your hydration targets, and interact with cached exercise instructions entirely offline. Changes will automatically synchronize when connection resumes."
+    question: "Can I use AzharFit AI offline on my device?",
+    answer: "Yes! AzharFit AI is a fully functional Progressive Web App (PWA). Once cached by your browser, you can load and run workouts, check your hydration targets, and interact with cached exercise instructions entirely offline. Changes will automatically synchronize when connection resumes."
   },
   {
     question: "How do I back up or export my training history?",
@@ -41,7 +41,7 @@ const FAQ_ITEMS: FAQItem[] = [
     answer: "Absolutely. All biometrics, hydration logs, and physical measurements are stored in a secure Cloud Firestore database managed under strict Firebase security rules. Your personal records are only accessible by you."
   },
   {
-    question: "How can I delete my GymTrainer Pro account?",
+    question: "How can I delete my AzharFit AI account?",
     answer: "Under the 'Danger Zone' in the Settings panel, you can click 'Delete Account'. This will completely wipe your authentication profile and delete all corresponding athlete telemetry from Firestore databases permanently."
   }
 ];
@@ -291,7 +291,7 @@ export const SupportFAQ: React.FC = () => {
             <div>
               <h3 className="text-base font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                 <FileText className="w-5 h-5 text-indigo-500" />
-                <span>GymTrainer Pro - Terms of Service</span>
+                <span>AzharFit AI - Terms of Service</span>
               </h3>
               <p className="text-[10px] text-zinc-400 dark:text-zinc-500 uppercase tracking-widest font-extrabold mt-1">LAST MODIFIED: JUNE 28, 2026</p>
             </div>
@@ -299,12 +299,12 @@ export const SupportFAQ: React.FC = () => {
             <div className="space-y-4 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed font-semibold max-h-[400px] overflow-y-auto pr-2">
               <p className="font-bold text-zinc-900 dark:text-white text-sm">1. ACCEPTANCE OF TRAINING REGIME</p>
               <p>
-                By accessing GymTrainer Pro, you accept and agree to follow safe athletic protocols and physical exercise regulations. The formulas, calorie counts, strength indexes, and AI advice provided are mathematical estimations and simulations for strength/hypertrophy and do not substitute for professional medical/cardiovascular consulting.
+                By accessing AzharFit AI, you accept and agree to follow safe athletic protocols and physical exercise regulations. The formulas, calorie counts, strength indexes, and AI advice provided are mathematical estimations and simulations for strength/hypertrophy and do not substitute for professional medical/cardiovascular consulting.
               </p>
 
               <p className="font-bold text-zinc-900 dark:text-white text-sm">2. BIO-DIAGNOSTIC TELEMETRY LICENSING</p>
               <p>
-                You grant GymTrainer Pro permission to collect and analyze physical records (including body weight, age, height, gender indicators, water intake, and logged training sets) purely to calibrate localized hypertrophy multipliers and display charts.
+                You grant AzharFit AI permission to collect and analyze physical records (including body weight, age, height, gender indicators, water intake, and logged training sets) purely to calibrate localized hypertrophy multipliers and display charts.
               </p>
 
               <p className="font-bold text-zinc-900 dark:text-white text-sm">3. ATHLETE RESPONSIBILITIES</p>
@@ -344,7 +344,7 @@ export const SupportFAQ: React.FC = () => {
 
               <p className="font-bold text-zinc-900 dark:text-white text-sm">3. OFFLINE STANDALONE SHIELD</p>
               <p>
-                When running GymTrainer Pro offline under PWA service workers, your workout history and physical statistics remain locked in local browser storage, and are synchronized to Firestore databases ONLY when your physical network transitions back online.
+                When running AzharFit AI offline under PWA service workers, your workout history and physical statistics remain locked in local browser storage, and are synchronized to Firestore databases ONLY when your physical network transitions back online.
               </p>
 
               <p className="font-bold text-zinc-900 dark:text-white text-sm">4. DATA BACKUP AND DELETION RIGHTS</p>

@@ -47,7 +47,7 @@ const NotFoundPage: React.FC<NotFoundProps> = ({ onNavigate }) => (
     </div>
     <h1 className="text-xl font-extrabold text-zinc-900 dark:text-white tracking-wider uppercase mb-2">ATHLETIC VECTOR LOST (404)</h1>
     <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-sm leading-relaxed mb-6 uppercase tracking-wider font-semibold">
-      The telemetry coordinates you entered do not exist inside GymTrainer Pro's digital simulator.
+      The telemetry coordinates you entered do not exist inside AzharFit AI's digital simulator.
     </p>
     <button
       onClick={() => onNavigate('dashboard')}
@@ -77,11 +77,11 @@ function AppContent() {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
-          className="bg-indigo-600 p-4 rounded-3xl text-white shadow-2xl shadow-indigo-600/20 mb-4"
+          className="bg-[#7C3AED] p-4 rounded-3xl text-white shadow-2xl shadow-[#7C3AED]/20 mb-4"
         >
           <Dumbbell className="w-8 h-8" />
         </motion.div>
-        <p className="text-white font-extrabold tracking-wide uppercase text-sm">GymTrainer Pro</p>
+        <p className="text-white font-extrabold tracking-wide uppercase text-sm">AzharFit AI</p>
         <p className="text-zinc-500 text-[10px] mt-1.5 font-bold tracking-widest uppercase">AUTHENTICATING ATHLETE PROFILES...</p>
       </div>
     );

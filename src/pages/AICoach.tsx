@@ -227,7 +227,22 @@ export const AICoach: React.FC = () => {
         })
       });
 
-      const data = await response.json();
+      let data: any = {};
+      const contentType = response.headers.get('content-type') || '';
+      
+      if (contentType.includes('application/json')) {
+        try {
+          data = await response.json();
+        } catch (jsonErr) {
+          console.error("JSON parse failure on /api/coach/chat:", jsonErr);
+          throw new Error("Received an invalid response format from the server.");
+        }
+      } else {
+        const textResponse = await response.text();
+        console.error("Received non-JSON response:", textResponse);
+        throw new Error(`The training server returned an error page (${response.status}). This can occur if your network is unstable or your backend service is restarting.`);
+      }
+
       if (response.ok && data.text) {
         const aiMsg: AIChatMessage = {
           sender: 'ai',
@@ -239,14 +254,15 @@ export const AICoach: React.FC = () => {
         const savedAi = await saveAIChatMessage(profile.uid, aiMsg);
         setMessages(prev => [...prev, savedAi]);
       } else {
-        throw new Error(data.error || 'Failed to get response');
+        throw new Error(data.error || 'The system could not compute a plan.');
       }
     } catch (err: any) {
       console.error(err);
       const errorMsg: AIChatMessage = {
         sender: 'ai',
-        text: `Sorry, I encountered a physical performance barrier: ${err.message || 'connection issue'}. Let's try that rep again.`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        text: `Sorry, Coach AzharFit encountered a connection hurdle: ${err.message || 'connection issue'}. Let's re-try this rep!`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        isError: true
       };
       setMessages(prev => [...prev, errorMsg]);
     } finally {
@@ -547,31 +563,31 @@ export const AICoach: React.FC = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-270px)] min-h-[500px]">
               
               {/* Main Chat Box */}
-              <div className="lg:col-span-2 bg-[#111827] border border-white/[0.08] rounded-3xl flex flex-col justify-between overflow-hidden shadow-2xl h-full">
+              <div className="lg:col-span-2 bg-white dark:bg-[#111827] border border-zinc-200 dark:border-white/[0.08] rounded-3xl flex flex-col justify-between overflow-hidden shadow-2xl h-full">
                 
                 {/* Header info */}
-                <div className="px-6 py-4 border-b border-white/[0.06] bg-[#09090B] flex items-center justify-between">
+                <div className="px-6 py-4 border-b border-zinc-100 dark:border-white/[0.06] bg-zinc-50 dark:bg-[#09090B] flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-2xl bg-[#7C3AED]/10 border border-[#7C3AED]/20 text-[#7C3AED] flex items-center justify-center">
                       <Bot className="w-5 h-5 animate-pulse" />
                     </div>
                     <div>
-                      <h3 className="text-xs font-black text-white">Coach GymTrainer</h3>
-                      <span className="text-[9px] text-emerald-400 font-bold block">● SYNCED PERFORMANCE AGENT</span>
+                      <h3 className="text-xs font-black text-zinc-900 dark:text-white">Coach AzharFit</h3>
+                      <span className="text-[9px] text-emerald-500 dark:text-emerald-400 font-bold block">● SYNCED PERFORMANCE AGENT</span>
                     </div>
                   </div>
                   <button
                     onClick={handleClearHistory}
                     disabled={clearingChat}
                     title="Clear chat history"
-                    className="p-2 text-[#A1A1AA] hover:text-[#EF4444] transition-colors rounded-xl hover:bg-white/[0.02] disabled:opacity-50 cursor-pointer"
+                    className="p-2 text-zinc-500 dark:text-[#A1A1AA] hover:text-[#EF4444] transition-colors rounded-xl hover:bg-zinc-100 dark:hover:bg-white/[0.02] disabled:opacity-50 cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
 
                 {/* Message Log */}
-                <div className="flex-1 p-6 overflow-y-auto space-y-4 scrollbar-none bg-[#09090B]/30">
+                <div className="flex-1 p-6 overflow-y-auto space-y-4 scrollbar-none bg-zinc-50/30 dark:bg-[#09090B]/30">
                   {messages.map((msg, index) => (
                     <div
                       key={msg.id || index}
@@ -579,7 +595,7 @@ export const AICoach: React.FC = () => {
                     >
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                         msg.sender === 'user' 
-                          ? 'bg-zinc-800 border border-zinc-700 text-white' 
+                          ? 'bg-zinc-200 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-white' 
                           : 'bg-[#7C3AED]/15 border border-[#7C3AED]/25 text-[#7C3AED]'
                       }`}>
                         {msg.sender === 'user' ? <User className="w-4.5 h-4.5" /> : <Bot className="w-4.5 h-4.5" />}
@@ -589,11 +605,28 @@ export const AICoach: React.FC = () => {
                         <div className={`px-4 py-3.5 rounded-2xl text-xs leading-relaxed ${
                           msg.sender === 'user'
                             ? 'bg-[#7C3AED] text-white rounded-tr-none shadow-md font-bold'
-                            : 'bg-[#111827] border border-white/[0.06] text-white rounded-tl-none font-medium'
+                            : msg.isError
+                              ? 'bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 rounded-tl-none font-medium'
+                              : 'bg-zinc-100 dark:bg-[#111827] border border-zinc-200 dark:border-white/[0.06] text-zinc-900 dark:text-white rounded-tl-none font-medium'
                         }`}>
                           <MarkdownText text={msg.text} />
+                          {msg.isError && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                // Find the last user message and trigger send
+                                const userMsgs = messages.filter(m => m.sender === 'user');
+                                if (userMsgs.length > 0) {
+                                  setInputValue(userMsgs[userMsgs.length - 1].text);
+                                }
+                              }}
+                              className="mt-2 text-[10px] font-black underline text-red-500 hover:text-red-600 block cursor-pointer transition-all uppercase tracking-wider"
+                            >
+                              Retry sending message
+                            </button>
+                          )}
                         </div>
-                        <span className={`text-[8px] text-[#A1A1AA] font-bold block ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}>
+                        <span className={`text-[8px] text-zinc-400 dark:text-[#A1A1AA] font-bold block ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}>
                           {msg.timestamp}
                         </span>
                       </div>
@@ -605,7 +638,7 @@ export const AICoach: React.FC = () => {
                       <div className="w-8 h-8 rounded-full bg-[#7C3AED]/15 border border-[#7C3AED]/25 text-[#7C3AED] flex items-center justify-center shrink-0">
                         <Bot className="w-4.5 h-4.5 animate-pulse" />
                       </div>
-                      <div className="bg-[#111827] border border-white/[0.06] px-4 py-3.5 rounded-2xl rounded-tl-none flex items-center gap-1">
+                      <div className="bg-zinc-100 dark:bg-[#111827] border border-zinc-200 dark:border-white/[0.06] px-4 py-3.5 rounded-2xl rounded-tl-none flex items-center gap-1">
                         <span className="w-1.5 h-1.5 bg-[#7C3AED] rounded-full animate-bounce" />
                         <span className="w-1.5 h-1.5 bg-[#7C3AED] rounded-full animate-bounce delay-100" />
                         <span className="w-1.5 h-1.5 bg-[#7C3AED] rounded-full animate-bounce delay-200" />
@@ -616,13 +649,13 @@ export const AICoach: React.FC = () => {
                 </div>
 
                 {/* Form Input */}
-                <form onSubmit={handleSendMessage} className="p-4 border-t border-white/[0.06] bg-[#09090B]/50 flex gap-3">
+                <form onSubmit={handleSendMessage} className="p-4 border-t border-zinc-200 dark:border-white/[0.06] bg-zinc-50 dark:bg-[#09090B]/50 flex gap-3">
                   <input
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     placeholder="Type natural queries: 'I want to lose 10 kg' or 'I have knee pain'..."
-                    className="flex-1 bg-[#09090B] border border-white/[0.08] rounded-2xl px-4 py-3.5 text-xs text-white font-bold outline-none focus:ring-1 focus:ring-[#7C3AED] transition-all"
+                    className="flex-1 bg-white dark:bg-[#09090B] border border-zinc-200 dark:border-white/[0.08] rounded-2xl px-4 py-3.5 text-xs text-zinc-900 dark:text-white font-bold outline-none focus:ring-1 focus:ring-[#7C3AED] transition-all"
                   />
                   <button
                     type="submit"
@@ -635,8 +668,8 @@ export const AICoach: React.FC = () => {
 
               {/* Suggestions Side Bar */}
               <div className="lg:col-span-1 space-y-6 flex flex-col justify-between">
-                <div className="bg-[#111827] border border-white/[0.08] rounded-3xl p-5 shadow-xl space-y-4">
-                  <h3 className="text-sm font-black text-white flex items-center gap-2">
+                <div className="bg-white dark:bg-[#111827] border border-zinc-200 dark:border-white/[0.08] rounded-3xl p-5 shadow-xl space-y-4">
+                  <h3 className="text-sm font-black text-zinc-900 dark:text-white flex items-center gap-2">
                     <Sparkle className="w-4 h-4 text-[#7C3AED]" />
                     <span>Quick Coaching Queries</span>
                   </h3>
@@ -650,14 +683,14 @@ export const AICoach: React.FC = () => {
                       <button
                         key={idx}
                         onClick={() => setInputValue(prompt.q)}
-                        className="w-full text-left bg-[#09090B] border border-white/[0.04] p-3 rounded-xl hover:border-[#7C3AED] hover:bg-white/[0.02] transition-all flex items-start gap-3 cursor-pointer group"
+                        className="w-full text-left bg-zinc-50 dark:bg-[#09090B] border border-zinc-100 dark:border-white/[0.04] p-3 rounded-xl hover:border-[#7C3AED] hover:bg-zinc-100 dark:hover:bg-white/[0.02] transition-all flex items-start gap-3 cursor-pointer group"
                       >
                         <div className="p-1.5 bg-[#7C3AED]/10 border border-[#7C3AED]/20 rounded-lg text-[#7C3AED] group-hover:bg-[#7C3AED] group-hover:text-white transition-all">
                           <Bot className="w-3.5 h-3.5" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h4 className="text-[11px] font-bold text-white transition-colors">{prompt.q}</h4>
-                          <p className="text-[9px] text-[#A1A1AA] mt-0.5">{prompt.desc}</p>
+                          <h4 className="text-[11px] font-bold text-zinc-900 dark:text-white transition-colors">{prompt.q}</h4>
+                          <p className="text-[9px] text-zinc-500 dark:text-[#A1A1AA] mt-0.5">{prompt.desc}</p>
                         </div>
                       </button>
                     ))}

@@ -1,6 +1,6 @@
 {
-  "name": "GymTrainer Pro",
-  "description": "A modern web application for personalized fitness training, exercise library management, and progress tracking.",
+  "name": "AzharFit AI",
+  "description": "AzharFit AI - Train Smart. Live Strong. State-of-the-art strength simulation, interactive AI Coach chats, biometrics, nutrition tracker, and customized workout plans.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

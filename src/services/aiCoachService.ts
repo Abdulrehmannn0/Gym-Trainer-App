@@ -17,6 +17,7 @@ export interface AIChatMessage {
   text: string;
   timestamp: string;
   category?: string; // e.g. 'general' | 'workout' | 'meal' | 'analysis' | 'motivation'
+  isError?: boolean;
 }
 
 export interface AIRecommendation {

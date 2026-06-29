@@ -96,10 +96,10 @@ export const Login: React.FC<LoginProps> = ({ onNavigate }) => {
             <Dumbbell className="w-6 h-6 animate-pulse" />
           </div>
           <h2 className="text-3xl font-extrabold tracking-tight text-white uppercase">
-            GymTrainer<span className="text-indigo-500">Pro</span>
+            AzharFit<span className="text-[#7C3AED]">AI</span>
           </h2>
           <p className="mt-1 text-xs text-zinc-500 uppercase tracking-widest font-semibold">
-            Strength & Hypertrophy Simulator
+            Train Smart. Live Strong.
           </p>
         </div>
 

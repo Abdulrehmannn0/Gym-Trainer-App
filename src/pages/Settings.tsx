@@ -95,7 +95,7 @@ export const Settings: React.FC = () => {
     
     const link = document.createElement('a');
     link.setAttribute('href', csvContent);
-    link.setAttribute('download', `GymTrainer_Biometrics_Logs_${profile.uid}.csv`);
+    link.setAttribute('download', `AzharFit_Biometrics_Logs_${profile.uid}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -107,7 +107,7 @@ export const Settings: React.FC = () => {
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(profile, null, 2));
     const link = document.createElement('a');
     link.setAttribute('href', dataStr);
-    link.setAttribute('download', `GymTrainer_Athlete_Backup_${profile.uid}.json`);
+    link.setAttribute('download', `AzharFit_Athlete_Backup_${profile.uid}.json`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

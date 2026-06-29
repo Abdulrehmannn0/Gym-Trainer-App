@@ -266,7 +266,7 @@ export async function getNotifications(uid: string): Promise<AppNotification[]> 
       const initial: AppNotification[] = [
         {
           id: 'welcome',
-          title: 'Welcome to GymTrainer Pro Elite!',
+          title: 'Welcome to AzharFit AI!',
           body: 'Your athletic profile is ready. Create a custom workout plan or log your first training session!',
           date: new Date().toLocaleDateString(),
           read: false,

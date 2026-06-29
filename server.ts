@@ -40,7 +40,7 @@ async function startServer() {
       const userProfile = profile || {};
 
       // Build general prompt instruction with user profile context
-      const systemInstruction = `You are Coach GymTrainer, a world-class, elite personal trainer and sports nutritionist.
+      const systemInstruction = `You are Coach AzharFit, a world-class, elite personal trainer and sports nutritionist.
 Your mission is to motivate, instruct, and build elite physical trajectories for your athletes.
 Be direct, professional, encouraging, and highly technical yet action-oriented.
 
